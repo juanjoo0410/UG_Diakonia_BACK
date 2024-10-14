@@ -1,0 +1,6 @@
+--BACK
+npm init -y(crear archivo package.json)
+npm i express mysql2 sequelize dotenv cors jsonwebtoken bcryptjs typeorm reflect-metadata(instalacion de herramientas)
+npm i --save-dev typescript @types/express @types/cors @types/bcryptjs @types/jsonwebtoken ts-node nodemon
+npx tsc --init
+npm start (ejecutar)
