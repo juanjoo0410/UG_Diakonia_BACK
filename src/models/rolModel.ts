@@ -14,20 +14,20 @@ Rol.init(
     idRol: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
-      primaryKey: true,
+      primaryKey: true
     },
     nombre: {
       type: DataTypes.STRING(75),
-      allowNull: false,
+      allowNull: false
     },
     anulado: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
+      defaultValue: false
     }
   },
   {
     sequelize,
     tableName: 'roles',
-    timestamps: true, // Desactivamos timestamps si no los necesitamos
+    timestamps: true
   }
 );

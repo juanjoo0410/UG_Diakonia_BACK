@@ -3,6 +3,7 @@ import { Sequelize } from "sequelize";
 
 const sequelize = new Sequelize({
     dialect: 'mysql',
+    timezone: '-05:00',
     port: parseInt(process.env.DB_PORT!, 10),
     host: process.env.DB_HOST,
     username: process.env.DB_USER,
