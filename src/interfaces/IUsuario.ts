@@ -1,9 +1,8 @@
-export interface IUsuario {
-    id_usario: number;
+import { IAuth } from "./IAuth";
+
+export interface IUsuario extends IAuth {
+    idUsuario?: number;
     nombre: string;
-    codigo: string;
-    clave: string;
-    anulado: boolean;
-    creado_date: Date;
-    creado_por: string;
+    idRol: number;
+    anulado?: boolean;
 }

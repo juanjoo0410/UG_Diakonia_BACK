@@ -1,22 +1,48 @@
-import db from "../config/db";
-import {IUsuario } from "../interfaces/IUsuario";
+import { DataTypes, Model } from 'sequelize';
+import sequelize from "../config/db";
+import { IUsuario } from '../interfaces/IUsuario';
 
-const createUsuario = (user: IUsuario) => {
-    const query = "INSERT INTO users (nombre, codigo, clave, creado_por) VALUES (?, ?, ?, ?)";
-    return new Promise<any>((resolve, reject) => {
-        db.query(query, [
-            user.nombre, 
-            user.codigo,
-            user.clave,
-            user.creado_por], (err, result) => {
-            if (err) {
-                return reject(err);
-            }
-            resolve(result);
-        });
-    });
-};
+// Definimos el modelo sin usar decoradores
+export class Usuario extends Model<IUsuario> implements IUsuario {
+  public idUsuario?: number;
+  public nombre!: string;
+  public codigo!: string;
+  public clave!: string;
+  public idRol!: number;
+  public anulado?: boolean;
+}
 
-export default {
-    createUsuario,
-};
+Usuario.init(
+  {
+    idUsuario: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true
+    },
+    nombre: {
+      type: DataTypes.STRING(75),
+      allowNull: false
+    },
+    codigo: {
+        type: DataTypes.STRING(15),
+        allowNull: false
+      },
+    clave: {
+        type: DataTypes.STRING(75),
+        allowNull: false
+      },
+    idRol: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+    anulado: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    }
+  },
+  {
+    sequelize,
+    tableName: 'usuarios',
+    timestamps: true
+  }
+);
