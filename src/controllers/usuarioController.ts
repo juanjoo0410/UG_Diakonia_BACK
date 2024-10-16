@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Usuario } from '../models/usuarioModel';
-import { handleHttp } from '../utils/error.handle';
+import { handleHttp } from '../utils/handleError';
 import { encrypt } from '../helpers/handleBcrypt';
 
 // Crear un nuevo usuario

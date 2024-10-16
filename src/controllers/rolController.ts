@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Rol } from '../models/rolModel';
-import { handleHttp } from '../utils/error.handle';
+import { handleHttp } from '../utils/handleError';
 
 // Crear un nuevo rol
 const createRol = async (req: Request, res: Response) => {
