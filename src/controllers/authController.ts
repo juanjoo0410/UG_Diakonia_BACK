@@ -1,7 +1,8 @@
-import {Request, Response} from "express";
+import { Request, Response } from "express";
 import { Usuario } from "../models/usuarioModel";
 import { handleHttp } from "../utils/error.handle";
 import { compare } from '../helpers/handleBcrypt';
+import { generateToken } from "../helpers/handleJwt";
 
 const login = async (req: Request, res: Response) => {
     try {
@@ -11,10 +12,10 @@ const login = async (req: Request, res: Response) => {
         else {
             const passHash = checkIs.clave;
             const isCorrect = await compare(clave, passHash);
-            if (isCorrect) res.status(200).json({
-                message: 'Contraseña correcta',
-                data: checkIs
-            });
+            if (isCorrect){
+                const token = generateToken(checkIs.codigo);
+                res.status(200).json({token, user: checkIs});
+            }
             else res.status(403).json({ message: 'Contraseña no es correcta'});
         }
     } catch (error) {
@@ -22,4 +23,6 @@ const login = async (req: Request, res: Response) => {
     }
 }
 
-export { login };
+export {
+    login
+};

@@ -71,4 +71,10 @@ const deleteRol = async (req: Request, res: Response) => {
     }
 };
 
-export { createRol, getRoles, getRolById, updateRol, deleteRol };
+export { 
+    createRol,
+    getRoles,
+    getRolById,
+    updateRol,
+    deleteRol
+};
