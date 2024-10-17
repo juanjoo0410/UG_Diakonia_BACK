@@ -11,4 +11,4 @@ connectDB();
 app.use(cors());
 app.use(express.json())
 app.use(router);
-app.listen(PORT, () => console.log("Conectado en puerto " + PORT));
+app.listen(PORT, () => console.log("Connected on port " + PORT));
