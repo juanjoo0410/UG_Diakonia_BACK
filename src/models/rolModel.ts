@@ -1,6 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from "../config/db";
 import { IRol } from '../interfaces/IRol';
+import { Usuario } from './usuarioModel';
 
 // Definimos el modelo sin usar decoradores
 export class Rol extends Model<IRol> implements IRol {
@@ -32,3 +33,11 @@ Rol.init(
     timestamps: true
   }
 );
+
+Rol.hasMany(Usuario,{
+  foreignKey: 'idRol'
+});
+
+Usuario.belongsTo(Rol, {
+  foreignKey: 'idRol'
+});

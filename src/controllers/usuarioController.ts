@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Usuario } from '../models/usuarioModel';
 import { handleHttp } from '../utils/handleError';
 import { encrypt } from '../helpers/handleBcrypt';
+import { Rol } from '../models/rolModel';
 
 // Crear un nuevo usuario
 const createUsuario = async (req: Request, res: Response) => {
@@ -26,7 +27,12 @@ const createUsuario = async (req: Request, res: Response) => {
 // Obtener todos los usuarios
 const getUsuarios = async (req: Request, res: Response) => {
     try {
-        const usuarios = await Usuario.findAll();
+        const usuarios = await Usuario.findAll({
+            include: [{
+                model: Rol,
+                attributes: ['nombre']
+            }]
+        });
         res.status(200).json(usuarios);
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
