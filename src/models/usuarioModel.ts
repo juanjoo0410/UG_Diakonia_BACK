@@ -9,6 +9,7 @@ export class Usuario extends Model<IUsuario> implements IUsuario {
   public nombre!: string;
   public codigo!: string;
   public clave!: string;
+  public cambiarClave!: boolean;
   public idRol!: number;
   public anulado?: boolean;
 }
@@ -32,7 +33,12 @@ Usuario.init(
         type: DataTypes.STRING(75),
         allowNull: false
       },
-      idRol: {
+    cambiarClave: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+      },
+    idRol: {
         type: DataTypes.INTEGER,
         references: {
           model: 'roles',
