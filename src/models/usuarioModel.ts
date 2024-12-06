@@ -9,7 +9,8 @@ export class Usuario extends Model<IUsuario> implements IUsuario {
   public nombre!: string;
   public codigo!: string;
   public clave!: string;
-  public cambiarClave!: boolean;
+  public correo!: string;
+  public cambiarClave?: boolean;
   public idRol!: number;
   public anulado?: boolean;
 }
@@ -30,6 +31,10 @@ Usuario.init(
         allowNull: false
       },
     clave: {
+        type: DataTypes.STRING(75),
+        allowNull: false
+      },
+    correo: {
         type: DataTypes.STRING(75),
         allowNull: false
       },

@@ -7,13 +7,13 @@ import { Rol } from '../models/rolModel';
 // Crear un nuevo usuario
 const createUsuario = async (req: Request, res: Response) => {
     try {
-        const { nombre, codigo, clave, idRol } = req.body;
+        const { nombre, codigo, clave, correo, idRol } = req.body;
         const checkIs = await Usuario.findOne({ where: { codigo } });
         if (checkIs) {
             res.status(400).json({ message: 'Usuario ya existe' });
         } else {
             const passHash = await encrypt(clave);
-            const newUsuario = await Usuario.create({ nombre, codigo, clave: passHash, idRol });
+            const newUsuario = await Usuario.create({ nombre, codigo, clave: passHash, correo, idRol });
             res.status(201).json({
                 message: 'Usuario agregado',
                 data: newUsuario
@@ -54,7 +54,7 @@ const getUsuarioById = async (req: Request, res: Response) => {
 // Actualizar un usuario por ID
 const updateUsuario = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { nombre, clave, idRol } = req.body;
+    const { nombre, clave, correo, idRol } = req.body;
     try {
         const usuario = await Usuario.findByPk(id);
         if (!usuario) res.status(404).json({ message: 'Usuario no encontrado' });
@@ -62,6 +62,7 @@ const updateUsuario = async (req: Request, res: Response) => {
             const passHash = await encrypt(clave);
             usuario.nombre = nombre;
             usuario.clave = passHash;
+            usuario.correo = correo;
             usuario.idRol = idRol;
             await usuario.save();
             res.status(200).json(usuario);

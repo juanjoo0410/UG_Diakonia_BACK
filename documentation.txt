@@ -3,4 +3,5 @@ npm init -y(crear archivo package.json)
 npm i express mysql2 sequelize dotenv cors jsonwebtoken bcryptjs (instalacion de herramientas)
 npm i --save-dev typescript @types/express @types/cors @types/bcryptjs @types/jsonwebtoken @types/sequelize ts-node nodemon
 npx tsc --init
-npm start (ejecutar)
+npm start (produccion)
+npm run dev (desarrollo)
