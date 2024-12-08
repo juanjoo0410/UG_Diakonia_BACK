@@ -1,3 +1,4 @@
+import { Rol } from "../models/rolModel";
 import { IAuth } from "./IAuth";
 
 export interface IUsuario extends IAuth {
@@ -7,4 +8,5 @@ export interface IUsuario extends IAuth {
     cambiarClave?: boolean;
     idRol: number;
     anulado?: boolean;
+    rol?: Rol;
 }

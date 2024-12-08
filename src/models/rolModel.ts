@@ -35,9 +35,11 @@ Rol.init(
 );
 
 Rol.hasMany(Usuario,{
-  foreignKey: 'idRol'
+  foreignKey: 'idRol',
+  as: 'usuarios'
 });
 
 Usuario.belongsTo(Rol, {
-  foreignKey: 'idRol'
+  foreignKey: 'idRol',
+  as: 'rol'
 });

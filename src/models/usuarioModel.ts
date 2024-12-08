@@ -13,6 +13,7 @@ export class Usuario extends Model<IUsuario> implements IUsuario {
   public cambiarClave?: boolean;
   public idRol!: number;
   public anulado?: boolean;
+  public rol?: Rol | undefined;
 }
 
 Usuario.init(

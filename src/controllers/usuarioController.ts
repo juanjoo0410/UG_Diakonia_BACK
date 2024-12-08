@@ -30,10 +30,11 @@ const getUsuarios = async (req: Request, res: Response) => {
         const usuarios = await Usuario.findAll({
             include: [{
                 model: Rol,
+                as: 'rol',
                 attributes: ['nombre']
             }]
         });
-        res.status(200).json(usuarios);
+        res.status(200).json({value: usuarios});
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
     }
