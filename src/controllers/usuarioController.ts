@@ -10,12 +10,16 @@ const createUsuario = async (req: Request, res: Response) => {
         const { nombre, codigo, clave, correo, idRol } = req.body;
         const checkIs = await Usuario.findOne({ where: { codigo } });
         if (checkIs) {
-            res.status(400).json({ message: 'Usuario ya existe' });
+            res.status(400).json({
+                status: false,
+                message: 'Usuario ya existe'
+            });
         } else {
             const passHash = await encrypt(clave);
             const newUsuario = await Usuario.create({ nombre, codigo, clave: passHash, correo, idRol });
             res.status(201).json({
-                message: 'Usuario agregado',
+                status: true,
+                message: 'Usuario agregado exitosamente. Se envió al correo del usuario las credenciales ',
                 data: newUsuario
             });
         }
@@ -34,7 +38,7 @@ const getUsuarios = async (req: Request, res: Response) => {
                 attributes: ['nombre']
             }]
         });
-        res.status(200).json({value: usuarios});
+        res.status(200).json({ value: usuarios });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
     }
@@ -45,8 +49,12 @@ const getUsuarioById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const usuario = await Usuario.findByPk(id);
-        if (!usuario) res.status(404).json({ message: 'Usuario no encontrado' });
-        else res.status(200).json(usuario);
+        if (!usuario) res.status(404).json({
+            status: false,
+            message: 'Usuario no encontrado' });
+        else res.status(200).json({
+            status: true,
+            value: usuario});
     } catch (error) {
         handleHttp(res, 'ERROR_GET_BY_ID', error);
     }
@@ -54,19 +62,22 @@ const getUsuarioById = async (req: Request, res: Response) => {
 
 // Actualizar un usuario por ID
 const updateUsuario = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { nombre, clave, correo, idRol } = req.body;
+    const { idUsuario, nombre, correo, idRol } = req.body;
     try {
-        const usuario = await Usuario.findByPk(id);
-        if (!usuario) res.status(404).json({ message: 'Usuario no encontrado' });
+        const usuario = await Usuario.findByPk(idUsuario);
+        if (!usuario) res.status(404).json({
+            status: false,
+            message: 'Usuario no encontrado' });
         else {
-            const passHash = await encrypt(clave);
             usuario.nombre = nombre;
-            usuario.clave = passHash;
             usuario.correo = correo;
             usuario.idRol = idRol;
             await usuario.save();
-            res.status(200).json(usuario);
+            res.status(200).json({
+                status: true,
+                message: 'Datos de usuario actualizados exitosamente',
+                value: usuario
+            });
         }
     } catch (error) {
         handleHttp(res, 'ERROR_PUT', error);
@@ -78,18 +89,22 @@ const deleteUsuario = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const usuario = await Usuario.findByPk(id);
-        if (!usuario) res.status(404).json({ message: 'Usuario no encontrado' });
+        if (!usuario) res.status(404).json({
+            status: false,
+            message: 'Usuario no encontrado' });
         else {
             usuario.anulado = true; // Marcar como anulado
             await usuario.save();
-            res.status(200).json({ message: 'Usuario anulado correctamente' });
+            res.status(200).json({ 
+                status: true,
+                message: 'Usuario anulado correctamente' });
         }
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
     }
 };
 
-export { 
+export {
     createUsuario,
     getUsuarios,
     getUsuarioById,

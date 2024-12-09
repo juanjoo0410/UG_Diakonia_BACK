@@ -7,7 +7,7 @@ const checkJwt = (req: Request, res: Response, next: NextFunction) => {
         const jwt = jwtByUser?.split(' ').pop();
         const isOk = verifyToken(`${jwt}`);
         if (!isOk){
-            res.status(401);
+            res.status(401).json({message: "Sesión finalizada, inicie nuevamente"});
             res.send("SESSION_FINISH");
         }
         else {
@@ -15,7 +15,7 @@ const checkJwt = (req: Request, res: Response, next: NextFunction) => {
             next()
         }
     } catch (error) {
-        res.status(400);
+        res.status(400).json({message: "Sesión no válida, inicie nuevamente."});
         res.send("SESSION_NO_VALIDA");
     }
 }
