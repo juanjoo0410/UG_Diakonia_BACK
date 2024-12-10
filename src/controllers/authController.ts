@@ -10,7 +10,7 @@ const login = async (req: Request, res: Response) => {
         const { codigo, clave } = req.body;
         const checkIs = await Usuario.findOne({
             where: { codigo },
-            attributes: ['codigo', 'clave', 'cambiarClave', 'nombre'],
+            attributes: ['codigo', 'clave', 'cambiarClave', 'nombre', 'anulado'],
             include: [{
                 model: Rol,
                 as: 'rol',
@@ -23,6 +23,13 @@ const login = async (req: Request, res: Response) => {
             message: 'Usuario no encontrado'
         });
         else {
+            if (checkIs.anulado) {
+                res.status(403).json({
+                    status: false,
+                    message: 'El usuario está anulado y no puede iniciar sesión'
+                });
+                return;
+            }
             const passHash = checkIs.clave;
             const isCorrect = await compare(clave, passHash);
             if (isCorrect) {

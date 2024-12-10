@@ -32,6 +32,7 @@ const createUsuario = async (req: Request, res: Response) => {
 const getUsuarios = async (req: Request, res: Response) => {
     try {
         const usuarios = await Usuario.findAll({
+            where: {anulado: false},
             include: [{
                 model: Rol,
                 as: 'rol',
@@ -87,6 +88,7 @@ const updateUsuario = async (req: Request, res: Response) => {
 // Eliminar (anular) un usuario por ID
 const deleteUsuario = async (req: Request, res: Response) => {
     const { id } = req.params;
+    console.log(id);
     try {
         const usuario = await Usuario.findByPk(id);
         if (!usuario) res.status(404).json({
@@ -97,7 +99,7 @@ const deleteUsuario = async (req: Request, res: Response) => {
             await usuario.save();
             res.status(200).json({ 
                 status: true,
-                message: 'Usuario anulado correctamente' });
+                message: 'Usuario eliminado correctamente' });
         }
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
