@@ -2,6 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from "../config/db";
 import { ISubmenu } from '../interfaces/ISubmenu';
 import { Menu } from './menuModel';
+import { RolSubmenu } from './rolSubmenuModel';
 
 // Definimos el modelo sin usar decoradores
 export class Submenu extends Model<ISubmenu> implements ISubmenu {
@@ -52,4 +53,14 @@ Submenu.init(
         timestamps: true
     }
 );
+
+Submenu.hasMany(RolSubmenu, {
+    foreignKey: 'idSubmenu',
+    as: 'roles_submenus'
+});
+
+RolSubmenu.belongsTo(Submenu, {
+    foreignKey: 'idSubmenu',
+    as: 'submenu'
+});
 

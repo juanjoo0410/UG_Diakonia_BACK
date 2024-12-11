@@ -4,10 +4,10 @@ import { checkJwt } from '../middlewares/session';
 
 const router = Router();
 
-router.post('/', createRol);
+router.post('/', checkJwt, createRol);
 router.get('/', checkJwt, getRoles);
 router.get('/:id', getRolById);
-router.put('/:id', updateRol);
-router.delete('/:id', deleteRol);
+router.put('/', checkJwt, updateRol);
+router.delete('/:idRol', checkJwt, deleteRol);
 
 export default router;
