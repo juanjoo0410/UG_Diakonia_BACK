@@ -19,7 +19,9 @@ const createRol = async (req: Request, res: Response) => {
 // Obtener todos los roles
 const getRoles = async (req: Request, res: Response) => {
     try {
-        const roles = await Rol.findAll();
+        const roles = await Rol.findAll({
+            where: {anulado: false},
+        });
         res.status(200).json({value: roles});
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);

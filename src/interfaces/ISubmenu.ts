@@ -1,10 +1,11 @@
-import { IMenu } from "./IMenu";
+import { Menu } from "../models/menuModel";
 
-export interface ISubmenu extends IMenu {
+export interface ISubmenu {
     idSubmenu?: number;
     idMenu: number;
     nombre: string;
     ruta: string;
     orden: number;
     anulado?: boolean;
+    menu?: Menu;
 }

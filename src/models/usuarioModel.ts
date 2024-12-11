@@ -28,29 +28,29 @@ Usuario.init(
       allowNull: false
     },
     codigo: {
-        type: DataTypes.STRING(15),
-        allowNull: false
-      },
+      type: DataTypes.STRING(15),
+      allowNull: false
+    },
     clave: {
-        type: DataTypes.STRING(75),
-        allowNull: false
-      },
+      type: DataTypes.STRING(75),
+      allowNull: false
+    },
     correo: {
-        type: DataTypes.STRING(75),
-        allowNull: false
-      },
+      type: DataTypes.STRING(75),
+      allowNull: false
+    },
     cambiarClave: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: true
-      },
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true
+    },
     idRol: {
-        type: DataTypes.INTEGER,
-        references: {
-          model: 'roles',
-          key: 'idRol'
-        }
-      },
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'roles',
+        key: 'idRol'
+      }
+    },
     anulado: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
