@@ -9,6 +9,7 @@ export class Rol extends Model<IRol> implements IRol {
   public idRol?: number;
   public nombre!: string;
   public anulado?: boolean;
+  public roles_submenus?: RolSubmenu[] | undefined;
 }
 
 Rol.init(

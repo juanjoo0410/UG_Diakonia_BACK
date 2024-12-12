@@ -4,6 +4,8 @@ import { handleHttp } from "../utils/handleError";
 import { compare, encrypt } from '../helpers/handleBcrypt';
 import { generateToken } from "../helpers/handleJwt";
 import { Rol } from "../models/rolModel";
+import { RolSubmenu } from "../models/rolSubmenuModel";
+import { Submenu } from "../models/submenuModel";
 
 const login = async (req: Request, res: Response) => {
     try {
@@ -14,9 +16,21 @@ const login = async (req: Request, res: Response) => {
             include: [{
                 model: Rol,
                 as: 'rol',
-                attributes: ['idRol', 'nombre']
-            }
-            ]
+                attributes: ['idRol', 'nombre'],
+                include: [
+                    {
+                        model: RolSubmenu,
+                        as: 'roles_submenus', // Alias definido en la relación
+                        attributes: ['idSubmenu'],
+                        include: [
+                            {
+                                model: Submenu,
+                                as: 'submenu',
+                                attributes: ['idSubmenu'], // Asegúrate de incluir esta relación
+                            },
+                        ],
+                    }]
+            }]
         });
         if (!checkIs) res.status(404).json({
             status: false,
@@ -35,6 +49,9 @@ const login = async (req: Request, res: Response) => {
             if (isCorrect) {
                 let token = '';
                 if (!checkIs.cambiarClave) { token = generateToken(checkIs.codigo); }
+                
+                const permisos = checkIs.rol?.roles_submenus?.map((permiso: any) => permiso.idSubmenu) || [];
+
                 res.status(200).json({
                     status: true,
                     token,
@@ -43,7 +60,8 @@ const login = async (req: Request, res: Response) => {
                         nombre: checkIs.nombre,
                         cambiarClave: checkIs.cambiarClave,
                         idRol: checkIs.rol?.idRol,
-                        nombreRol: checkIs.rol?.nombre
+                        nombreRol: checkIs.rol?.nombre,
+                        permisos
                     }
                 });
             }
