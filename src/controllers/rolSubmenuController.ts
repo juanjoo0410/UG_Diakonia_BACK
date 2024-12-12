@@ -3,6 +3,7 @@ import { handleHttp } from '../utils/handleError';
 import { RolSubmenu } from '../models/rolSubmenuModel';
 import { Menu } from '../models/menuModel';
 import { Submenu } from '../models/submenuModel';
+import { Op } from 'sequelize';
 
 const getPermisosByIdRol = async (req: Request, res: Response) => {
     try {
@@ -17,7 +18,7 @@ const getPermisosByIdRol = async (req: Request, res: Response) => {
                     include: [{
                             model: Menu,
                             as: 'menu',
-                            attributes: ['idMenu', 'nombre', 'icono', 'orden'], // Agregar "orden" para el ordenamiento
+                            attributes: ['idMenu', 'nombre', 'icono', 'orden'],
                         }],
                 }],
             order: [
