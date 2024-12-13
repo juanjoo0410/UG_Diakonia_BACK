@@ -6,30 +6,28 @@ import { generateToken } from "../helpers/handleJwt";
 import { Rol } from "../models/rolModel";
 import { RolSubmenu } from "../models/rolSubmenuModel";
 import { Submenu } from "../models/submenuModel";
+import { registrarBitacora } from "../utils/bitacoraService";
 
 const login = async (req: Request, res: Response) => {
     try {
         const { codigo, clave } = req.body;
         const checkIs = await Usuario.findOne({
             where: { codigo },
-            attributes: ['codigo', 'clave', 'cambiarClave', 'nombre', 'anulado'],
+            attributes: ['idUsuario', 'codigo', 'clave', 'cambiarClave', 'nombre', 'anulado'],
             include: [{
                 model: Rol,
                 as: 'rol',
                 attributes: ['idRol', 'nombre'],
-                include: [
-                    {
-                        model: RolSubmenu,
-                        as: 'roles_submenus', // Alias definido en la relación
-                        attributes: ['idSubmenu'],
-                        include: [
-                            {
-                                model: Submenu,
-                                as: 'submenu',
-                                attributes: ['idSubmenu'], // Asegúrate de incluir esta relación
-                            },
-                        ],
-                    }]
+                include: [{
+                    model: RolSubmenu,
+                    as: 'roles_submenus', // Alias definido en la relación
+                    attributes: ['idSubmenu'],
+                    include: [{
+                        model: Submenu,
+                        as: 'submenu',
+                        attributes: ['idSubmenu'], // Asegúrate de incluir esta relación
+                    }],
+                }]
             }]
         });
         if (!checkIs) res.status(404).json({
@@ -49,8 +47,9 @@ const login = async (req: Request, res: Response) => {
             if (isCorrect) {
                 let token = '';
                 if (!checkIs.cambiarClave) { token = generateToken(checkIs.codigo); }
-                
                 const permisos = checkIs.rol?.roles_submenus?.map((permiso: any) => permiso.idSubmenu) || [];
+
+                await registrarBitacora(req, checkIs.idUsuario ?? 0, 'INICIO DE SESION', 'AUTENTICACION', `El usuario ${checkIs.nombre} inició sesión.`)
 
                 res.status(200).json({
                     status: true,
