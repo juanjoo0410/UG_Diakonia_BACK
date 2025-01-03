@@ -3,9 +3,10 @@ import { Usuario } from '../models/usuarioModel';
 import { handleHttp } from '../utils/handleError';
 import { encrypt } from '../helpers/handleBcrypt';
 import { Rol } from '../models/rolModel';
+import { registrarBitacora } from '../utils/bitacoraService';
 
 // Crear un nuevo usuario
-const createUsuario = async (req: Request, res: Response) => {
+const createUsuario = async (req: Request & { user?: any }, res: Response) => {
     try {
         const { nombre, codigo, clave, correo, idRol } = req.body;
         const checkIs = await Usuario.findOne({ where: { codigo } });
@@ -17,6 +18,7 @@ const createUsuario = async (req: Request, res: Response) => {
         } else {
             const passHash = await encrypt(clave);
             const newUsuario = await Usuario.create({ nombre, codigo, clave: passHash, correo, idRol });
+            await registrarBitacora(req, 'CREACIÓN', 'USUARIO', `Se creó el usuario ${newUsuario.nombre}.`);
             res.status(201).json({
                 status: true,
                 message: 'Usuario agregado exitosamente. Se envió al correo del usuario las credenciales ',
@@ -62,7 +64,7 @@ const getUsuarioById = async (req: Request, res: Response) => {
 };
 
 // Actualizar un usuario por ID
-const updateUsuario = async (req: Request, res: Response) => {
+const updateUsuario = async (req: Request & { user?: any }, res: Response) => {
     const { idUsuario, nombre, correo, idRol } = req.body;
     try {
         const usuario = await Usuario.findByPk(idUsuario);
@@ -74,6 +76,7 @@ const updateUsuario = async (req: Request, res: Response) => {
             usuario.correo = correo;
             usuario.idRol = idRol;
             await usuario.save();
+            await registrarBitacora(req, 'MODIFICACIÓN', 'USUARIO', `Se modificó informacion del usuario ${usuario.nombre}.`);
             res.status(200).json({
                 status: true,
                 message: 'Datos de usuario actualizados exitosamente',
@@ -86,7 +89,7 @@ const updateUsuario = async (req: Request, res: Response) => {
 };
 
 // Eliminar (anular) un usuario por ID
-const deleteUsuario = async (req: Request, res: Response) => {
+const deleteUsuario = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     console.log(id);
     try {
@@ -97,6 +100,7 @@ const deleteUsuario = async (req: Request, res: Response) => {
         else {
             usuario.anulado = true; // Marcar como anulado
             await usuario.save();
+            await registrarBitacora(req, 'ELIMINACIÓN', 'USUARIO', `Se eliminó el usuario ${usuario.nombre}.`);
             res.status(200).json({ 
                 status: true,
                 message: 'Usuario eliminado correctamente' });

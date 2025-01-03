@@ -1,5 +1,12 @@
 import { Router } from 'express';
-import { createSubmenu, getSubmenus, getSubmenusByIdMenu, getSubmenuById, updateSubmenu, deleteSubmenu } from '../controllers/submenuController';
+import {
+    createSubmenu,
+    getSubmenus,
+    getSubmenusByIdMenu,
+    getSubmenuById,
+    updateSubmenu,
+    deleteSubmenu
+} from '../controllers/submenuController';
 
 const router = Router();
 

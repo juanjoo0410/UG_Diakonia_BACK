@@ -1,5 +1,11 @@
 import { Router, Request, Response } from 'express';
-import { createRol, getRoles, getRolById, updateRol, deleteRol } from '../controllers/rolController';
+import {
+    createRol,
+    getRoles,
+    getRolById,
+    updateRol,
+    deleteRol
+} from '../controllers/rolController';
 import { checkJwt } from '../middlewares/session';
 
 const router = Router();

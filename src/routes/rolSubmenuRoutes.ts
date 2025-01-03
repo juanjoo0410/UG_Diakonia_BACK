@@ -1,5 +1,8 @@
 import { Router, Request, Response } from 'express';
-import { getIdSubmenusByIdRol, getPermisosByIdRol } from '../controllers/rolSubmenuController';
+import {
+    getIdSubmenusByIdRol,
+    getPermisosByIdRol
+} from '../controllers/rolSubmenuController';
 
 const router = Router();
 

@@ -11,13 +11,13 @@ export const obtenerNavegador = (req: Request): string => {
 };
 
 export const registrarBitacora = async (
-  req: Request,
-  idUsuario: number,
+  req: Request & { user?: any },
   accion: string,
   entidad: string,
   descripcion: string
 ) => {
   try {
+    const { idUsuario } = req.user;
     const ip = obtenerIP(req);
     const navegador = obtenerNavegador(req);
     await Bitacora.create({ idUsuario, accion, entidad, descripcion, ip, navegador });

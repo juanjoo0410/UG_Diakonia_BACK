@@ -8,7 +8,7 @@ import { RolSubmenu } from "../models/rolSubmenuModel";
 import { Submenu } from "../models/submenuModel";
 import { registrarBitacora } from "../utils/bitacoraService";
 
-const login = async (req: Request, res: Response) => {
+const login = async (req: Request & { user?: any }, res: Response) => {
     try {
         const { codigo, clave } = req.body;
         const checkIs = await Usuario.findOne({
@@ -46,10 +46,10 @@ const login = async (req: Request, res: Response) => {
             const isCorrect = await compare(clave, passHash);
             if (isCorrect) {
                 let token = '';
-                if (!checkIs.cambiarClave) { token = generateToken(checkIs.codigo); }
+                if (!checkIs.cambiarClave) { token = generateToken(checkIs.idUsuario ?? 0, checkIs.codigo); }
                 const permisos = checkIs.rol?.roles_submenus?.map((permiso: any) => permiso.idSubmenu) || [];
-
-                await registrarBitacora(req, checkIs.idUsuario ?? 0, 'INICIO DE SESION', 'AUTENTICACION', `El usuario ${checkIs.nombre} inició sesión.`)
+                req.user = { idUsuario: checkIs.idUsuario ?? 0 };
+                await registrarBitacora(req, 'INICIO DE SESION', 'AUTENTICACION', `El usuario ${checkIs.nombre} inició sesión.`)
 
                 res.status(200).json({
                     status: true,

@@ -6,9 +6,10 @@ import { RolSubmenu } from '../models/rolSubmenuModel';
 import { Op } from 'sequelize';
 import { Menu } from '../models/menuModel';
 import { Submenu } from '../models/submenuModel';
+import { registrarBitacora } from '../utils/bitacoraService';
 
 // Crear un nuevo rol
-const createRol = async (req: Request, res: Response) => {
+const createRol = async (req: Request & { user?: any }, res: Response) => {
     const transaction = await sequelize.transaction();
     try {
         const { nombre, permisos } = req.body;
@@ -32,7 +33,7 @@ const createRol = async (req: Request, res: Response) => {
         }
 
         await transaction.commit();
-
+        await registrarBitacora(req, 'CREACIÓN', 'ROL', `Se creó el rol ${newRol.nombre}.`);
         res.status(201).json({
             status: true,
             message: 'Rol creado con éxito',
@@ -100,7 +101,7 @@ const getRolById = async (req: Request, res: Response) => {
 };
 
 // Actualizar un rol por ID
-const updateRol = async (req: Request, res: Response) => {
+const updateRol = async (req: Request & { user?: any }, res: Response) => {
     const transaction = await sequelize.transaction();
 
     try {
@@ -137,6 +138,7 @@ const updateRol = async (req: Request, res: Response) => {
             await RolSubmenu.bulkCreate(permisosData, { transaction });
         }
         await transaction.commit();
+        await registrarBitacora(req, 'MODIFICACIÓN', 'ROL', `Se modificó la información del rol ${rol.nombre}.`)
         res.status(200).json({
             status: true,
             message: 'Rol actualizado con éxito',
@@ -149,7 +151,7 @@ const updateRol = async (req: Request, res: Response) => {
 };
 
 // Eliminar (anular) un rol por ID
-const deleteRol = async (req: Request, res: Response) => {
+const deleteRol = async (req: Request & { user?: any }, res: Response) => {
     const transaction = await sequelize.transaction();
     try {
         const { idRol } = req.params;
@@ -167,6 +169,7 @@ const deleteRol = async (req: Request, res: Response) => {
                 transaction,
             });
             await transaction.commit();
+            await registrarBitacora(req, 'ELIMINACIÓN', 'ROL', `Se eliminó el rol ${rol.nombre}.`);
             res.status(200).json({
                 status: true,
                 message: 'Rol anulado y permisos eliminados con éxito'

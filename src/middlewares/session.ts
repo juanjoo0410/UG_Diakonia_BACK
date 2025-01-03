@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../helpers/handleJwt";
 
-const checkJwt = (req: Request, res: Response, next: NextFunction) => {
+const checkJwt = (req: Request & { user?: any }, res: Response, next: NextFunction) => {
     try {
         const jwtByUser = req.headers.authorization || null;
         const jwt = jwtByUser?.split(' ').pop();
@@ -11,7 +11,8 @@ const checkJwt = (req: Request, res: Response, next: NextFunction) => {
             res.send("SESSION_FINISH");
         }
         else {
-            console.log(jwtByUser);
+            console.log(isOk);
+            req.user = isOk;
             next()
         }
     } catch (error) {

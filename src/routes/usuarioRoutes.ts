@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { createUsuario, getUsuarios, getUsuarioById, updateUsuario, deleteUsuario } from "../controllers/usuarioController";
+import {
+    createUsuario,
+    getUsuarios,
+    getUsuarioById,
+    updateUsuario,
+    deleteUsuario
+} from "../controllers/usuarioController";
 import { checkJwt } from "../middlewares/session";
 
 const router = Router();
