@@ -3,10 +3,11 @@ import { TipoOrg } from '../models/tipoOrgModel';
 import { handleHttp } from '../utils/handleError';
 import { ITipoOrg } from '../interfaces/ITipoOrg';
 import { registrarBitacora } from '../utils/bitacoraService';
+import { Beneficiario } from '../models/beneficiarioModel';
 
 const entidad = 'TIPO_ORGANIZACION';
 
-const createTipoORg = async (
+const createTipoOrg = async (
     req: Request<{}, {}, Omit<ITipoOrg, 'idTipoOrg' | 'estado'>> & { user?: any },
     res: Response) => {
     try {
@@ -72,14 +73,14 @@ const updateTipoOrg = async (req: Request & { user?: any }, res: Response) => {
             return;
         }
 
-        if (tipoOrg.nombre != checkIs.nombre){
-            const nameExist = await TipoOrg.findOne({where : {nombre: tipoOrg.nombre}});
-            if(nameExist){
+        if (tipoOrg.nombre != checkIs.nombre) {
+            const nameExist = await TipoOrg.findOne({ where: { nombre: tipoOrg.nombre } });
+            if (nameExist) {
                 res.status(404).json({
                     status: false,
                     message: 'El nomnre del Tipo de organización ya existe'
                 });
-                return; 
+                return;
             }
         }
         checkIs.codigo = tipoOrg.codigo;
@@ -102,26 +103,35 @@ const deleteTipoOrg = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const tipoOrg = await TipoOrg.findByPk(id);
-        if (!tipoOrg) res.status(404).json({
-            status: false,
-            message: 'Tipo de organización no encontrado'
-        });
-        else {
-            tipoOrg.estado = false; // Marcar como anulado
-            await tipoOrg.save();
-            await registrarBitacora(req, 'ELIMINACIÓN', entidad, `Se eliminó el tipo de organización ${tipoOrg.nombre}.`);
-            res.status(200).json({
-                status: true,
-                message: 'Tipo de organización eliminado correctamente'
+        if (!tipoOrg) {
+            res.status(404).json({
+                status: false,
+                message: 'Tipo de organización no encontrado'
             });
+            return;
         }
+        const beneficiario = await Beneficiario.findOne({ where: { idTipoOrg: tipoOrg.idTipoOrg } });
+        if (beneficiario) {
+            res.status(404).json({
+                status: false,
+                message: 'Existen beneficiarios asignados a este tipo de organizacion. Imposible eliminar.'
+            });
+            return;
+        }
+        tipoOrg.estado = false; // Marcar como anulado
+        await tipoOrg.save();
+        await registrarBitacora(req, 'ELIMINACIÓN', entidad, `Se eliminó el tipo de organización ${tipoOrg.nombre}.`);
+        res.status(200).json({
+            status: true,
+            message: 'Tipo de organización eliminado correctamente'
+        });
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
     }
 };
 
 export {
-    createTipoORg,
+    createTipoOrg,
     getTiposOrg,
     getTipoOrgById,
     updateTipoOrg,

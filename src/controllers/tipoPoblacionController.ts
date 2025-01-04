@@ -3,6 +3,7 @@ import { TipoPoblacion } from '../models/tipoPoblacionModel';
 import { handleHttp } from '../utils/handleError';
 import { ITipoPoblacion } from '../interfaces/ITipoPoblacion';
 import { registrarBitacora } from '../utils/bitacoraService';
+import { Beneficiario } from '../models/beneficiarioModel';
 
 const entidad = 'TIPO_POBLACIÓN';
 
@@ -93,14 +94,14 @@ const deleteTipoPoblacion = async (req: Request & { user?: any }, res: Response)
             });
             return;
         }
-        /*const establecimientos = await Establecimiento.findOne({ where: { idDonante: donante.idDonante } });
-        if (establecimientos) {
+        const beneficiario = await Beneficiario.findOne({ where: { idTipoPoblacion: tipoPoblacion.idTipoPoblacion } });
+        if (beneficiario) {
             res.status(404).json({
                 status: false,
-                message: 'Existen establecimientos asignados a este donante. Imposible eliminar.'
+                message: 'Existen beneficiarios asignados a este tipo de población. Imposible eliminar.'
             });
             return;
-        }*/
+        }
         tipoPoblacion.estado = false; // Marcar como anulado
         await tipoPoblacion.save();
         await registrarBitacora(req, 'ELIMINACIÓN', entidad,
