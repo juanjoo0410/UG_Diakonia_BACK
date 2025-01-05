@@ -4,6 +4,7 @@ import { handleHttp } from '../utils/handleError';
 import { IGrupoProducto } from '../interfaces/IGrupoProducto';
 import { registrarBitacora } from '../utils/bitacoraService';
 import { SubgrupoProducto } from '../models/subgrupoProductoModel';
+import { Producto } from '../models/productoModel';
 
 const entidad = 'GRUPO_PRODUCTO';
 
@@ -113,6 +114,14 @@ const deleteGrupoProducto = async (req: Request & { user?: any }, res: Response)
             res.status(404).json({
                 status: false,
                 message: 'Existen subgrupos de producto asignados a este grupo. Imposible eliminar.'
+            });
+            return;
+        }
+        const producto = await Producto.findOne({ where: { idGrupoProducto: grupoProducto.idGrupoProducto } });
+        if (producto) {
+            res.status(404).json({
+                status: false,
+                message: 'Existen productos asignados a este grupo. Imposible eliminar.'
             });
             return;
         }

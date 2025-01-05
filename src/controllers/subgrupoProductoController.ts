@@ -4,6 +4,7 @@ import { handleHttp } from '../utils/handleError';
 import { ISubgrupoProducto } from '../interfaces/ISubgrupoProducto';
 import { registrarBitacora } from '../utils/bitacoraService';
 import { Beneficiario } from '../models/beneficiarioModel';
+import { Producto } from '../models/productoModel';
 
 const entidad = 'SUBGRUPO_PRODUCTO';
 
@@ -106,6 +107,14 @@ const deleteSubgrupoProducto = async (req: Request & { user?: any }, res: Respon
             res.status(404).json({
                 status: false,
                 message: 'Subgrupo de producto no encontrado'
+            });
+            return;
+        }
+        const producto = await Producto.findOne({ where: { idSubgrupoProducto: subgrupoProducto.idSubgrupoProducto } });
+        if (producto) {
+            res.status(404).json({
+                status: false,
+                message: 'Existen productos asignados a este subgrupo. Imposible eliminar.'
             });
             return;
         }

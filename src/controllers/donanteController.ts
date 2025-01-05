@@ -4,6 +4,7 @@ import { handleHttp } from '../utils/handleError';
 import { IDonante } from '../interfaces/IDonante';
 import { registrarBitacora } from '../utils/bitacoraService';
 import { Establecimiento } from '../models/establecimientoModel';
+import { Producto } from '../models/productoModel';
 
 const entidad = 'DONANTE';
 
@@ -105,6 +106,14 @@ const deleteDonante = async (req: Request & { user?: any }, res: Response) => {
             res.status(404).json({
                 status: false,
                 message: 'Existen establecimientos asignados a este donante. Imposible eliminar.'
+            });
+            return;
+        }
+        const producto = await Producto.findOne({ where: { idDonante: donante.idDonante } });
+        if (producto) {
+            res.status(404).json({
+                status: false,
+                message: 'Existen productos asignados a este donante. Imposible eliminar.'
             });
             return;
         }
