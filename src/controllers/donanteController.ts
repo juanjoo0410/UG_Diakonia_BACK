@@ -77,6 +77,7 @@ const updateDonante = async (req: Request & { user?: any }, res: Response) => {
             checkIs.telefono = donante.telefono;
             checkIs.correo = donante.correo;
             checkIs.nombreContacto = donante.nombreContacto;
+            checkIs.abreviatura = donante.abreviatura;
             await checkIs.save();
             await registrarBitacora(req, 'MODIFICACIÓN', entidad,
                 `Se actualizó información del donante ${donante.nombre}.`)

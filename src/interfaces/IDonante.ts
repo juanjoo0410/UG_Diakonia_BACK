@@ -8,5 +8,6 @@ export interface IDonante{
     telefono: string;
     correo: string;
     nombreContacto: string;
+    abreviatura: string;
     estado?: boolean;
 }

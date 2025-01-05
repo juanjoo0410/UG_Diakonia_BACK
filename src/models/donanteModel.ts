@@ -12,6 +12,7 @@ export class Donante extends Model<IDonante> implements IDonante {
     public telefono!: string;
     public correo!: string;
     public nombreContacto!: string;
+    public abreviatura!: string;
     public estado?: boolean;
 }
 
@@ -26,6 +27,7 @@ Donante.init(
         telefono: { type: DataTypes.STRING(25), allowNull: false },
         correo: { type: DataTypes.STRING(100), allowNull: false },
         nombreContacto: { type: DataTypes.STRING(100), allowNull: false },
+        abreviatura: { type: DataTypes.STRING(5), allowNull: false },
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
     },
     {
