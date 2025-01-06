@@ -4,11 +4,14 @@ import { Producto } from './productoModel';
 import { Ubicacion } from './ubicacionModel';
 import { ITransferenciaDt } from '../interfaces/ITransferenciaDt';
 import { Transferencia } from './transferenciaModel';
+import { Bodega } from './bodegaModel';
 
 export class TransferenciaDt extends Model<ITransferenciaDt> implements ITransferenciaDt {
     public idTransferenciaDt?: number;
     public idTransferencia!: number;
     public idProducto!: number;
+    public idBodegaOrigen!: number;
+    public idBodegaDestino!: number;
     public idUbicacionOrigen!: number;
     public idUbicacionDestino!: number;
     public cantidad!: number;
@@ -16,6 +19,8 @@ export class TransferenciaDt extends Model<ITransferenciaDt> implements ITransfe
     public estado?: boolean;
     public transferencia?: Transferencia | undefined;
     public producto?: Producto | undefined;
+    public bodegaOrigen?: Bodega | undefined;
+    public bodegaDestino?: Bodega | undefined;
     public ubicacionOrigen?: Ubicacion | undefined;
     public ubicacionDestino?: Ubicacion | undefined;
 }
@@ -35,6 +40,20 @@ TransferenciaDt.init(
             references: {
                 model: 'productos',
                 key: 'idProducto'
+            }
+        },
+        idBodegaOrigen: {
+            type: DataTypes.INTEGER,
+            references: {
+                model: 'bodegas',
+                key: 'idBodega'
+            }
+        },
+        idBodegaDestino: {
+            type: DataTypes.INTEGER,
+            references: {
+                model: 'bodegas',
+                key: 'idBodega'
             }
         },
         idUbicacionOrigen: {
@@ -75,6 +94,16 @@ TransferenciaDt.belongsTo(Transferencia, {
 TransferenciaDt.belongsTo(Producto, {
     foreignKey: 'idProducto',
     as: 'producto'
+});
+
+TransferenciaDt.belongsTo(Bodega, {
+    foreignKey: 'idBodegaOrigen',
+    as: 'bodegaOrigen'
+});
+
+TransferenciaDt.belongsTo(Bodega, {
+    foreignKey: 'idBodegaDestino',
+    as: 'bodegaDestino'
 });
 
 TransferenciaDt.belongsTo(Ubicacion, {

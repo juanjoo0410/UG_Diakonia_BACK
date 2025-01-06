@@ -1,37 +1,40 @@
 import { Request, Response } from 'express';
-import { Donante } from '../models/donanteModel';
 import { handleHttp } from '../utils/handleError';
-import { IDonante } from '../interfaces/IDonante';
 import { registrarBitacora } from '../utils/bitacoraService';
-import { Establecimiento } from '../models/establecimientoModel';
-import { Producto } from '../models/productoModel';
 import { ICliente } from '../interfaces/ICliente';
 import { Cliente } from '../models/clienteModel';
+import { generarCodigo } from '../utils/contadorService';
+import sequelize from '../config/db';
 
 const entidad = 'CLIENTE';
 
 const createCliente = async (
     req: Request<{}, {}, Omit<ICliente, 'idCliente' | 'estado'>> & { user?: any },
     res: Response) => {
+    const transaction = await sequelize.transaction();
     try {
         const cliente: Omit<ICliente, 'idCliente' | 'estado'> = req.body;
         const checkIs = await Cliente.findOne({ where: { identificacion: cliente.identificacion } });
         if (checkIs) {
+            await transaction.rollback();
             res.status(400).json({
                 status: false,
                 message: 'La Identificación/Ruc del cliente ya existe'
             });
         } else {
-            await registrarBitacora(req, 'CREACIÓN', entidad,
-                `Se creó el cliente ${cliente.nombre}.`)
+            cliente.codigo = await generarCodigo('clientes', transaction);
             const newCliente = await Cliente.create(cliente);
+            await transaction.commit();
             res.status(201).json({
                 status: true,
-                message: 'Cliente agregado exitosamente.',
+                message: `Cliente con codigo ${newCliente.codigo} agregado exitosamente.`,
                 data: newCliente
             });
+            await registrarBitacora(req, 'CREACIÓN', entidad,
+                `Se creó el cliente ${cliente.nombre}.`);
         }
     } catch (error) {
+        await transaction.rollback();
         return handleHttp(res, 'ERROR_POST', error);
     }
 };

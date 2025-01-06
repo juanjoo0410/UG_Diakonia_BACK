@@ -26,6 +26,7 @@ export const agregarKardex = async (
                 tipo: documento.tipo,
                 detalle: documento.detalle,
                 idBodega: detalle.idBodega,
+                idUbicacion: detalle.idUbicacion,
                 idProducto: detalle.idProducto,
                 cantidad: +detalle.cantidad,
                 esIngreso: documento.esIngreso,

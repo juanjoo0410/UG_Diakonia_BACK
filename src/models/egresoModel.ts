@@ -24,7 +24,7 @@ Egreso.init(
             }
         },
         descripcion: { type: DataTypes.STRING(500), allowNull: false },
-        idBeneficiario: { type: DataTypes.INTEGER, allowNull: false },
+        idBeneficiario: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
         totalPeso: { type: DataTypes.DECIMAL(10,2), allowNull: false },
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
     },

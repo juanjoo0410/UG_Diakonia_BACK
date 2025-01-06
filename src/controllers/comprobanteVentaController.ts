@@ -6,6 +6,9 @@ import { IComprobanteVenta } from '../interfaces/IComprobanteVenta';
 import { ComprobanteVenta } from '../models/comprobanteVentaModel';
 import { IComprobanteVentaDt } from '../interfaces/IComprobanteVentaDt';
 import { ComprobanteVentaDt } from '../models/comprobanteVentaDtModel';
+import { Cliente } from '../models/clienteModel';
+import { actualizarStock } from '../utils/stockService';
+import { agregarKardex } from '../utils/kardexService';
 
 const entidad = 'COMPROBANTE_VENTA';
 
@@ -15,8 +18,8 @@ const createComprobanteVenta = async (
     const transaction = await sequelize.transaction();
     try {
         const comprobanteVenta: Omit<IComprobanteVenta, 'idComprobanteVenta' | 'estado'> = req.body;
-        if (!comprobanteVenta.comprobanteVentaDt || 
-            !Array.isArray(comprobanteVenta.comprobanteVentaDt) || 
+        if (!comprobanteVenta.comprobanteVentaDt ||
+            !Array.isArray(comprobanteVenta.comprobanteVentaDt) ||
             comprobanteVenta.comprobanteVentaDt.length === 0) {
             res.status(400).json({
                 status: false,
@@ -34,15 +37,27 @@ const createComprobanteVenta = async (
             },
             { transaction }
         );
+        const cliente = await Cliente.findByPk(comprobanteVenta.idCliente);
         const detalles = comprobanteVenta.comprobanteVentaDt.map((
             detalle: Omit<IComprobanteVentaDt, 'idComprobanteVentaDt' | 'estado'>) => ({
                 idComprobanteVenta: newComprobanteVenta.idComprobanteVenta ?? 0,
                 idProducto: detalle.idProducto,
+                idBodega: detalle.idBodega,
+                idUbicacion: detalle.idUbicacion,
                 cantidad: detalle.cantidad,
                 precioUnd: detalle.precioUnd,
-                total: detalle.total
+                total: detalle.total,
+                peso: detalle.peso
             }));
+        const documento = {
+            idDocumento: newComprobanteVenta.idComprobanteVenta,
+            tipo: entidad,
+            detalle: `Venta a cliente: ${cliente?.nombre}.`,
+            esIngreso: false
+        }
         await ComprobanteVentaDt.bulkCreate(detalles, { transaction });
+        await actualizarStock(detalles, false, transaction);
+        await agregarKardex(documento, detalles, transaction);
         await transaction.commit();
         res.status(201).json({
             status: true,

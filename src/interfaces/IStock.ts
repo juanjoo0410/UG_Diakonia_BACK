@@ -8,6 +8,7 @@ export interface IStock{
     idBodega: number;
     idUbicacion:number;
     stock: number;
+    pesoTotal: number;
     estado?:boolean;
     producto?: IProducto;
     bodega?: IBodega;

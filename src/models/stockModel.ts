@@ -11,6 +11,7 @@ export class Stock extends Model<IStock> implements IStock {
     public idBodega!: number;
     public idUbicacion!: number;
     public stock!: number;
+    public pesoTotal!: number;
     public estado?: boolean;
     public producto?: Producto | undefined;
     public bodega?: Bodega | undefined;
@@ -42,6 +43,7 @@ Stock.init(
             }
         },
         stock: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+        pesoTotal: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
     },
     {

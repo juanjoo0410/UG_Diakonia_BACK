@@ -6,6 +6,8 @@ import { ITransferencia } from '../interfaces/ITransferencia';
 import { Transferencia } from '../models/transferenciaModel';
 import { ITransferenciaDt } from '../interfaces/ITransferenciaDt';
 import { TransferenciaDt } from '../models/transferenciaDtModel';
+import { actualizarStock } from '../utils/stockService';
+import { agregarKardex } from '../utils/kardexService';
 
 const entidad = 'TRANSFERENCIA';
 
@@ -15,8 +17,8 @@ const createTransferencia = async (
     const transaction = await sequelize.transaction();
     try {
         const transferencia: Omit<ITransferencia, 'idTransferencia' | 'estado'> = req.body;
-        if (!transferencia.transferenciaDt || 
-            !Array.isArray(transferencia.transferenciaDt) || 
+        if (!transferencia.transferenciaDt ||
+            !Array.isArray(transferencia.transferenciaDt) ||
             transferencia.transferenciaDt.length === 0) {
             res.status(400).json({
                 status: false,
@@ -27,8 +29,8 @@ const createTransferencia = async (
         const newTransferencia = await Transferencia.create(
             {
                 descripcion: transferencia.descripcion,
-                idBodegaOrigen:  transferencia.idBodegaOrigen,
-                idBodegaDestino:  transferencia.idBodegaDestino,
+                idBodegaOrigen: transferencia.idBodegaOrigen,
+                idBodegaDestino: transferencia.idBodegaDestino,
                 totalPeso: transferencia.totalPeso,
             },
             { transaction }
@@ -37,12 +39,44 @@ const createTransferencia = async (
             detalle: Omit<ITransferenciaDt, 'idTransferenciaDt' | 'estado'>) => ({
                 idTransferencia: newTransferencia.idTransferencia ?? 0,
                 idProducto: detalle.idProducto,
+                idBodegaOrigen: detalle.idBodegaOrigen,
+                idBodegaDestino: detalle.idBodegaDestino,
                 idUbicacionOrigen: detalle.idUbicacionOrigen,
                 idUbicacionDestino: detalle.idUbicacionDestino,
                 cantidad: detalle.cantidad,
                 peso: detalle.peso
             }));
+        
         await TransferenciaDt.bulkCreate(detalles, { transaction });
+        const documento = {
+            idDocumento: newTransferencia.idTransferencia,
+            tipo: entidad,
+            detalle: `Egreso: ${newTransferencia.descripcion}`,
+            esIngreso: false
+        };
+        const detallesEg = detalles.map((
+            detalle: any) => ({
+                idProducto: detalle.idProducto,
+                idBodega: detalle.idBodegaOrigen,
+                idUbicacion: detalle.idUbicacionOrigen,
+                cantidad: detalle.cantidad,
+                peso: detalle.peso
+            }));
+        const detallesIng = detalles.map((
+            detalle: any) => ({
+                idProducto: detalle.idProducto,
+                idBodega: detalle.idBodegaDestino,
+                idUbicacion: detalle.idUbicacionDestino,
+                cantidad: detalle.cantidad,
+                peso: detalle.peso
+            }));
+        await actualizarStock(detallesEg, documento.esIngreso, transaction);
+        await agregarKardex(documento, detallesEg, transaction);
+
+        documento.esIngreso = true;
+        documento.detalle = `Ingreso: ${newTransferencia.descripcion}`
+        await actualizarStock(detallesIng, documento.esIngreso, transaction);
+        await agregarKardex(documento, detallesIng, transaction);
         await transaction.commit();
         await registrarBitacora(req, 'CREACIÓN', entidad,
             `Se creó la transferencia ${newTransferencia.idTransferencia}.`);

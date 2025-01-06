@@ -1,5 +1,6 @@
 import { Transaction } from "sequelize";
 import { Stock } from "../models/stockModel";
+import { Producto } from "../models/productoModel";
 
 export const actualizarStock = async (
     detalles: any[],
@@ -15,18 +16,21 @@ export const actualizarStock = async (
             },
             transaction,
         });
-
+        console.log(esIngreso + " - " + detalle.idUbicacion);
         if (existingStock) {
             const nuevoStock = esIngreso
                 ? (+existingStock.stock + +detalle.cantidad)
                 : (+existingStock.stock - +detalle.cantidad);
+            const nuevoPeso = esIngreso
+                ? (+existingStock.pesoTotal + +detalle.peso)
+                : (+existingStock.pesoTotal - +detalle.peso);
             if (nuevoStock < 0) {
                 throw new Error(
                     `El stock para el producto ${detalle.idProducto} en la bodega ${detalle.idBodega} no puede ser negativo.`
                 );
             }
-
             existingStock.stock = nuevoStock;
+            existingStock.pesoTotal = nuevoPeso;
             await existingStock.save({ transaction });
         } else if (esIngreso) {
             await Stock.create(
@@ -35,6 +39,7 @@ export const actualizarStock = async (
                     idBodega: detalle.idBodega,
                     idUbicacion: detalle.idUbicacion,
                     stock: detalle.cantidad,
+                    pesoTotal: detalle.peso
                 },
                 { transaction }
             );
