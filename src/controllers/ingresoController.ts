@@ -6,6 +6,7 @@ import sequelize from "../config/db";
 import { Ingreso } from '../models/ingresoModel';
 import { IngresoDt } from '../models/ingresoDtModel';
 import { IIngresoDt } from '../interfaces/IIngresoDt';
+import { actualizarStock } from '../utils/stockService';
 
 const entidad = 'INGRESO';
 
@@ -15,7 +16,9 @@ const createIngreso = async (
     const transaction = await sequelize.transaction();
     try {
         const ingreso: Omit<IIngreso, 'idIngreso' | 'estado'> = req.body;
-        if (!ingreso.ingresoDt || !Array.isArray(ingreso.ingresoDt)) {
+        if (!ingreso.ingresoDt || 
+            !Array.isArray(ingreso.ingresoDt) || 
+            ingreso.ingresoDt.length === 0) {
             res.status(400).json({
                 status: false,
                 message: "Detalle del ingreso es requerido"
@@ -40,6 +43,7 @@ const createIngreso = async (
                 peso: detalle.peso
             }));
         await IngresoDt.bulkCreate(detalles, { transaction });
+        await actualizarStock(detalles, true, transaction);
         await transaction.commit();
         await registrarBitacora(req, 'CREACIÓN', entidad,
             `Se creó el ingreso ${newIngreso.idIngreso}.`);

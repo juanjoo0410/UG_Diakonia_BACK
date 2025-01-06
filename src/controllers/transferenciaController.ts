@@ -15,7 +15,9 @@ const createTransferencia = async (
     const transaction = await sequelize.transaction();
     try {
         const transferencia: Omit<ITransferencia, 'idTransferencia' | 'estado'> = req.body;
-        if (!transferencia.transferenciaDt || !Array.isArray(transferencia.transferenciaDt)) {
+        if (!transferencia.transferenciaDt || 
+            !Array.isArray(transferencia.transferenciaDt) || 
+            transferencia.transferenciaDt.length === 0) {
             res.status(400).json({
                 status: false,
                 message: "Detalle de la transferencia es requerido"

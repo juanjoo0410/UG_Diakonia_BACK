@@ -6,6 +6,7 @@ import { IEgreso } from '../interfaces/IEgreso';
 import { Egreso } from '../models/egresoModel';
 import { IEgresoDt } from '../interfaces/IEgresoDt';
 import { EgresoDt } from '../models/egresoDtModel';
+import { actualizarStock } from '../utils/stockService';
 
 const entidad = 'EGRESO';
 
@@ -15,7 +16,9 @@ const createEgreso = async (
     const transaction = await sequelize.transaction();
     try {
         const egreso: Omit<IEgreso, 'idEgreso' | 'estado'> = req.body;
-        if (!egreso.egresoDt || !Array.isArray(egreso.egresoDt)) {
+        if (!egreso.egresoDt ||
+            !Array.isArray(egreso.egresoDt) ||
+            egreso.egresoDt.length === 0) {
             res.status(400).json({
                 status: false,
                 message: "Detalle del egreso es requerido"
@@ -26,7 +29,7 @@ const createEgreso = async (
             {
                 idTipoTransaccion: egreso.idTipoTransaccion,
                 descripcion: egreso.descripcion,
-                idBeneficiario:  egreso.idBeneficiario,
+                idBeneficiario: egreso.idBeneficiario,
                 totalPeso: egreso.totalPeso,
             },
             { transaction }
@@ -41,6 +44,7 @@ const createEgreso = async (
                 peso: detalle.peso
             }));
         await EgresoDt.bulkCreate(detalles, { transaction });
+        await actualizarStock(detalles, false, transaction);
         await transaction.commit();
         await registrarBitacora(req, 'CREACIÓN', entidad,
             `Se creó el egreso ${newEgreso.idEgreso}.`);

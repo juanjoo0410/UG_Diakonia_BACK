@@ -15,7 +15,9 @@ const createComprobanteVenta = async (
     const transaction = await sequelize.transaction();
     try {
         const comprobanteVenta: Omit<IComprobanteVenta, 'idComprobanteVenta' | 'estado'> = req.body;
-        if (!comprobanteVenta.comprobanteVentaDt || !Array.isArray(comprobanteVenta.comprobanteVentaDt)) {
+        if (!comprobanteVenta.comprobanteVentaDt || 
+            !Array.isArray(comprobanteVenta.comprobanteVentaDt) || 
+            comprobanteVenta.comprobanteVentaDt.length === 0) {
             res.status(400).json({
                 status: false,
                 message: "Detalle del comprobante es requerido"
