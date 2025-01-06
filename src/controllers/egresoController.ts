@@ -7,6 +7,7 @@ import { Egreso } from '../models/egresoModel';
 import { IEgresoDt } from '../interfaces/IEgresoDt';
 import { EgresoDt } from '../models/egresoDtModel';
 import { actualizarStock } from '../utils/stockService';
+import { agregarKardex } from '../utils/kardexService';
 
 const entidad = 'EGRESO';
 
@@ -43,8 +44,15 @@ const createEgreso = async (
                 cantidad: detalle.cantidad,
                 peso: detalle.peso
             }));
+        const documento = {
+            idDocumento: newEgreso.idEgreso,
+            tipo: entidad,
+            detalle: newEgreso.descripcion,
+            esIngreso: false
+        }
         await EgresoDt.bulkCreate(detalles, { transaction });
         await actualizarStock(detalles, false, transaction);
+        await agregarKardex(documento, detalles, transaction);
         await transaction.commit();
         await registrarBitacora(req, 'CREACIÓN', entidad,
             `Se creó el egreso ${newEgreso.idEgreso}.`);

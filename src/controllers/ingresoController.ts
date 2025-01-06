@@ -7,6 +7,7 @@ import { Ingreso } from '../models/ingresoModel';
 import { IngresoDt } from '../models/ingresoDtModel';
 import { IIngresoDt } from '../interfaces/IIngresoDt';
 import { actualizarStock } from '../utils/stockService';
+import { agregarKardex } from '../utils/kardexService';
 
 const entidad = 'INGRESO';
 
@@ -16,8 +17,8 @@ const createIngreso = async (
     const transaction = await sequelize.transaction();
     try {
         const ingreso: Omit<IIngreso, 'idIngreso' | 'estado'> = req.body;
-        if (!ingreso.ingresoDt || 
-            !Array.isArray(ingreso.ingresoDt) || 
+        if (!ingreso.ingresoDt ||
+            !Array.isArray(ingreso.ingresoDt) ||
             ingreso.ingresoDt.length === 0) {
             res.status(400).json({
                 status: false,
@@ -42,8 +43,15 @@ const createIngreso = async (
                 cantidad: detalle.cantidad,
                 peso: detalle.peso
             }));
+        const documento = {
+            idDocumento: newIngreso.idIngreso,
+            tipo: entidad,
+            detalle: newIngreso.descripcion,
+            esIngreso: true
+        }
         await IngresoDt.bulkCreate(detalles, { transaction });
         await actualizarStock(detalles, true, transaction);
+        await agregarKardex(documento, detalles, transaction);
         await transaction.commit();
         await registrarBitacora(req, 'CREACIÓN', entidad,
             `Se creó el ingreso ${newIngreso.idIngreso}.`);
