@@ -24,7 +24,7 @@ const createEgreso = async (
         }
         const newEgreso = await Egreso.create(
             {
-                idTipoDocumento: egreso.idTipoDocumento,
+                idTipoTransaccion: egreso.idTipoTransaccion,
                 descripcion: egreso.descripcion,
                 idBeneficiario:  egreso.idBeneficiario,
                 totalPeso: egreso.totalPeso,

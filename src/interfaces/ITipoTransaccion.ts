@@ -1,5 +1,5 @@
-export interface ITipoDocumento{
-    idTipoDocumento?: number;
+export interface ITipoTransaccion{
+    idTipoTransaccion?: number;
     nombre: string;
     ingreso: boolean;
     egreso: boolean;

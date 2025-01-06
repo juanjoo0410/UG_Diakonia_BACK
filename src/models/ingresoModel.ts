@@ -1,26 +1,25 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from "../config/db";
 import { IIngreso } from '../interfaces/IIngreso';
-import { TipoDocumento } from './tipoDocumentoModel';
-import { IngresoDt } from './ingresoDtModel';
+import { TipoTransaccion } from './tipoTransaccionModel';
 
 export class Ingreso extends Model<IIngreso> implements IIngreso {
     public idIngreso?: number;
-    public idTipoDocumento!: number;
+    public idTipoTransaccion!: number;
     public descripcion!: string;
     public totalPeso!: number;
     public estado?: boolean;
-    public tipoDocumento?: TipoDocumento | undefined;
+    public tipoTransaccion?: TipoTransaccion | undefined;
 }
 
 Ingreso.init(
     {
         idIngreso: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-        idTipoDocumento: {
+        idTipoTransaccion: {
             type: DataTypes.INTEGER,
             references: {
-                model: 'tipos_documento',
-                key: 'idTipoDocumento'
+                model: 'tipos_transaccion',
+                key: 'idTipoTransaccion'
             }
         },
         descripcion: { type: DataTypes.STRING(500), allowNull: false },
@@ -34,7 +33,7 @@ Ingreso.init(
     }
 );
 
-Ingreso.belongsTo(TipoDocumento, {
-    foreignKey: 'idTipoDocumento',
-    as: 'tipoDocumento'
+Ingreso.belongsTo(TipoTransaccion, {
+    foreignKey: 'idTipoTransaccion',
+    as: 'tipoTransaccion'
 });

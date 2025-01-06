@@ -1,12 +1,12 @@
 import { IngresoDt } from "../models/ingresoDtModel";
-import { TipoDocumento } from "../models/tipoDocumentoModel";
+import { TipoTransaccion } from "../models/tipoTransaccionModel";
 
 export interface IIngreso{
     idIngreso?: number;
-    idTipoDocumento: number;
+    idTipoTransaccion: number;
     descripcion: string;
     totalPeso: number;
     estado?: boolean;
     ingresoDt?: IngresoDt[];
-    tipoDocumento?: TipoDocumento;
+    tipoTransaccion?: TipoTransaccion;
 }

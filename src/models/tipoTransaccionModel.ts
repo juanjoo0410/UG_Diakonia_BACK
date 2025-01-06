@@ -1,18 +1,18 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from "../config/db";
-import { ITipoDocumento } from '../interfaces/ITipoDocumento';
+import { ITipoTransaccion } from '../interfaces/ITipoTransaccion';
 
-export class TipoDocumento extends Model<ITipoDocumento> implements ITipoDocumento {
-    public idTipoDocumento?: number;
+export class TipoTransaccion extends Model<ITipoTransaccion> implements ITipoTransaccion {
+    public idTipoTransaccion?: number;
     public nombre!: string;
     public ingreso!: boolean;
     public egreso!: boolean;
     public estado?: boolean;
 }
 
-TipoDocumento.init(
+TipoTransaccion.init(
     {
-        idTipoDocumento: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+        idTipoTransaccion: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
         nombre: { type: DataTypes.STRING(100), allowNull: false },
         ingreso: { type: DataTypes.BOOLEAN, allowNull: false },
         egreso: { type: DataTypes.BOOLEAN, allowNull: false },
@@ -20,7 +20,7 @@ TipoDocumento.init(
     },
     {
         sequelize,
-        tableName: 'tipos_documento',
+        tableName: 'tipos_transaccion',
         timestamps: true
     }
 );

@@ -1,13 +1,13 @@
 import { EgresoDt } from "../models/egresoDtModel";
-import { TipoDocumento } from "../models/tipoDocumentoModel";
+import { TipoTransaccion } from "../models/tipoTransaccionModel";
 
 export interface IEgreso{
     idEgreso?: number;
-    idTipoDocumento: number;
+    idTipoTransaccion: number;
     descripcion: string;
     idBeneficiario: number
     totalPeso: number;
     estado?: boolean;
     egresoDt?: EgresoDt[];
-    tipoDocumento?: TipoDocumento;
+    tipoTransaccion?: TipoTransaccion;
 }

@@ -24,7 +24,7 @@ const createIngreso = async (
         }
         const newIngreso = await Ingreso.create(
             {
-                idTipoDocumento: ingreso.idTipoDocumento,
+                idTipoTransaccion: ingreso.idTipoTransaccion,
                 descripcion: ingreso.descripcion,
                 totalPeso: ingreso.totalPeso,
             },
