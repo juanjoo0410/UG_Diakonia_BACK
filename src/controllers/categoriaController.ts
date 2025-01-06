@@ -4,31 +4,38 @@ import { registrarBitacora } from '../utils/bitacoraService';
 import { ICategoria } from '../interfaces/ICategoria';
 import { Categoria } from '../models/categoriaModel';
 import { Producto } from '../models/productoModel';
+import sequelize from '../config/db';
+import { generarCodigo } from '../utils/contadorService';
 
 const entidad = 'CATEGORIA';
 
 const createCategoria = async (
     req: Request<{}, {}, Omit<ICategoria, 'idCategoria' | 'estado'>> & { user?: any },
     res: Response) => {
+        const transaction = await sequelize.transaction();
     try {
         const categoria: Omit<ICategoria, 'idCategoria' | 'estado'> = req.body;
         const checkIs = await Categoria.findOne({ where: { nombre: categoria.nombre } });
         if (checkIs) {
+            await transaction.rollback();
             res.status(400).json({
                 status: false,
                 message: 'El nombre de la categoria ya existe en la base datos.'
             });
-        } else {
-            await registrarBitacora(req, 'CREACIÓN', entidad,
-                `Se creó la categoria ${categoria.nombre}.`)
-            const newCategoria = await Categoria.create(categoria);
-            res.status(201).json({
-                status: true,
-                message: 'Categoria agregada exitosamente.',
-                data: newCategoria
-            });
+            return;
         }
+        categoria.codigo = await generarCodigo('categorias', transaction);
+        const newCategoria = await Categoria.create(categoria, {transaction});
+        await transaction.commit();
+        res.status(201).json({
+            status: true,
+            message: `Categoria con codigo ${newCategoria.codigo} agregada exitosamente.`,
+            data: newCategoria
+        });
+        await registrarBitacora(req, 'CREACIÓN', entidad,
+            `Se creó la categoria ${categoria.nombre}.`);
     } catch (error) {
+        await transaction.rollback();
         return handleHttp(res, 'ERROR_POST', error);
     }
 };

@@ -1,4 +1,4 @@
-import { GrupoProducto } from "../models/grupoProductoModel";
+import { IGrupoProducto } from "./IGrupoProducto";
 
 export interface ISubgrupoProducto {
     idSubgrupoProducto?: number;
@@ -6,5 +6,5 @@ export interface ISubgrupoProducto {
     nombre: string;
     idGrupoProducto: number;
     estado?: boolean;
-    grupoProducto?: GrupoProducto;
+    grupoProducto?: IGrupoProducto;
 }

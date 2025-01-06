@@ -5,31 +5,38 @@ import { IGrupoProducto } from '../interfaces/IGrupoProducto';
 import { registrarBitacora } from '../utils/bitacoraService';
 import { SubgrupoProducto } from '../models/subgrupoProductoModel';
 import { Producto } from '../models/productoModel';
+import { generarCodigo } from '../utils/contadorService';
+import sequelize from '../config/db';
 
 const entidad = 'GRUPO_PRODUCTO';
 
 const createGrupoProducto = async (
     req: Request<{}, {}, Omit<IGrupoProducto, 'idGrupoProducto' | 'estado'>> & { user?: any },
     res: Response) => {
+    const transaction = await sequelize.transaction();
     try {
         const grupoProducto: Omit<IGrupoProducto, 'idGrupoProducto' | 'estado'> = req.body;
         const checkIs = await GrupoProducto.findOne({ where: { nombre: grupoProducto.nombre } });
         if (checkIs) {
+            await transaction.rollback();
             res.status(400).json({
                 status: false,
                 message: 'El nombre del grupo de producto ya existe'
             });
-        } else {
-            await registrarBitacora(req, 'CREACIÓN', entidad,
-                `Se creó el grupo de producto ${grupoProducto.nombre}.`)
-            const newGrupoProducto = await GrupoProducto.create(grupoProducto);
-            res.status(201).json({
-                status: true,
-                message: 'Grupo de producto agregado exitosamente.',
-                data: newGrupoProducto
-            });
+            return;
         }
+        grupoProducto.codigo = await generarCodigo('gruposProducto', transaction);
+        const newGrupoProducto = await GrupoProducto.create(grupoProducto, { transaction });
+        await transaction.commit();
+        res.status(201).json({
+            status: true,
+            message: `Grupo de producto con codigo ${newGrupoProducto.codigo} agregado exitosamente.`,
+            data: newGrupoProducto
+        });
+        await registrarBitacora(req, 'CREACIÓN', entidad,
+            `Se creó el grupo de producto ${grupoProducto.nombre}.`);
     } catch (error) {
+        await transaction.rollback();
         return handleHttp(res, 'ERROR_POST', error);
     }
 };

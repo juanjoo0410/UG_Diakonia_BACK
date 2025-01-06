@@ -21,8 +21,8 @@ export interface IProducto{
     precioTiendita: number;
     sku: string;
     estado?: boolean;
-    tipoOrg?: GrupoProducto;
-    tipoPoblacion?: SubgrupoProducto;
+    grupoProducto?: GrupoProducto;
+    subgrupoProducto?: SubgrupoProducto;
     categoria?: Categoria;
     donante?: Donante;
 }

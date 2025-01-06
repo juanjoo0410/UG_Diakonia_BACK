@@ -1,5 +1,5 @@
-import { GrupoProducto } from "../models/grupoProductoModel";
-import { SubgrupoProducto } from "../models/subgrupoProductoModel";
+import { IGrupoProducto } from "./IGrupoProducto";
+import { ISubgrupoProducto } from "./ISubgrupoProducto";
 
 export interface ICategoria {
     idCategoria?: number;
@@ -8,6 +8,6 @@ export interface ICategoria {
     idGrupoProducto: number;
     idSubgrupoProducto: number;
     estado?: boolean;
-    grupoProducto?: GrupoProducto;
-    subgrupoProducto?: SubgrupoProducto;
+    grupoProducto?: IGrupoProducto;
+    subgrupoProducto?: ISubgrupoProducto;
 }

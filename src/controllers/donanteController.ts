@@ -5,31 +5,38 @@ import { IDonante } from '../interfaces/IDonante';
 import { registrarBitacora } from '../utils/bitacoraService';
 import { Establecimiento } from '../models/establecimientoModel';
 import { Producto } from '../models/productoModel';
+import sequelize from '../config/db';
+import { generarCodigo } from '../utils/contadorService';
 
 const entidad = 'DONANTE';
 
 const createDonante = async (
     req: Request<{}, {}, Omit<IDonante, 'idDonante' | 'estado'>> & { user?: any },
     res: Response) => {
+    const transaction = await sequelize.transaction();
     try {
         const donante: Omit<IDonante, 'idDonante' | 'estado'> = req.body;
         const checkIs = await Donante.findOne({ where: { identificacion: donante.identificacion } });
         if (checkIs) {
+            await transaction.rollback();
             res.status(400).json({
                 status: false,
                 message: 'La Identificación/Ruc del donante ya existe'
             });
-        } else {
-            await registrarBitacora(req, 'CREACIÓN', entidad,
-                `Se creó el donante ${donante.nombre}.`)
-            const newdonante = await Donante.create(donante);
-            res.status(201).json({
-                status: true,
-                message: 'Donante agregado exitosamente.',
-                data: newdonante
-            });
-        }
+            return;
+        } 
+        donante.codigo = await generarCodigo('donantes', transaction);
+        const newdonante = await Donante.create(donante);
+        await transaction.commit();
+        res.status(201).json({
+            status: true,
+            message: `Donante con codigo ${newdonante.codigo} agregado exitosamente.`,
+            data: newdonante
+        });
+        await registrarBitacora(req, 'CREACIÓN', entidad,
+            `Se creó el donante ${donante.nombre}.`);
     } catch (error) {
+        await transaction.rollback();
         return handleHttp(res, 'ERROR_POST', error);
     }
 };

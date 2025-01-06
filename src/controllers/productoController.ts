@@ -1,17 +1,18 @@
 import { Request, Response } from 'express';
-import { Beneficiario } from '../models/beneficiarioModel';
 import { handleHttp } from '../utils/handleError';
-import { IBeneficiario } from '../interfaces/IBeneficiario';
 import { registrarBitacora } from '../utils/bitacoraService';
 import { Op } from 'sequelize';
 import { IProducto } from '../interfaces/IProducto';
 import { Producto } from '../models/productoModel';
+import sequelize from '../config/db';
+import { generarCodigo } from '../utils/contadorService';
 
 const entidad = 'PRODUCTO';
 
 const createProducto = async (
     req: Request<{}, {}, Omit<IProducto, 'idProducto' | 'estado'>> & { user?: any },
     res: Response) => {
+    const transaction = await sequelize.transaction();
     try {
         const producto: Omit<IProducto, 'idProducto' | 'estado'> = req.body;
         const checkIs = await Producto.findOne({
@@ -23,21 +24,25 @@ const createProducto = async (
             }
         });
         if (checkIs) {
+            await transaction.rollback();
             res.status(400).json({
                 status: false,
                 message: 'El sku o descripcion del producto ya existen en la base datos.'
             });
-        } else {
-            await registrarBitacora(req, 'CREACIÓN', entidad,
-                `Se creó el producto ${producto.descripcion}.`)
-            const newProducto = await Producto.create(producto);
-            res.status(201).json({
-                status: true,
-                message: 'Producto agregado exitosamente.',
-                data: newProducto
-            });
+            return;
         }
+        producto.codigo = await generarCodigo('productos', transaction);
+        const newProducto = await Producto.create(producto);
+        await transaction.commit();
+        res.status(201).json({
+            status: true,
+            message: 'Producto agregado exitosamente.',
+            data: newProducto
+        });
+        await registrarBitacora(req, 'CREACIÓN', entidad,
+            `Se creó el producto ${producto.descripcion}.`);
     } catch (error) {
+        await transaction.rollback();
         return handleHttp(res, 'ERROR_POST', error);
     }
 };

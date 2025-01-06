@@ -3,35 +3,42 @@ import { SubgrupoProducto } from '../models/subgrupoProductoModel';
 import { handleHttp } from '../utils/handleError';
 import { ISubgrupoProducto } from '../interfaces/ISubgrupoProducto';
 import { registrarBitacora } from '../utils/bitacoraService';
-import { Beneficiario } from '../models/beneficiarioModel';
 import { Producto } from '../models/productoModel';
+import sequelize from '../config/db';
+import { generarCodigo } from '../utils/contadorService';
 
 const entidad = 'SUBGRUPO_PRODUCTO';
 
 const createSubgrupoProducto = async (
     req: Request<{}, {}, Omit<ISubgrupoProducto, 'idSubgrupoProducto' | 'estado'>> & { user?: any },
     res: Response) => {
+    const transaction = await sequelize.transaction();
     try {
         const subgrupoProducto: Omit<ISubgrupoProducto, 'idSubgrupoProducto' | 'estado'> = req.body;
         const checkIs = await SubgrupoProducto.findOne({
             where: { nombre: subgrupoProducto.nombre, }
         });
         if (checkIs) {
+            await transaction.rollback();
             res.status(400).json({
                 status: false,
                 message: 'El subgrupo de producto ya existe'
             });
-        } else {
-            await registrarBitacora(req, 'CREACIÓN', entidad,
-                `Se creó el grupo de producto ${subgrupoProducto.nombre}.`)
-            const newSubgrupoProducto = await SubgrupoProducto.create(subgrupoProducto);
-            res.status(201).json({
-                status: true,
-                message: 'Subgrupo de producto agregado exitosamente.',
-                data: newSubgrupoProducto
-            });
+            return;
         }
+        subgrupoProducto.codigo = await generarCodigo('subgruposProducto', transaction);
+        const newSubgrupoProducto = await SubgrupoProducto.create(subgrupoProducto, { transaction });
+        await transaction.commit();
+        res.status(201).json({
+            status: true,
+            message:
+                `Subgrupo de producto con codigo ${newSubgrupoProducto.codigo} agregado exitosamente.`,
+            data: newSubgrupoProducto
+        });
+        await registrarBitacora(req, 'CREACIÓN', entidad,
+            `Se creó el grupo de producto ${subgrupoProducto.nombre}.`);
     } catch (error) {
+        await transaction.rollback();
         return handleHttp(res, 'ERROR_POST', error);
     }
 };
