@@ -1,7 +1,7 @@
-import { Categoria } from "../models/categoriaModel";
-import { Donante } from "../models/donanteModel";
-import { GrupoProducto } from "../models/grupoProductoModel";
-import { SubgrupoProducto } from "../models/subgrupoProductoModel";
+import { ICategoria } from "./ICategoria";
+import { IDonante } from "./IDonante";
+import { IGrupoProducto } from "./IGrupoProducto";
+import { ISubgrupoProducto } from "./ISubgrupoProducto";
 
 export interface IProducto{
     idProducto?: number;
@@ -21,8 +21,8 @@ export interface IProducto{
     precioTiendita: number;
     sku: string;
     estado?: boolean;
-    grupoProducto?: GrupoProducto;
-    subgrupoProducto?: SubgrupoProducto;
-    categoria?: Categoria;
-    donante?: Donante;
+    grupoProducto?: IGrupoProducto;
+    subgrupoProducto?: ISubgrupoProducto;
+    categoria?: ICategoria;
+    donante?: IDonante;
 }
