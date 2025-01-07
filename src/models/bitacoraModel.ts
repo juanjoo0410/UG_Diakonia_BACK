@@ -62,12 +62,7 @@ Bitacora.init(
     }
 );
 
-Bitacora.hasMany(Usuario, {
+Bitacora.belongsTo(Usuario, {
     foreignKey: 'idUsuario',
     as: 'usuario'
-});
-
-Usuario.belongsTo(Bitacora, {
-    foreignKey: 'idUsuario',
-    as: 'bitacora'
 });

@@ -16,7 +16,8 @@ const getBitacora = async (req: Request, res: Response) => {
                     as: 'rol',
                     attributes: ['idRol','nombre']
                 }]
-            }]
+            }],
+            order: [['fecha', 'DESC']]
         });
         res.status(200).json({
             status: true,
