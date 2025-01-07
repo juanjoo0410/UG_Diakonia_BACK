@@ -3,40 +3,56 @@ import { Establecimiento } from '../models/establecimientoModel';
 import { handleHttp } from '../utils/handleError';
 import { IEstablecimiento } from '../interfaces/IEstablecimiento';
 import { registrarBitacora } from '../utils/bitacoraService';
+import { Donante } from '../models/donanteModel';
+import sequelize from '../config/db';
+import { generarCodigo } from '../utils/contadorService';
 
 const entidad = 'ESTABLECIMIENTO';
 
 const createEstablecimiento = async (
     req: Request<{}, {}, Omit<IEstablecimiento, 'idEstablecimiento' | 'estado'>> & { user?: any },
     res: Response) => {
+    const transaction = await sequelize.transaction();
     try {
         const establecimiento: Omit<IEstablecimiento, 'idEstablecimiento' | 'estado'> = req.body;
         const checkIs = await Establecimiento.findOne({
             where: { nombre: establecimiento.nombre, }
         });
         if (checkIs) {
+            await transaction.rollback();
             res.status(400).json({
                 status: false,
                 message: 'El establecimiento ya existe'
             });
-        } else {
-            await registrarBitacora(req, 'CREACIÓN', entidad,
-                `Se creó el establecimiento ${establecimiento.nombre}.`)
-            const newEstablecimiento = await Establecimiento.create(establecimiento);
-            res.status(201).json({
-                status: true,
-                message: 'Establecimiento agregado exitosamente.',
-                value: newEstablecimiento
-            });
+            return;
         }
+       
+        establecimiento.codigo = await generarCodigo('establecimientos', transaction);
+        const newEstablecimiento = await Establecimiento.create(establecimiento);
+        await transaction.commit();
+        res.status(201).json({
+            status: true,
+            message: 'Establecimiento agregado exitosamente.',
+            value: newEstablecimiento
+        });
+        await registrarBitacora(req, 'CREACIÓN', entidad,
+            `Se creó el establecimiento ${establecimiento.nombre}.`);
     } catch (error) {
+        await transaction.rollback();
         return handleHttp(res, 'ERROR_POST', error);
     }
 };
 
 const getEstablecimientos = async (req: Request, res: Response) => {
     try {
-        const establecimientos = await Establecimiento.findAll({ where: { estado: true } });
+        const establecimientos = await Establecimiento.findAll({
+            where: { estado: true },
+            include: [{
+                model: Donante,
+                as: 'donante',
+                attributes: ['nombre']
+            }]
+        });
         res.status(200).json({ value: establecimientos });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
