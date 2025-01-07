@@ -26,7 +26,7 @@ const createEstablecimiento = async (
             res.status(201).json({
                 status: true,
                 message: 'Establecimiento agregado exitosamente.',
-                data: newEstablecimiento
+                value: newEstablecimiento
             });
         }
     } catch (error) {
@@ -79,6 +79,7 @@ const updateEstablecimiento = async (req: Request & { user?: any }, res: Respons
                 `Se actualizó información del establecimiento ${establecimiento.nombre}.`)
             res.status(200).json({
                 status: true,
+                message: 'Datos de establecimiento actualizados exitosamente',
                 value: checkIs
             });
         }

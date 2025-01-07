@@ -31,7 +31,7 @@ const createDonante = async (
         res.status(201).json({
             status: true,
             message: `Donante con codigo ${newdonante.codigo} agregado exitosamente.`,
-            data: newdonante
+            value: newdonante
         });
         await registrarBitacora(req, 'CREACIÓN', entidad,
             `Se creó el donante ${donante.nombre}.`);
@@ -90,6 +90,7 @@ const updateDonante = async (req: Request & { user?: any }, res: Response) => {
                 `Se actualizó información del donante ${donante.nombre}.`)
             res.status(200).json({
                 status: true,
+                message: 'Datos de donante actualizados exitosamente',
                 value: checkIs
             });
         }
