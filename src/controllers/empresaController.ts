@@ -6,6 +6,24 @@ import { registrarBitacora } from '../utils/bitacoraService';
 
 const entidad = 'EMPRESA';
 
+const getEmpresa = async (
+    req: Request,
+    res: Response) => {
+    try {
+        const empresa = await Empresa.findOne({ where: { estado: true } });
+        if (!empresa) res.status(404).json({
+            status: false,
+            message: 'Empresa no encontrada'
+        });
+        else res.status(200).json({
+            status: true,
+            value: empresa
+        });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_BY_ID', error);
+    }
+};
+
 const createEmpresa = async (
     req: Request<{}, {}, Omit<IEmpresa, 'idEmpresa' | 'estado'>> & { user?: any },
     res: Response) => {
@@ -23,8 +41,8 @@ const createEmpresa = async (
             const newEmpresa = await Empresa.create(empresa);
             res.status(201).json({
                 status: true,
-                message: 'Empresa agregada exitosamente.',
-                data: newEmpresa
+                message: 'Empresa registrada exitosamente.',
+                value: newEmpresa
             });
         }
     } catch (error) {
@@ -55,29 +73,12 @@ const updateEmpresa = async (
                 `Se actualizó información de la empresa ${empresa.razonSocial}.`)
             res.status(200).json({
                 status: true,
+                message: 'Datos de empresa actualizados exitosamente.',
                 value: checkIs
             });
         }
     } catch (error) {
         handleHttp(res, 'ERROR_PUT', error);
-    }
-};
-
-const getEmpresa = async (
-    req: Request,
-    res: Response) => {
-    try {
-        const empresa = await Empresa.findOne({ where: { estado: true } });
-        if (!empresa) res.status(404).json({
-            status: false,
-            message: 'Empresa no encontrada'
-        });
-        else res.status(200).json({
-            status: true,
-            value: empresa
-        });
-    } catch (error) {
-        handleHttp(res, 'ERROR_GET_BY_ID', error);
     }
 };
 
