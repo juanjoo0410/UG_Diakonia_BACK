@@ -1,5 +1,6 @@
-import { TipoOrg } from "../models/tipoOrgModel";
-import { TipoPoblacion } from "../models/tipoPoblacionModel";
+import { IClasificacion } from "./IClasificacion";
+import { ITipoOrg } from "./ITipoOrg";
+import { ITipoPoblacion } from "./ITipoPoblacion";
 
 export interface IBeneficiario{
     idBeneficiario?: number;
@@ -9,6 +10,7 @@ export interface IBeneficiario{
     tipoBeneficiario: string;
     idTipoOrg: number;
     idTipoPoblacion: number;
+    idClasificacion: number;
     actividad: string;
     totalBeneficiarios: number;
     direccion: string;
@@ -16,6 +18,7 @@ export interface IBeneficiario{
     correo: string;
     nombreContacto: string;
     estado?: boolean;
-    tipoOrg?: TipoOrg;
-    tipoPoblacion?: TipoPoblacion;
+    tipoOrg?: ITipoOrg;
+    tipoPoblacion?: ITipoPoblacion;
+    clasificacion?: IClasificacion;
 }

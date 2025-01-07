@@ -4,31 +4,38 @@ import { handleHttp } from '../utils/handleError';
 import { ITipoPoblacion } from '../interfaces/ITipoPoblacion';
 import { registrarBitacora } from '../utils/bitacoraService';
 import { Beneficiario } from '../models/beneficiarioModel';
+import sequelize from '../config/db';
+import { generarCodigo } from '../utils/contadorService';
 
 const entidad = 'TIPO_POBLACIÓN';
 
 const createTipoPoblacion = async (
     req: Request<{}, {}, Omit<ITipoPoblacion, 'idTipoPoblacion' | 'estado'>> & { user?: any },
     res: Response) => {
+    const transaction = await sequelize.transaction();
     try {
         const tipoPoblacion: Omit<ITipoPoblacion, 'idTipoPoblacion' | 'estado'> = req.body;
         const checkIs = await TipoPoblacion.findOne({ where: { nombre: tipoPoblacion.nombre } });
         if (checkIs) {
+            await transaction.rollback();
             res.status(400).json({
                 status: false,
                 message: 'El nombre del tipo de poblacion ya existe'
             });
-        } else {
-            await registrarBitacora(req, 'CREACIÓN', entidad,
-                `Se creó tipo de población ${tipoPoblacion.nombre}.`)
-            const newTipoPoblacion = await TipoPoblacion.create(tipoPoblacion);
-            res.status(201).json({
-                status: true,
-                message: 'Tipo de poblacion agregado exitosamente.',
-                data: newTipoPoblacion
-            });
+            return;
         }
+        tipoPoblacion.codigo = await generarCodigo('tiposPoblacion', transaction);
+        const newTipoPoblacion = await TipoPoblacion.create(tipoPoblacion);
+        await transaction.commit();
+        res.status(201).json({
+            status: true,
+            message: 'Tipo de poblacion agregado exitosamente.',
+            value: newTipoPoblacion
+        });
+        await registrarBitacora(req, 'CREACIÓN', entidad,
+            `Se creó tipo de población ${tipoPoblacion.nombre}.`);
     } catch (error) {
+        await transaction.rollback();
         return handleHttp(res, 'ERROR_POST', error);
     }
 };
@@ -75,6 +82,7 @@ const updateTipoPoblacion = async (req: Request & { user?: any }, res: Response)
                 `Se actualizó información del tipo de población ${tipoPoblacion.nombre}.`)
             res.status(200).json({
                 status: true,
+                message: 'Datos de tipo de poblacion actualizados exitosamente',
                 value: checkIs
             });
         }

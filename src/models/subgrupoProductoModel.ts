@@ -1,6 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from "../config/db";
-import { ClaseTipoOrg } from './claseTipoOrgModel';
+import { Clasificacion } from './clasificacionModel';
 import { ISubgrupoProducto } from '../interfaces/ISubgrupoProducto';
 import { GrupoProducto } from './grupoProductoModel';
 

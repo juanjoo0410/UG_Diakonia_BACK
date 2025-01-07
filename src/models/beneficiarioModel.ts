@@ -3,6 +3,7 @@ import sequelize from "../config/db";
 import { IBeneficiario } from '../interfaces/IBeneficiario';
 import { TipoOrg } from './tipoOrgModel';
 import { TipoPoblacion } from './tipoPoblacionModel';
+import { Clasificacion } from './clasificacionModel';
 
 export class Beneficiario extends Model<IBeneficiario> implements IBeneficiario {
     public idBeneficiario?: number;
@@ -12,6 +13,7 @@ export class Beneficiario extends Model<IBeneficiario> implements IBeneficiario 
     public tipoBeneficiario!: string;
     public idTipoOrg!: number;
     public idTipoPoblacion!: number;
+    public idClasificacion!: number;
     public actividad!: string;
     public totalBeneficiarios!: number;
     public direccion!: string;
@@ -19,8 +21,9 @@ export class Beneficiario extends Model<IBeneficiario> implements IBeneficiario 
     public correo!: string;
     public nombreContacto!: string;
     public estado?: boolean;
-    public tipoOrg?: TipoOrg;
+    public tipoOrg?: TipoOrg | undefined;
     public tipoPoblacion?: TipoPoblacion | undefined;
+    public clasificacion?: Clasificacion | undefined;
 }
 
 Beneficiario.init(
@@ -42,6 +45,13 @@ Beneficiario.init(
             references: {
                 model: 'tipos_poblacion',
                 key: 'idTipoPoblacion'
+            }
+        },
+        idClasificacion: {
+            type: DataTypes.INTEGER,
+            references: {
+                model: 'clasificacion',
+                key: 'idClasificacion'
             }
         },
         actividad: { type: DataTypes.STRING(100), allowNull: false },
@@ -67,4 +77,9 @@ Beneficiario.belongsTo(TipoOrg, {
 Beneficiario.belongsTo(TipoPoblacion, {
     foreignKey: 'idTipoPoblacion',
     as: 'tipoPoblacion'
+});
+
+Beneficiario.belongsTo(Clasificacion, {
+    foreignKey: 'idClasificacion',
+    as: 'clasificacion'
 });

@@ -4,12 +4,15 @@ import { handleHttp } from '../utils/handleError';
 import { IBeneficiario } from '../interfaces/IBeneficiario';
 import { registrarBitacora } from '../utils/bitacoraService';
 import { Op } from 'sequelize';
+import sequelize from '../config/db';
+import { generarCodigo } from '../utils/contadorService';
 
 const entidad = 'BENEFICIARIO';
 
 const createBeneficiario = async (
     req: Request<{}, {}, Omit<IBeneficiario, 'idBeneficiario' | 'estado'>> & { user?: any },
     res: Response) => {
+        const transaction = await sequelize.transaction();
     try {
         const beneficiario: Omit<IBeneficiario, 'idBeneficiario' | 'estado'> = req.body;
         const checkIs = await Beneficiario.findOne({
@@ -21,21 +24,25 @@ const createBeneficiario = async (
             }
         });
         if (checkIs) {
+            await transaction.rollback();
             res.status(400).json({
                 status: false,
                 message: 'La Identificación/Ruc o el nombre del beneficiario ya existen en la base datos.'
             });
-        } else {
-            await registrarBitacora(req, 'CREACIÓN', entidad,
-                `Se creó el beneficiario ${beneficiario.nombre}.`)
-            const newBeneficiario = await Beneficiario.create(beneficiario);
-            res.status(201).json({
-                status: true,
-                message: 'Beneficiario agregado exitosamente.',
-                data: newBeneficiario
-            });
-        }
+            return;
+        } 
+        beneficiario.codigo = await generarCodigo('beneficiarios', transaction);
+        const newBeneficiario = await Beneficiario.create(beneficiario);
+        await transaction.commit();
+        res.status(201).json({
+            status: true,
+            message: 'Beneficiario agregado exitosamente.',
+            value: newBeneficiario
+        });
+        await registrarBitacora(req, 'CREACIÓN', entidad,
+            `Se creó el beneficiario ${beneficiario.nombre}.`);
     } catch (error) {
+        await transaction.rollback();
         return handleHttp(res, 'ERROR_POST', error);
     }
 };
@@ -91,6 +98,7 @@ const updateBeneficiario = async (req: Request & { user?: any }, res: Response) 
         checkIs.tipoBeneficiario = beneficiario.tipoBeneficiario;
         checkIs.idTipoOrg = beneficiario.idTipoOrg;
         checkIs.idTipoPoblacion = beneficiario.idTipoPoblacion;
+        checkIs.idClasificacion = beneficiario.idClasificacion;
         checkIs.actividad = beneficiario.actividad;
         checkIs.totalBeneficiarios = beneficiario.totalBeneficiarios;
         checkIs.direccion = beneficiario.direccion;
@@ -102,6 +110,7 @@ const updateBeneficiario = async (req: Request & { user?: any }, res: Response) 
             `Se actualizó información del beneficiario ${beneficiario.nombre}.`)
         res.status(200).json({
             status: true,
+            message: 'Datos de beneficiario actualizados exitosamente',
             value: checkIs
         });
     } catch (error) {
