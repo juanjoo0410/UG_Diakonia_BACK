@@ -33,7 +33,7 @@ const createBodega = async (
             res.status(201).json({
                 status: true,
                 message: 'Bodega agregada exitosamente.',
-                data: newBodega
+                value: newBodega
             });
         }
     } catch (error) {
@@ -86,6 +86,7 @@ const updateBodega = async (req: Request & { user?: any }, res: Response) => {
                 `Se actualizó información de la bodega ${bodega.nombre}.`)
             res.status(200).json({
                 status: true,
+                message: 'Datos de bodega actualizados exitosamente',
                 value: checkIs
             });
         }

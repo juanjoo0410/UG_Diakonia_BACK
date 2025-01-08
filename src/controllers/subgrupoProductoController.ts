@@ -6,6 +6,7 @@ import { registrarBitacora } from '../utils/bitacoraService';
 import { Producto } from '../models/productoModel';
 import sequelize from '../config/db';
 import { generarCodigo } from '../utils/contadorService';
+import { GrupoProducto } from '../models/grupoProductoModel';
 
 const entidad = 'SUBGRUPO_PRODUCTO';
 
@@ -33,7 +34,7 @@ const createSubgrupoProducto = async (
             status: true,
             message:
                 `Subgrupo de producto con codigo ${newSubgrupoProducto.codigo} agregado exitosamente.`,
-            data: newSubgrupoProducto
+            value: newSubgrupoProducto
         });
         await registrarBitacora(req, 'CREACIÓN', entidad,
             `Se creó el grupo de producto ${subgrupoProducto.nombre}.`);
@@ -45,7 +46,14 @@ const createSubgrupoProducto = async (
 
 const getSubgruposProducto = async (req: Request, res: Response) => {
     try {
-        const subgruposProducto = await SubgrupoProducto.findAll({ where: { estado: true } });
+        const subgruposProducto = await SubgrupoProducto.findAll({
+            where: { estado: true },
+            include: [{
+                model: GrupoProducto,
+                as: 'grupoProducto',
+                attributes: ['nombre']
+            }]
+        });
         res.status(200).json({ value: subgruposProducto });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -99,6 +107,7 @@ const updateSubgrupoProducto = async (req: Request & { user?: any }, res: Respon
             `Se actualizó información del subgrupo de producto ${subgrupoProducto.nombre}.`)
         res.status(200).json({
             status: true,
+            message: 'Datos de subgrupo actualizados exitosamente',
             value: checkIs
         });
     } catch (error) {

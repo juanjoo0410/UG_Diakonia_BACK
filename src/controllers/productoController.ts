@@ -6,6 +6,9 @@ import { IProducto } from '../interfaces/IProducto';
 import { Producto } from '../models/productoModel';
 import sequelize from '../config/db';
 import { generarCodigo } from '../utils/contadorService';
+import { GrupoProducto } from '../models/grupoProductoModel';
+import { SubgrupoProducto } from '../models/subgrupoProductoModel';
+import { Categoria } from '../models/categoriaModel';
 
 const entidad = 'PRODUCTO';
 
@@ -37,7 +40,7 @@ const createProducto = async (
         res.status(201).json({
             status: true,
             message: 'Producto agregado exitosamente.',
-            data: newProducto
+            value: newProducto
         });
         await registrarBitacora(req, 'CREACIÓN', entidad,
             `Se creó el producto ${producto.descripcion}.`);
@@ -49,7 +52,26 @@ const createProducto = async (
 
 const getProductos = async (req: Request, res: Response) => {
     try {
-        const productos = await Producto.findAll({ where: { estado: true } });
+        const productos = await Producto.findAll({
+            where: { estado: true },
+            include: [
+                {
+                    model: GrupoProducto,
+                    as: 'grupoProducto',
+                    attributes: ['nombre']
+                },
+                {
+                    model: SubgrupoProducto,
+                    as: 'subgrupoProducto',
+                    attributes: ['nombre']
+                },
+                {
+                    model: Categoria,
+                    as: 'categoria',
+                    attributes: ['nombre']
+                }
+            ]
+        });
         res.status(200).json({ value: productos });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -113,6 +135,7 @@ const updateProducto = async (req: Request & { user?: any }, res: Response) => {
             `Se actualizó información del producto ${producto.descripcion}.`)
         res.status(200).json({
             status: true,
+            message: 'Datos de producto actualizados exitosamente',
             value: checkIs
         });
     } catch (error) {

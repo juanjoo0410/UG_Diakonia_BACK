@@ -76,6 +76,7 @@ const updateidClasificacion = async (req: Request & { user?: any }, res: Respons
                 `Se actualizó información de la clasificacion ${clasificacion.nombre}.`)
             res.status(200).json({
                 status: true,
+                message: 'Datos de clasificacion actualizados exitosamente',
                 value: checkIs
             });
         }

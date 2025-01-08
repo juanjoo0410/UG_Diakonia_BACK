@@ -6,13 +6,15 @@ import { Categoria } from '../models/categoriaModel';
 import { Producto } from '../models/productoModel';
 import sequelize from '../config/db';
 import { generarCodigo } from '../utils/contadorService';
+import { GrupoProducto } from '../models/grupoProductoModel';
+import { SubgrupoProducto } from '../models/subgrupoProductoModel';
 
 const entidad = 'CATEGORIA';
 
 const createCategoria = async (
     req: Request<{}, {}, Omit<ICategoria, 'idCategoria' | 'estado'>> & { user?: any },
     res: Response) => {
-        const transaction = await sequelize.transaction();
+    const transaction = await sequelize.transaction();
     try {
         const categoria: Omit<ICategoria, 'idCategoria' | 'estado'> = req.body;
         const checkIs = await Categoria.findOne({ where: { nombre: categoria.nombre } });
@@ -25,12 +27,12 @@ const createCategoria = async (
             return;
         }
         categoria.codigo = await generarCodigo('categorias', transaction);
-        const newCategoria = await Categoria.create(categoria, {transaction});
+        const newCategoria = await Categoria.create(categoria, { transaction });
         await transaction.commit();
         res.status(201).json({
             status: true,
             message: `Categoria con codigo ${newCategoria.codigo} agregada exitosamente.`,
-            data: newCategoria
+            value: newCategoria
         });
         await registrarBitacora(req, 'CREACIÓN', entidad,
             `Se creó la categoria ${categoria.nombre}.`);
@@ -42,7 +44,21 @@ const createCategoria = async (
 
 const getCategorias = async (req: Request, res: Response) => {
     try {
-        const categorias = await Categoria.findAll({ where: { estado: true } });
+        const categorias = await Categoria.findAll({
+            where: { estado: true },
+            include: [
+                {
+                    model: GrupoProducto,
+                    as: 'grupoProducto',
+                    attributes: ['nombre']
+                },
+                {
+                    model: SubgrupoProducto,
+                    as: 'subgrupoProducto',
+                    attributes: ['nombre']
+                }
+            ]
+        });
         res.status(200).json({ value: categorias });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -95,6 +111,7 @@ const updateCategoria = async (req: Request & { user?: any }, res: Response) => 
             `Se actualizó información de la categoría ${categoria.nombre}.`)
         res.status(200).json({
             status: true,
+            message: 'Datos de categoria actualizados exitosamente',
             value: checkIs
         });
     } catch (error) {

@@ -28,7 +28,7 @@ const createCliente = async (
             res.status(201).json({
                 status: true,
                 message: `Cliente con codigo ${newCliente.codigo} agregado exitosamente.`,
-                data: newCliente
+                value: newCliente
             });
             await registrarBitacora(req, 'CREACIÓN', entidad,
                 `Se creó el cliente ${cliente.nombre}.`);
@@ -88,6 +88,7 @@ const updateCliente = async (req: Request & { user?: any }, res: Response) => {
                 `Se actualizó información del cliente ${cliente.nombre}.`)
             res.status(200).json({
                 status: true,
+                message: 'Datos de cliente actualizados exitosamente',
                 value: checkIs
             });
         }

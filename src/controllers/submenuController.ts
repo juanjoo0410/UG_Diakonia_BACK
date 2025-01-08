@@ -9,7 +9,7 @@ const createSubmenu = async (req: Request, res: Response) => {
         res.status(201).json({
             status: true,
             message: 'Submenu agregado',
-            data: newSubmenu
+            value: newSubmenu
         });
     } catch (error) {
         handleHttp(res, 'ERROR_POST', error);
@@ -57,6 +57,7 @@ const getSubmenuById = async (req: Request, res: Response) => {
         });
         else res.status(200).json({
             status: true,
+            message: 'Datos de submenu actualizados exitosamente',
             value: submenu
         });
     } catch (error) {

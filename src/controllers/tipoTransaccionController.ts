@@ -22,7 +22,7 @@ const createTipoTransaccion = async (
             res.status(201).json({
                 status: true,
                 message: 'Tipo de transaccion agregado exitosamente.',
-                data: newTipoTransaccion
+                value: newTipoTransaccion
             });
             await registrarBitacora(req, 'CREACIÓN', entidad,
                 `Se creó tipo de transaccion ${tipoTransaccion.nombre}.`);
@@ -87,6 +87,7 @@ const updateTipoTransaccion = async (req: Request & { user?: any }, res: Respons
             `Se actualizó información del tipo de transaccion ${tipoTransaccion.nombre}.`)
         res.status(200).json({
             status: true,
+            message: 'Datos de tipo de transaccion actualizados exitosamente',
             value: checkIs
         });
     } catch (error) {

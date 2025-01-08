@@ -19,7 +19,7 @@ const createContador = async (
             res.status(201).json({
                 status: true,
                 message: 'Contador agregado exitosamente.',
-                data: newContador
+                value: newContador
             });
         }
     } catch (error) {

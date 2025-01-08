@@ -3,6 +3,7 @@ import { handleHttp } from '../utils/handleError';
 import { IUbicacion } from '../interfaces/IUbicacion';
 import { registrarBitacora } from '../utils/bitacoraService';
 import { Ubicacion } from '../models/ubicacionModel';
+import { Bodega } from '../models/bodegaModel';
 
 const entidad = 'UBICACION';
 
@@ -26,7 +27,7 @@ const createUbicacion = async (
             res.status(201).json({
                 status: true,
                 message: 'Ubicación agregada exitosamente.',
-                data: newUbicacion
+                value: newUbicacion
             });
         }
     } catch (error) {
@@ -36,7 +37,14 @@ const createUbicacion = async (
 
 const getUbicaciones = async (req: Request, res: Response) => {
     try {
-        const ubicaciones = await Ubicacion.findAll({ where: { estado: true } });
+        const ubicaciones = await Ubicacion.findAll({
+            where: { estado: true },
+            include: [{
+                model: Bodega,
+                as: 'bodega',
+                attributes: ['nombre']
+            }]
+        });
         res.status(200).json({ value: ubicaciones });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -78,6 +86,7 @@ const updateUbicacion = async (req: Request & { user?: any }, res: Response) => 
             `Se actualizó información de la ubicacion ${ubicacion.codigo}.`)
         res.status(200).json({
             status: true,
+            message: 'Datos de ubicacion actualizados exitosamente',
             value: checkIs
         });
     } catch (error) {

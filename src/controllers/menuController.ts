@@ -9,7 +9,7 @@ const createMenu = async (req: Request, res: Response) => {
         res.status(201).json({
             status: true,
             message: 'Menu agregado',
-            data: newMenu
+            value: newMenu
         });
     } catch (error) {
         handleHttp(res, 'ERROR_POST', error);
@@ -64,6 +64,7 @@ const updateMenu = async (req: Request, res: Response) => {
             await menu.save();
             res.status(200).json({
                 status: true,
+                message: 'Datos de menu actualizados exitosamente',
                 value: menu
             });
         }
