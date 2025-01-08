@@ -94,6 +94,7 @@ const updateGrupoProducto = async (req: Request & { user?: any }, res: Response)
             `Se actualizó información del grupo de producto ${grupoProducto.nombre}.`)
         res.status(200).json({
             status: true,
+            essage: 'Datos de grupo actualizados exitosamente',
             value: checkIs
         });
     } catch (error) {
