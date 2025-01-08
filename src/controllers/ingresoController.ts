@@ -30,6 +30,7 @@ const createIngreso = async (
             {
                 idTipoTransaccion: ingreso.idTipoTransaccion,
                 descripcion: ingreso.descripcion,
+                idDonante: ingreso.idDonante ?? 0,
                 totalPeso: ingreso.totalPeso,
             },
             { transaction }

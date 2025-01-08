@@ -13,7 +13,6 @@ export class Producto extends Model<IProducto> implements IProducto {
     public idGrupoProducto!: number;
     public idSubgrupoProducto!: number;
     public idCategoria!: number;
-    public idDonante!: number;
     public prest!: string;
     public unidadesPorPrest!: number;
     public pesoPorUnidad!: number;
@@ -56,7 +55,6 @@ Producto.init(
                 key: 'idCategoria'
             }
         },
-        idDonante: { type: DataTypes.INTEGER, allowNull: true },
         prest: { type: DataTypes.STRING(15), allowNull: false },
         unidadesPorPrest: { type: DataTypes.DECIMAL(12, 2), allowNull: false },
         pesoPorUnidad: { type: DataTypes.DECIMAL(10, 2), allowNull: false },

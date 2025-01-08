@@ -10,7 +10,6 @@ export interface IProducto{
     idGrupoProducto: number;
     idSubgrupoProducto: number;
     idCategoria: number;
-    idDonante: number;
     prest: string;
     unidadesPorPrest: number;
     pesoPorUnidad: number;

@@ -120,7 +120,6 @@ const updateProducto = async (req: Request & { user?: any }, res: Response) => {
         checkIs.idGrupoProducto = producto.idGrupoProducto;
         checkIs.idSubgrupoProducto = producto.idSubgrupoProducto;
         checkIs.idCategoria = producto.idCategoria;
-        checkIs.idDonante = producto.idDonante;
         checkIs.prest = producto.prest;
         checkIs.unidadesPorPrest = producto.unidadesPorPrest;
         checkIs.pesoPorUnidad = producto.pesoPorUnidad;

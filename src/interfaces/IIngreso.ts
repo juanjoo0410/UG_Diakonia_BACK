@@ -5,6 +5,7 @@ export interface IIngreso{
     idIngreso?: number;
     idTipoTransaccion: number;
     descripcion: string;
+    idDonante?: number;
     totalPeso: number;
     estado?: boolean;
     ingresoDt?: IngresoDt[];
