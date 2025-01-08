@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
     createCategoria,
     getCategorias,
+    getCategoriasByIdSubgrupo,
     getCategoriaById,
     updateCategoria,
     deleteCategoria
@@ -12,6 +13,7 @@ const router = Router();
 
 router.post('/', checkJwt, createCategoria);
 router.get('/', checkJwt, getCategorias);
+router.get('/:idSubgrupo', checkJwt, getCategoriasByIdSubgrupo);
 router.get('/:id', checkJwt, getCategoriaById);
 router.put('/', checkJwt, updateCategoria);
 router.delete('/:id', checkJwt, deleteCategoria);

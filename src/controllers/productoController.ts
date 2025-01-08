@@ -30,7 +30,8 @@ const createProducto = async (
             await transaction.rollback();
             res.status(400).json({
                 status: false,
-                message: 'El sku o descripcion del producto ya existen en la base datos.'
+                message: 
+                `El sku o descripcion del producto ya existen en la base datos. Codigo: ${checkIs.codigo}`
             });
             return;
         }

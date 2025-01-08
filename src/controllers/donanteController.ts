@@ -109,7 +109,7 @@ const deleteDonante = async (req: Request & { user?: any }, res: Response) => {
                 message: 'Donante no encontrado. Imposible eliminar.'
             });
             return;
-        }
+        };
         const establecimientos = await Establecimiento.findOne({ where: { idDonante: donante.idDonante } });
         if (establecimientos) {
             res.status(404).json({
@@ -117,15 +117,7 @@ const deleteDonante = async (req: Request & { user?: any }, res: Response) => {
                 message: 'Existen establecimientos asignados a este donante. Imposible eliminar.'
             });
             return;
-        }
-        const producto = await Producto.findOne({ where: { idDonante: donante.idDonante } });
-        if (producto) {
-            res.status(404).json({
-                status: false,
-                message: 'Existen productos asignados a este donante. Imposible eliminar.'
-            });
-            return;
-        }
+        };
         donante.estado = false; // Marcar como anulado
         await donante.save();
         await registrarBitacora(req, 'ELIMINACIÓN', entidad,

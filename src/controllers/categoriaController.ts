@@ -65,6 +65,22 @@ const getCategorias = async (req: Request, res: Response) => {
     }
 };
 
+const getCategoriasByIdSubgrupo = async (req: Request, res: Response) => {
+    const { idSubgrupo } = req.params;
+    try {
+        const categorias = await Categoria.findAll({
+            where: { idSubgrupoProducto: idSubgrupo },
+            order: [['nombre', 'ASC']]
+        });
+        res.status(200).json({
+            status: true,
+            value: categorias
+        });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_BY_IDMENU', error);
+    }
+};
+
 const getCategoriaById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
@@ -154,6 +170,7 @@ const deleteCategoria = async (req: Request & { user?: any }, res: Response) => 
 export {
     createCategoria,
     getCategorias,
+    getCategoriasByIdSubgrupo,
     getCategoriaById,
     updateCategoria,
     deleteCategoria

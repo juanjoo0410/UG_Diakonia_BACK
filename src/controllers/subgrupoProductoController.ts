@@ -60,6 +60,22 @@ const getSubgruposProducto = async (req: Request, res: Response) => {
     }
 };
 
+const getSubgruposByIdGrupo = async (req: Request, res: Response) => {
+    const { idGrupo } = req.params;
+    try {
+        const subgrupos = await SubgrupoProducto.findAll({
+            where: { idGrupoProducto: idGrupo },
+            order: [['nombre', 'ASC']]
+        });
+        res.status(200).json({
+            status: true,
+            value: subgrupos
+        });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_BY_IDMENU', error);
+    }
+};
+
 const getSubgrupoProductoById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
@@ -150,6 +166,7 @@ const deleteSubgrupoProducto = async (req: Request & { user?: any }, res: Respon
 export {
     createSubgrupoProducto,
     getSubgruposProducto,
+    getSubgruposByIdGrupo,
     getSubgrupoProductoById,
     updateSubgrupoProducto,
     deleteSubgrupoProducto
