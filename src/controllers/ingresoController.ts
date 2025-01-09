@@ -58,7 +58,7 @@ const createIngreso = async (
             `Se creó el ingreso ${newIngreso.idIngreso}.`);
         res.status(201).json({
             status: true,
-            message: 'Rol creado con éxito',
+            message: 'Ingreso registrado con éxito',
             value: newIngreso
         });
     } catch (error) {

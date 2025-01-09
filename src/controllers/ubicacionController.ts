@@ -4,6 +4,7 @@ import { IUbicacion } from '../interfaces/IUbicacion';
 import { registrarBitacora } from '../utils/bitacoraService';
 import { Ubicacion } from '../models/ubicacionModel';
 import { Bodega } from '../models/bodegaModel';
+import { Stock } from '../models/stockModel';
 
 const entidad = 'UBICACION';
 
@@ -84,6 +85,36 @@ const getUbicacionById = async (req: Request, res: Response) => {
     }
 };
 
+const getEspacioDisponible = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const totalPeso = await Stock.sum('pesoTotal', { where: { idUbicacion: id, }, });
+        if (totalPeso === null) {
+            res.status(404).json({
+                status: false,
+                message: 'No se encontraron registros para los parámetros proporcionados'
+            });
+            return;
+        }
+        const ubicacion = await Ubicacion.findOne({ where: { idUbicacion: id, }, });
+        if (!ubicacion) {
+            res.status(404).json({
+                status: false,
+                message: 'Ubicación no encontrada'
+            });
+            return;
+        }
+        const capacidadMaxima = ubicacion.capacidadMaxima;
+        const diferencia = capacidadMaxima - totalPeso;
+        res.status(200).json({
+            status: true,
+            value: diferencia
+        });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_BY_ID', error);
+    }
+};
+
 const updateUbicacion = async (req: Request & { user?: any }, res: Response) => {
     try {
         const ubicacion: IUbicacion = req.body;
@@ -139,6 +170,7 @@ export {
     getUbicaciones,
     getUbicacionesByIdBodega,
     getUbicacionById,
+    getEspacioDisponible,
     updateUbicacion,
     deleteUbicacion
 }
