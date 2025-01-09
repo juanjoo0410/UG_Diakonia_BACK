@@ -41,6 +41,36 @@ const getTiposTransaccion = async (req: Request, res: Response) => {
     }
 };
 
+const getTiposTransaccionByIngreso = async (req: Request, res: Response) => {
+    try {
+        const tiposTransaccion = await TipoTransaccion.findAll({
+            where: { ingreso: true },
+            order: [['nombre', 'ASC']]
+        });
+        res.status(200).json({
+            status: true,
+            value: tiposTransaccion
+        });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_BY_IDMENU', error);
+    }
+};
+
+const getTiposTransaccionByEgreso = async (req: Request, res: Response) => {
+    try {
+        const tiposTransaccion = await TipoTransaccion.findAll({
+            where: { egreso: true },
+            order: [['nombre', 'ASC']]
+        });
+        res.status(200).json({
+            status: true,
+            value: tiposTransaccion
+        });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_BY_IDMENU', error);
+    }
+};
+
 const getTipoTransaccionById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
@@ -122,6 +152,8 @@ const deleteTipoTransaccion = async (req: Request & { user?: any }, res: Respons
 export {
     createTipoTransaccion,
     getTiposTransaccion,
+    getTiposTransaccionByIngreso,
+    getTiposTransaccionByEgreso,
     getTipoTransaccionById,
     updateTipoTransaccion,
     deleteTipoTransaccion

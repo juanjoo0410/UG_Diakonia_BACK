@@ -14,8 +14,8 @@ export interface IProducto{
     unidadesPorPrest: number;
     pesoPorUnidad: number;
     unidadPeso: string;
-    lote: string;
-    fechaCaducidad: Date;
+    lote?: string;
+    fechaCaducidad?: Date;
     precioCosto: number;
     precioTiendita: number;
     sku: string;

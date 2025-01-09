@@ -17,8 +17,8 @@ export class Producto extends Model<IProducto> implements IProducto {
     public unidadesPorPrest!: number;
     public pesoPorUnidad!: number;
     public unidadPeso!: string;
-    public lote!: string;
-    public fechaCaducidad!: Date;
+    public lote?: string;
+    public fechaCaducidad?: Date;
     public precioCosto!: number;
     public precioTiendita!: number;
     public sku!: string;

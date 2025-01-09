@@ -30,8 +30,8 @@ const createProducto = async (
             await transaction.rollback();
             res.status(400).json({
                 status: false,
-                message: 
-                `El sku o descripcion del producto ya existen en la base datos. Codigo: ${checkIs.codigo}`
+                message:
+                    `El sku o descripcion del producto ya existen en la base datos. Codigo: ${checkIs.codigo}`
             });
             return;
         }
@@ -107,12 +107,23 @@ const updateProducto = async (req: Request & { user?: any }, res: Response) => {
             });
             return;
         }
-        if (producto.descripcion != checkIs.descripcion) {
+        if (producto.descripcion.toLocaleUpperCase() !=
+            checkIs.descripcion.toLocaleUpperCase()) {
             const nameExist = await Producto.findOne({ where: { descripcion: producto.descripcion } });
             if (nameExist) {
                 res.status(404).json({
                     status: false,
                     message: 'La descripcion del producto ya existe'
+                });
+                return;
+            }
+        };
+        if (producto.sku != checkIs.sku) {
+            const nameExist = await Producto.findOne({ where: { sku: producto.sku } });
+            if (nameExist) {
+                res.status(404).json({
+                    status: false,
+                    message: 'El sku del producto ya existe'
                 });
                 return;
             }

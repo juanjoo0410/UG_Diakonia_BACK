@@ -51,6 +51,22 @@ const getUbicaciones = async (req: Request, res: Response) => {
     }
 };
 
+const getUbicacionesByIdBodega = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const ubicacion = await Ubicacion.findAll({
+            where: { idBodega: id },
+            order: [['codigo', 'ASC']]
+        });
+        res.status(200).json({
+            status: true,
+            value: ubicacion
+        });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_BY_IDMENU', error);
+    }
+};
+
 const getUbicacionById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
@@ -121,6 +137,7 @@ const deleteUbicacion = async (req: Request & { user?: any }, res: Response) => 
 export {
     createUbicacion,
     getUbicaciones,
+    getUbicacionesByIdBodega,
     getUbicacionById,
     updateUbicacion,
     deleteUbicacion

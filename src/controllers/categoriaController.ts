@@ -66,10 +66,10 @@ const getCategorias = async (req: Request, res: Response) => {
 };
 
 const getCategoriasByIdSubgrupo = async (req: Request, res: Response) => {
-    const { idSubgrupo } = req.params;
+    const { id } = req.params;
     try {
         const categorias = await Categoria.findAll({
-            where: { idSubgrupoProducto: idSubgrupo },
+            where: { idSubgrupoProducto: id },
             order: [['nombre', 'ASC']]
         });
         res.status(200).json({
