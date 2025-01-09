@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
     createProducto,
     getProductos,
+    getProductosConStock,
     getProductoById,
     updateProducto,
     deleteProducto
@@ -12,6 +13,7 @@ const router = Router();
 
 router.post('/', checkJwt, createProducto);
 router.get('/', checkJwt, getProductos);
+router.get('/conStock', checkJwt, getProductosConStock);
 router.get('/:id', checkJwt, getProductoById);
 router.put('/', checkJwt, updateProducto);
 router.delete('/:id', checkJwt, deleteProducto);

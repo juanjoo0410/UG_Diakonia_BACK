@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { handleHttp } from '../utils/handleError';
 import { registrarBitacora } from '../utils/bitacoraService';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { IProducto } from '../interfaces/IProducto';
 import { Producto } from '../models/productoModel';
 import sequelize from '../config/db';
@@ -9,6 +9,7 @@ import { generarCodigo } from '../utils/contadorService';
 import { GrupoProducto } from '../models/grupoProductoModel';
 import { SubgrupoProducto } from '../models/subgrupoProductoModel';
 import { Categoria } from '../models/categoriaModel';
+import { Stock } from '../models/stockModel';
 
 const entidad = 'PRODUCTO';
 
@@ -72,6 +73,46 @@ const getProductos = async (req: Request, res: Response) => {
                     attributes: ['nombre']
                 }
             ]
+        });
+        res.status(200).json({ value: productos });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
+const getProductosConStock = async (req: Request, res: Response) => {
+    try {
+        const productos = await Producto.findAll({
+            where: { estado: true },
+            include: [
+                {
+                    model: Stock,
+                    as: 'stocks',
+                    attributes: [] // No incluir los campos de Stock directamente en el resultado
+                },
+                {
+                    model: GrupoProducto,
+                    as: 'grupoProducto',
+                    attributes: ['nombre']
+                },
+                {
+                    model: SubgrupoProducto,
+                    as: 'subgrupoProducto',
+                    attributes: ['nombre']
+                },
+                {
+                    model: Categoria,
+                    as: 'categoria',
+                    attributes: ['nombre']
+                }
+            ],
+            group: [
+                'idProducto',
+                'idGrupoProducto',
+                'idSubgrupoProducto',
+                'idCategoria'
+            ],
+            having: Sequelize.literal('SUM(stocks.stock) > 0')
         });
         res.status(200).json({ value: productos });
     } catch (error) {
@@ -181,6 +222,7 @@ const deleteProducto = async (req: Request & { user?: any }, res: Response) => {
 export {
     createProducto,
     getProductos,
+    getProductosConStock,
     getProductoById,
     updateProducto,
     deleteProducto

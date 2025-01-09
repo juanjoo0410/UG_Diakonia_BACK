@@ -30,7 +30,7 @@ const createEgreso = async (
             {
                 idTipoTransaccion: egreso.idTipoTransaccion,
                 descripcion: egreso.descripcion,
-                idBeneficiario: egreso.idBeneficiario,
+                idBeneficiario: egreso.idBeneficiario ?? 0,
                 totalPeso: egreso.totalPeso,
             },
             { transaction }

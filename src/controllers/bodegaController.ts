@@ -3,8 +3,9 @@ import { Bodega } from '../models/bodegaModel';
 import { handleHttp } from '../utils/handleError';
 import { registrarBitacora } from '../utils/bitacoraService';
 import { IBodega } from '../interfaces/IBodega';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { Ubicacion } from '../models/ubicacionModel';
+import { Stock } from '../models/stockModel';
 
 const entidad = 'BODEGA';
 
@@ -44,6 +45,38 @@ const createBodega = async (
 const getBodegas = async (req: Request, res: Response) => {
     try {
         const bodegas = await Bodega.findAll({ where: { estado: true } });
+        res.status(200).json({ value: bodegas });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
+const getBodegasConStockPorProducto = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const bodegas = await Bodega.findAll({
+            where: { estado: true },
+            include: [
+                {
+                    model: Stock,
+                    as: 'stocks',
+                    attributes: [],
+                    where: {
+                        idProducto: id,
+                        stock: { [Op.gt]: 0 } // Filtrar solo donde stock > 0
+                    },
+                    include: [
+                        {
+                            model: Ubicacion,
+                            as: 'ubicacion',
+                            attributes: ['idUbicacion', 'codigo'], // Obtener detalles de la ubicación
+                        }
+                    ]
+                }
+            ],
+            group: ['idBodega', 'stocks->idUbicacion', ], // Agrupar por los atributos de Bodega
+        });
+
         res.status(200).json({ value: bodegas });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -130,6 +163,7 @@ const deleteBodega = async (req: Request & { user?: any }, res: Response) => {
 export {
     createBodega,
     getBodegas,
+    getBodegasConStockPorProducto,
     getBodegaById,
     updateBodega,
     deleteBodega

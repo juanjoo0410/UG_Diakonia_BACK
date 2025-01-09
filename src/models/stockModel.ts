@@ -53,6 +53,21 @@ Stock.init(
     }
 );
 
+Producto.hasMany(Stock, {
+    foreignKey: 'idProducto',
+    as: 'stocks'
+})
+
+Bodega.hasMany(Stock, {
+    foreignKey: 'idBodega',
+    as: 'stocks'
+})
+
+Ubicacion.hasMany(Stock, {
+    foreignKey: 'idUbicacion',
+    as: 'stocks'
+})
+
 Stock.belongsTo(Producto, {
     foreignKey: 'idProducto',
     as: 'producto'
