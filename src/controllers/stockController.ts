@@ -13,6 +13,22 @@ const getStock = async (req: Request, res: Response) => {
     }
 };
 
+const getStockProductoByUbicacion = async (req: Request, res: Response) => {
+    try {
+        const { idP, idU } = req.params;
+        const stock = await Stock.findOne({
+            where: {
+                idProducto: idP,
+                idUbicacion: idU
+            }
+        });
+        res.status(200).json({ value: stock });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
 export {
-    getStock
+    getStock,
+    getStockProductoByUbicacion
 }

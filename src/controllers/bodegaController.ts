@@ -65,16 +65,9 @@ const getBodegasConStockPorProducto = async (req: Request, res: Response) => {
                         idProducto: id,
                         stock: { [Op.gt]: 0 } // Filtrar solo donde stock > 0
                     },
-                    include: [
-                        {
-                            model: Ubicacion,
-                            as: 'ubicacion',
-                            attributes: ['idUbicacion', 'codigo'], // Obtener detalles de la ubicación
-                        }
-                    ]
                 }
             ],
-            group: ['idBodega', 'stocks->idUbicacion', ], // Agrupar por los atributos de Bodega
+            group: ['idBodega'], // Agrupar por los atributos de Bodega
         });
 
         res.status(200).json({ value: bodegas });

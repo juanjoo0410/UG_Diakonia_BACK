@@ -5,6 +5,7 @@ import { registrarBitacora } from '../utils/bitacoraService';
 import { Ubicacion } from '../models/ubicacionModel';
 import { Bodega } from '../models/bodegaModel';
 import { Stock } from '../models/stockModel';
+import { Op } from 'sequelize';
 
 const entidad = 'UBICACION';
 
@@ -65,6 +66,34 @@ const getUbicacionesByIdBodega = async (req: Request, res: Response) => {
         });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_BY_IDMENU', error);
+    }
+};
+
+const getUbicacionesConStockByProducto = async (req: Request, res: Response) => {
+    try {
+        const { idP, idB } = req.params;
+        const ubicaciones = await Ubicacion.findAll({
+            where: { estado: true },
+            include: [
+                {
+                    model: Stock,
+                    as: 'stocks',
+                    attributes: [],
+                    where: {
+                        idProducto: idP,
+                        idBodega: idB,
+                        stock: { [Op.gt]: 0 } // Filtrar solo donde stock > 0
+                    },
+                }
+            ],
+            group: ['idUbicacion'], // Agrupar por los atributos de Bodega
+        });
+        console.log('AQUI ESTOY');
+        console.log(ubicaciones);
+
+        res.status(200).json({ value: ubicaciones });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
     }
 };
 
@@ -169,6 +198,7 @@ export {
     createUbicacion,
     getUbicaciones,
     getUbicacionesByIdBodega,
+    getUbicacionesConStockByProducto,
     getUbicacionById,
     getEspacioDisponible,
     updateUbicacion,

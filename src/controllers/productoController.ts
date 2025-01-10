@@ -120,6 +120,32 @@ const getProductosConStock = async (req: Request, res: Response) => {
     }
 };
 
+const getProductosConStockByBodega = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const productos = await Producto.findAll({
+            where: { estado: true, precioTiendita: {
+                [Op.gt]: 0 // Filtra solo aquellos con precioTiendita mayor a 0
+              } },
+            include: [
+                {
+                    model: Stock,
+                    as: 'stocks',
+                    attributes: [],
+                    where: { idBodega: id }, // No incluir los campos de Stock directamente en el resultado
+                }
+            ],
+            group: [
+                'idProducto'
+            ],
+            having: Sequelize.literal('SUM(stocks.stock) > 0')
+        });
+        res.status(200).json({ value: productos });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
 const getProductoById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
@@ -223,6 +249,7 @@ export {
     createProducto,
     getProductos,
     getProductosConStock,
+    getProductosConStockByBodega,
     getProductoById,
     updateProducto,
     deleteProducto

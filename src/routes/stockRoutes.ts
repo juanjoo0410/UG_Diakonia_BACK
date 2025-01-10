@@ -1,10 +1,12 @@
 import { Router, Request, Response } from 'express';
 import {
-    getStock
+    getStock,
+    getStockProductoByUbicacion
 } from '../controllers/stockController';
 
 const router = Router();
 
 router.get('/', getStock);
+router.get('/producto/:idP/:idU', getStockProductoByUbicacion);
 
 export default router;

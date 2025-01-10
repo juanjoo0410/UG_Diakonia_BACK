@@ -58,7 +58,7 @@ const createEgreso = async (
             `Se creó el egreso ${newEgreso.idEgreso}.`);
         res.status(201).json({
             status: true,
-            message: 'Rol creado con éxito',
+            message: 'Egreso realizado con éxito',
             value: newEgreso
         });
     } catch (error) {
