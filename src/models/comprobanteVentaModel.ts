@@ -7,6 +7,7 @@ export class ComprobanteVenta extends Model<IComprobanteVenta> implements ICompr
     public idComprobanteVenta?: number;
     public idCliente!: number;
     public tipoPago!: string;
+    public banco!: string;
     public subtotal!: number;
     public descuento!: number;
     public total!: number;
@@ -26,6 +27,7 @@ ComprobanteVenta.init(
             }
         },
         tipoPago: { type: DataTypes.STRING(25), allowNull: false },
+        banco: { type: DataTypes.STRING(75), allowNull: false, },
         subtotal: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
         descuento: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
         total: { type: DataTypes.DECIMAL(10, 2), allowNull: false },

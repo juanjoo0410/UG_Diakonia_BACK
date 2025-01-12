@@ -5,6 +5,6 @@ import {
 
 const router = Router();
 
-router.get('/', getKardex);
+router.post('/', getKardex);
 
 export default router;

@@ -13,6 +13,7 @@ export interface IKardex{
     cantidad: number;
     esIngreso: boolean;
     unidades: number;
+    fecha?: Date;
     bodega?: IBodega;
     ubicacion?: IUbicacion;
     producto?: IProducto;

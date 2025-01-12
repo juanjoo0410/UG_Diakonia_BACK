@@ -221,6 +221,41 @@ const updateProducto = async (req: Request & { user?: any }, res: Response) => {
     }
 };
 
+const actualizarPrecios = async (req: Request & { user?: any }, res: Response) => {
+    try {
+      const { productos } = req.body; // Lista de productos con id y nuevoPrecio
+  
+      if (!Array.isArray(productos) || productos.length === 0) {
+        return res.status(400).json({ status: false, message: 'Debe enviar una lista de productos válida.' });
+      }
+  
+      // Validar que cada producto tenga id y nuevoPrecio
+      for (const producto of productos) {
+        if (!producto.id || !producto.nuevoPrecio) {
+          return res.status(400).json({
+            status: false,
+            message: 'Cada producto debe tener un id y un nuevoPrecio.',
+          });
+        }
+      }
+  
+      // Procesar actualización
+      const actualizaciones = productos.map((producto) => {
+        return Producto.update(
+          { precioTiendita: producto.nuevoPrecio }, // Campo a actualizar
+          { where: { idProducto: producto.id } }    // Condición para la actualización
+        );
+      });
+  
+      await Promise.all(actualizaciones); // Ejecutar todas las actualizaciones en paralelo
+  
+      res.json({ status: true, message: 'Precios actualizados correctamente.' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ status: false, message: 'Ocurrió un error al actualizar los precios.' });
+    }
+  };
+
 const deleteProducto = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {

@@ -16,6 +16,7 @@ export class Kardex extends Model<IKardex> implements IKardex {
     public cantidad!: number;
     public esIngreso!: boolean;
     public unidades!: number;
+    public fecha?: Date;
     public producto?: Producto | undefined;
 }
 
@@ -48,12 +49,13 @@ Kardex.init(
         },
         cantidad: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
         esIngreso: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
-        unidades: { type: DataTypes.DECIMAL(10, 2), allowNull: false }
+        unidades: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+        fecha: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     },
     {
         sequelize,
         tableName: 'kardex',
-        timestamps: true
+        timestamps: false
     }
 );
 

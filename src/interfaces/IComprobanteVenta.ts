@@ -5,6 +5,7 @@ export interface IComprobanteVenta{
     idComprobanteVenta?: number;
     idCliente: number;
     tipoPago: string;
+    banco: string;
     subtotal: number;
     descuento: number;
     total: number;

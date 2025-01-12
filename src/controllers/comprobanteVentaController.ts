@@ -32,6 +32,7 @@ const createComprobanteVenta = async (
             {
                 idCliente: comprobanteVenta.idCliente,
                 tipoPago: comprobanteVenta.tipoPago,
+                banco: comprobanteVenta.banco,
                 subtotal: comprobanteVenta.subtotal,
                 descuento: comprobanteVenta.descuento,
                 total: comprobanteVenta.total,
