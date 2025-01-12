@@ -4,6 +4,7 @@ import { handleHttp } from '../utils/handleError';
 import { encrypt } from '../helpers/handleBcrypt';
 import { Rol } from '../models/rolModel';
 import { registrarBitacora } from '../utils/bitacoraService';
+import { sendNotify } from '../utils/sendEmail';
 
 const entidad = 'USUARIO';
 
@@ -24,6 +25,19 @@ const createUsuario = async (req: Request & { user?: any }, res: Response) => {
                 message: 'Usuario agregado exitosamente. Se envió al correo del usuario las credenciales ',
                 data: newUsuario
             });
+            const form = {
+                nombre: 'Webmaster',
+                email: 'jecheverria@alessa.com.ec',
+                asunto: 'Sistema Diakonia: Registro de usuario exitoso',
+                mensaje: `<p>Estimado(a) <strong>${newUsuario.nombre}</strong>, su cuenta ha sido creada con éxito.</p>
+                        <p>A continuación, encontrará sus credenciales de acceso:</p>
+                        <ul>
+                        <li><strong>Usuario:</strong> ${newUsuario.codigo}</li>
+                        <li><strong>Contraseña temporal:</strong> ${clave}</li>
+                        </ul>
+                        <p>Por motivos de seguridad, el sistema le solicitará cambiar su contraseña al iniciar sesión por primera vez.</p>
+                        <p<strong>Webmaster</strong></p>`};
+            await sendNotify(form);
             await registrarBitacora(req, 'CREACIÓN', entidad,
                 `Se creó el usuario ${newUsuario.nombre}.`)
         }

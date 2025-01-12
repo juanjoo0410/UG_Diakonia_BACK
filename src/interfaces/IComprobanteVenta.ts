@@ -9,6 +9,7 @@ export interface IComprobanteVenta{
     descuento: number;
     total: number;
     estado?: boolean;
+    fecha?: Date;
     comprobanteVentaDt?: IComprobanteVentaDt[];
     cliente?: ICliente;
 }

@@ -7,6 +7,9 @@ import { Rol } from "../models/rolModel";
 import { RolSubmenu } from "../models/rolSubmenuModel";
 import { Submenu } from "../models/submenuModel";
 import { registrarBitacora } from "../utils/bitacoraService";
+import { sendNotify } from "../utils/sendEmail";
+
+const entidad = 'AUTENTICACION';
 
 const login = async (req: Request & { user?: any }, res: Response) => {
     try {
@@ -38,7 +41,7 @@ const login = async (req: Request & { user?: any }, res: Response) => {
             if (checkIs.anulado) {
                 res.status(403).json({
                     status: false,
-                    message: 'El usuario está anulado y no puede iniciar sesión'
+                    message: 'El usuario no esta activo y no puede iniciar sesión'
                 });
                 return;
             }
@@ -49,7 +52,7 @@ const login = async (req: Request & { user?: any }, res: Response) => {
                 if (!checkIs.cambiarClave) { token = generateToken(checkIs.idUsuario ?? 0, checkIs.codigo); }
                 const permisos = checkIs.rol?.roles_submenus?.map((permiso: any) => permiso.idSubmenu) || [];
                 req.user = { idUsuario: checkIs.idUsuario ?? 0 };
-                await registrarBitacora(req, 'INICIO DE SESION', 'AUTENTICACION', `El usuario ${checkIs.nombre} inició sesión.`)
+                await registrarBitacora(req, 'INICIO DE SESION', entidad, `El usuario ${checkIs.nombre} inició sesión.`)
 
                 res.status(200).json({
                     status: true,
@@ -74,7 +77,7 @@ const login = async (req: Request & { user?: any }, res: Response) => {
     }
 }
 
-const changePassword = async (req: Request, res: Response) => {
+const changePassword = async (req: Request & { user?: any }, res: Response) => {
     try {
         const { codigo, oldPassword, newPassword } = req.body;
 
@@ -100,6 +103,9 @@ const changePassword = async (req: Request, res: Response) => {
                     status: true,
                     message: 'Contraseña actualizada exitosamente'
                 });
+                req.user = { idUsuario: user.idUsuario ?? 0 };
+                await registrarBitacora(req, 'CAMBIAR CLAVE', entidad,
+                    `El usuario ${user.nombre} realizó cambio de clave de acceso.`)
             }
         }
     } catch (error) {
@@ -107,6 +113,60 @@ const changePassword = async (req: Request, res: Response) => {
     }
 };
 
+const forgotPassword = async (req: Request & { user?: any }, res: Response) => {
+    const { codigo, newPassword } = req.body;
+    try {
+        const user = await Usuario.findOne({ where: { codigo } });
+        if (!user) {
+            res.status(404).json({
+                status: false,
+                message: 'Usuario no encontrado.'
+            });
+            return
+        };
+        if (user.anulado) {
+            res.status(404).json({
+                status: false,
+                message: 'El usuario ingresado no esta activo.'
+            });
+            return
+        };
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!regex.test(user.correo)) {
+            res.status(404).json({
+                status: false,
+                message: `La cuenta de correo registrada no es válida: ${user.correo}`
+            });
+            return
+        }
+        const passHash = await encrypt(newPassword);
+        user.clave = passHash;
+        user.cambiarClave = true;
+        await user.save();
+        res.status(200).json({
+            status: true,
+            message: 'Recuperación exitosa. Se envió al correo registrado la contraseña temporal.'
+        });
+        const form = {
+            nombre: 'Webmaster',
+            email: 'jecheverria@alessa.com.ec',
+            asunto: 'Sistema Diakonia: Recuperación de contraseña',
+            mensaje: `<p>Estimado(a) <strong>${user.nombre}</strong>, se ha recibido una solicitud para restablecer su contraseña. A continuación, encontrará su nueva contraseña temporal:</p>
+                    <ul>
+                    <li><strong>Contraseña temporal:</strong> ${newPassword}</li>
+                    </ul>
+                    <p>Por motivos de seguridad, el sistema le solicitará cambiar esta contraseña al iniciar sesión.</p>
+                    <p>Si usted no solicitó este cambio, por favor comuníquese con el Administrador del Sistema.</p>
+                    <p><strong>Webmaster</strong></p>`};
+        await sendNotify(form);
+        req.user = { idUsuario: user.idUsuario ?? 0 };
+        await registrarBitacora(req, 'RECUPERACION CLAVE', entidad,
+            `El usuario ${user.nombre} solicitó recuperacion de clave de acceso.`)
+    } catch (error) {
+        return handleHttp(res, 'ERROR_CHANGE_PASSWORD', error);
+    }
+};
+
 export {
-    login, changePassword
+    login, changePassword, forgotPassword
 };

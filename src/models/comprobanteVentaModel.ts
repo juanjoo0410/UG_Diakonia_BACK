@@ -11,6 +11,7 @@ export class ComprobanteVenta extends Model<IComprobanteVenta> implements ICompr
     public descuento!: number;
     public total!: number;
     public estado?: boolean;
+    public fecha?: Date;
     public cliente?: Cliente | undefined;
 }
 
@@ -25,15 +26,16 @@ ComprobanteVenta.init(
             }
         },
         tipoPago: { type: DataTypes.STRING(25), allowNull: false },
-        subtotal: { type: DataTypes.DECIMAL(10,2), allowNull: false },
-        descuento: { type: DataTypes.DECIMAL(10,2), allowNull: false },
-        total: { type: DataTypes.DECIMAL(10,2), allowNull: false },
-        estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
+        subtotal: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+        descuento: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+        total: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+        estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
+        fecha: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, },
     },
     {
         sequelize,
         tableName: 'comprobantes_venta',
-        timestamps: true
+        timestamps: false
     }
 );
 

@@ -9,6 +9,7 @@ import { ComprobanteVentaDt } from '../models/comprobanteVentaDtModel';
 import { Cliente } from '../models/clienteModel';
 import { actualizarStock } from '../utils/stockService';
 import { agregarKardex } from '../utils/kardexService';
+import { Op } from 'sequelize';
 
 const entidad = 'COMPROBANTE_VENTA';
 
@@ -73,9 +74,22 @@ const createComprobanteVenta = async (
 };
 
 const getComprobantesVenta = async (req: Request, res: Response) => {
+    const { fechaInicio, fechaFin } = req.body;
     try {
-        const comprobanteVenta = await ComprobanteVenta.findAll({ where: { estado: true } });
-        res.status(200).json({ value: comprobanteVenta });
+        const comprobanteVenta = await ComprobanteVenta.findAll({
+            where: {
+                estado: true,
+                fecha: {
+                    [Op.between]: [fechaInicio, fechaFin], // Filtrar entre las fechas
+                },
+            },
+            include: [{
+                model: Cliente,
+                as: 'cliente',
+                attributes: ['codigo', 'identificacion', 'nombre', 'esEmpleado']
+            }]
+        });
+        res.status(200).json({ status: true, value: comprobanteVenta });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
     }
