@@ -120,7 +120,7 @@ const getProductosConStock = async (req: Request, res: Response) => {
     }
 };
 
-const getProductosConStockByBodega = async (req: Request, res: Response) => {
+const getProductosConStockByUbicacion = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const productos = await Producto.findAll({
@@ -132,7 +132,7 @@ const getProductosConStockByBodega = async (req: Request, res: Response) => {
                     model: Stock,
                     as: 'stocks',
                     attributes: [],
-                    where: { idBodega: id }, // No incluir los campos de Stock directamente en el resultado
+                    where: { idUbicacion: id }, // No incluir los campos de Stock directamente en el resultado
                 }
             ],
             group: [
@@ -249,7 +249,7 @@ export {
     createProducto,
     getProductos,
     getProductosConStock,
-    getProductosConStockByBodega,
+    getProductosConStockByUbicacion,
     getProductoById,
     updateProducto,
     deleteProducto

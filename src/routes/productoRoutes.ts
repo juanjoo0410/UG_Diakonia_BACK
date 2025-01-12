@@ -3,7 +3,7 @@ import {
     createProducto,
     getProductos,
     getProductosConStock,
-    getProductosConStockByBodega,
+    getProductosConStockByUbicacion,
     getProductoById,
     updateProducto,
     deleteProducto
@@ -15,7 +15,7 @@ const router = Router();
 router.post('/', checkJwt, createProducto);
 router.get('/', checkJwt, getProductos);
 router.get('/conStock', checkJwt, getProductosConStock);
-router.get('/byBodega/:id', checkJwt, getProductosConStockByBodega);
+router.get('/byUbicacion/:id', checkJwt, getProductosConStockByUbicacion);
 router.get('/:id', checkJwt, getProductoById);
 router.put('/', checkJwt, updateProducto);
 router.delete('/:id', checkJwt, deleteProducto);
