@@ -4,6 +4,7 @@ import {
     getProductos,
     getProductosConStock,
     getProductosConStockByUbicacion,
+    getProductosUndSinPrecio,
     getProductoById,
     updateProducto,
     deleteProducto
@@ -16,6 +17,7 @@ router.post('/', checkJwt, createProducto);
 router.get('/', checkJwt, getProductos);
 router.get('/conStock', checkJwt, getProductosConStock);
 router.get('/byUbicacion/:id', checkJwt, getProductosConStockByUbicacion);
+router.get('/sinPrecio', checkJwt, getProductosUndSinPrecio);
 router.get('/:id', checkJwt, getProductoById);
 router.put('/', checkJwt, updateProducto);
 router.delete('/:id', checkJwt, deleteProducto);

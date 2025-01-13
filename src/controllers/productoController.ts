@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { handleHttp } from '../utils/handleError';
 import { registrarBitacora } from '../utils/bitacoraService';
-import { Op, Sequelize } from 'sequelize';
+import { fn, Op, Sequelize } from 'sequelize';
 import { IProducto } from '../interfaces/IProducto';
 import { Producto } from '../models/productoModel';
 import sequelize from '../config/db';
@@ -148,6 +148,48 @@ const getProductosConStockByUbicacion = async (req: Request, res: Response) => {
     }
 };
 
+const getProductosUndSinPrecio = async (req: Request, res: Response) => {
+    try {
+        //const { idP, idU } = req.body;
+        const productos = await Stock.findAll({
+            where: {
+              idBodega: 1,
+              stock: { [Op.gt]: 0 },
+            },
+            attributes: ['idProducto',
+                [fn('SUM', Sequelize.col('stock')), 'totalStock']], 
+            group: [
+                'idProducto'],
+            include: [
+              {
+                model: Producto,
+                as: 'producto',
+                where: {
+                  precioTiendita: 0,
+                },
+                attributes: ['descripcion', 'precioTiendita', 'prest'], // Campos específicos de la tabla Productos
+                include: [
+                  {
+                    model: GrupoProducto,
+                    as: 'grupoProducto',
+                    attributes: ['nombre'],
+                  },
+                  {
+                    model: SubgrupoProducto,
+                    as: 'subgrupoProducto',
+                    attributes: ['nombre'],
+                  },
+                ],
+              },
+            ],
+          });
+        res.status(200).json({ status: true, value: productos });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
+
 const getProductoById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
@@ -278,6 +320,7 @@ export {
     getProductos,
     getProductosConStock,
     getProductosConStockByUbicacion,
+    getProductosUndSinPrecio,
     getProductoById,
     updateProducto,
     deleteProducto

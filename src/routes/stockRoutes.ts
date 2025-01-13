@@ -3,10 +3,11 @@ import {
     getStock,
     getStockProductoByUbicacion
 } from '../controllers/stockController';
+import { checkJwt } from '../middlewares/session';
 
 const router = Router();
 
-router.get('/', getStock);
-router.get('/producto/:idP/:idU', getStockProductoByUbicacion);
+router.get('/', checkJwt, getStock);
+router.get('/producto/:idP/:idU', checkJwt, getStockProductoByUbicacion);
 
 export default router;

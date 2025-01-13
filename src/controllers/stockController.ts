@@ -40,7 +40,7 @@ const getStockProductoByUbicacion = async (req: Request, res: Response) => {
                 idUbicacion: idU
             }
         });
-        res.status(200).json({ value: stock });
+        res.status(200).json({ status: true, value: stock });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
     }
