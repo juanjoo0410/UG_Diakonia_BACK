@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const tipoTransaccionController_1 = require("../controllers/tipoTransaccionController");
+const session_1 = require("../middlewares/session");
+const router = (0, express_1.Router)();
+router.post('/', session_1.checkJwt, tipoTransaccionController_1.createTipoTransaccion);
+router.get('/', session_1.checkJwt, tipoTransaccionController_1.getTiposTransaccion);
+router.get('/ingreso/', session_1.checkJwt, tipoTransaccionController_1.getTiposTransaccionByIngreso);
+router.get('/egreso/', session_1.checkJwt, tipoTransaccionController_1.getTiposTransaccionByEgreso);
+router.get('/:id', session_1.checkJwt, tipoTransaccionController_1.getTipoTransaccionById);
+router.put('/', session_1.checkJwt, tipoTransaccionController_1.updateTipoTransaccion);
+router.delete('/:id', session_1.checkJwt, tipoTransaccionController_1.deleteTipoTransaccion);
+exports.default = router;

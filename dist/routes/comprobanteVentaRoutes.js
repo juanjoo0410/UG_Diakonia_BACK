@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const comprobanteVentaController_1 = require("../controllers/comprobanteVentaController");
+const session_1 = require("../middlewares/session");
+const router = (0, express_1.Router)();
+router.post('/', session_1.checkJwt, comprobanteVentaController_1.createComprobanteVenta);
+router.post('/fecha', session_1.checkJwt, comprobanteVentaController_1.getComprobantesVenta);
+router.get('/:id', session_1.checkJwt, comprobanteVentaController_1.getComprobanteVentaById);
+exports.default = router;
