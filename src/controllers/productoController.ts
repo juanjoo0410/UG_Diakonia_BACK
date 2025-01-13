@@ -22,21 +22,23 @@ const createProducto = async (
         const checkIs = await Producto.findOne({
             where: {
                 [Op.or]: [
-                    { sku: producto.sku },
-                    { descripcion: { [Op.like]: `%${producto.descripcion}%` } },
+                    { descripcion: producto.descripcion }
                 ],
             }
         });
+        console.log("POR AQUI VOY");
         if (checkIs) {
             await transaction.rollback();
             res.status(400).json({
                 status: false,
                 message:
-                    `El sku o descripcion del producto ya existen en la base datos. Codigo: ${checkIs.codigo}`
+                    `La descripcion del producto ya existe en la base datos. Codigo: ${checkIs.codigo}`
             });
             return;
         }
+        console.log("NO EXISTE");
         producto.codigo = await generarCodigo('productos', transaction);
+        console.log("SE GENERO CODIGO");
         const newProducto = await Producto.create(producto);
         await transaction.commit();
         res.status(201).json({
@@ -185,16 +187,6 @@ const updateProducto = async (req: Request & { user?: any }, res: Response) => {
                 return;
             }
         };
-        if (producto.sku != checkIs.sku) {
-            const nameExist = await Producto.findOne({ where: { sku: producto.sku } });
-            if (nameExist) {
-                res.status(404).json({
-                    status: false,
-                    message: 'El sku del producto ya existe'
-                });
-                return;
-            }
-        }
         checkIs.descripcion = producto.descripcion;
         checkIs.idGrupoProducto = producto.idGrupoProducto;
         checkIs.idSubgrupoProducto = producto.idSubgrupoProducto;
@@ -207,6 +199,7 @@ const updateProducto = async (req: Request & { user?: any }, res: Response) => {
         checkIs.fechaCaducidad = producto.fechaCaducidad;
         checkIs.precioCosto = producto.precioCosto;
         checkIs.precioTiendita = producto.precioTiendita;
+        checkIs.noAplicaDescuento = producto.noAplicaDescuento;
         checkIs.sku = producto.sku;
         await checkIs.save();
         await registrarBitacora(req, 'MODIFICACIÓN', entidad,

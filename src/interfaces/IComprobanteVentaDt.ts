@@ -11,6 +11,8 @@ export interface IComprobanteVentaDt{
     idUbicacion: number;
     cantidad: number;
     precioUnd: number;
+    subtotal: number;
+    descuento: number;
     total: number;
     peso: number;
     estado?: boolean;

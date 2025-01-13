@@ -48,6 +48,8 @@ const createComprobanteVenta = async (
                 idUbicacion: detalle.idUbicacion,
                 cantidad: detalle.cantidad,
                 precioUnd: detalle.precioUnd,
+                subtotal: detalle.subtotal,
+                descuento: detalle.descuento,
                 total: detalle.total,
                 peso: detalle.peso
             }));

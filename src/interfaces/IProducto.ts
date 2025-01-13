@@ -18,6 +18,7 @@ export interface IProducto{
     fechaCaducidad?: Date;
     precioCosto: number;
     precioTiendita: number;
+    noAplicaDescuento: boolean;
     sku: string;
     estado?: boolean;
     grupoProducto?: IGrupoProducto;

@@ -14,6 +14,8 @@ export class ComprobanteVentaDt extends Model<IComprobanteVentaDt> implements IC
     public idUbicacion!: number;
     public cantidad!: number;
     public precioUnd!: number;
+    public subtotal!: number;
+    public descuento!: number;
     public total!: number;
     public peso!: number;
     public estado?: boolean;
@@ -56,6 +58,8 @@ ComprobanteVentaDt.init(
         },
         cantidad: { type: DataTypes.DECIMAL(10,2), allowNull: false },
         precioUnd: { type: DataTypes.DECIMAL(10,2), allowNull: false },
+        subtotal: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+        descuento: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
         total: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
         peso: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }

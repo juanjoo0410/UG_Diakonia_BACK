@@ -21,6 +21,7 @@ export class Producto extends Model<IProducto> implements IProducto {
     public fechaCaducidad?: Date;
     public precioCosto!: number;
     public precioTiendita!: number;
+    public noAplicaDescuento!: boolean;
     public sku!: string;
     public estado?: boolean;
     public grupoProducto?: GrupoProducto | undefined;
@@ -63,6 +64,7 @@ Producto.init(
         fechaCaducidad: { type: DataTypes.DATE, allowNull: true },
         precioCosto: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
         precioTiendita: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+        noAplicaDescuento: { type: DataTypes.BOOLEAN, allowNull: false },
         sku: { type: DataTypes.STRING(75), allowNull: false },
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
     },
