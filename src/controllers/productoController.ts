@@ -149,11 +149,12 @@ const getProductosConStockByUbicacion = async (req: Request, res: Response) => {
 };
 
 const getProductosUndSinPrecio = async (req: Request, res: Response) => {
+    const { id } = req.params;
     try {
         //const { idP, idU } = req.body;
         const productos = await Stock.findAll({
             where: {
-              idBodega: 1,
+              idBodega: id,
               stock: { [Op.gt]: 0 },
             },
             attributes: ['idProducto',
@@ -164,9 +165,6 @@ const getProductosUndSinPrecio = async (req: Request, res: Response) => {
               {
                 model: Producto,
                 as: 'producto',
-                where: {
-                  precioTiendita: 0,
-                },
                 attributes: ['descripcion', 'precioTiendita', 'prest'], // Campos específicos de la tabla Productos
                 include: [
                   {
