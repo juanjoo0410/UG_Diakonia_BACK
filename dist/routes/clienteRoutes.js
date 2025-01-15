@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const clienteController_1 = require("../controllers/clienteController");
+const session_1 = require("../middlewares/session");
+const router = (0, express_1.Router)();
+router.post('/', session_1.checkJwt, clienteController_1.createCliente);
+router.get('/', session_1.checkJwt, clienteController_1.getClientes);
+router.get('/:id', session_1.checkJwt, clienteController_1.getClienteById);
+router.put('/', session_1.checkJwt, clienteController_1.updateCliente);
+router.delete('/:id', session_1.checkJwt, clienteController_1.deleteCliente);
+exports.default = router;
