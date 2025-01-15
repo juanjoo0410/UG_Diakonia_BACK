@@ -12,7 +12,7 @@ const PORT = process.env.PORT;
 const app = (0, express_1.default)();
 (0, db_1.connectDB)();
 app.use((0, cors_1.default)({
-    origin: "http://54.172.159.35*"
+    origin: "http://54.172.159.35"
 }));
 app.use(express_1.default.json());
 app.use(routes_1.default);
