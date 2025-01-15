@@ -117,13 +117,9 @@ const getUbicacionById = async (req: Request, res: Response) => {
 const getEspacioDisponible = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
-        const totalPeso = await Stock.sum('pesoTotal', { where: { idUbicacion: id, }, });
+        let totalPeso = await Stock.sum('pesoTotal', { where: { idUbicacion: id, }, });
         if (totalPeso === null) {
-            res.status(404).json({
-                status: false,
-                message: 'No se encontraron registros para los parámetros proporcionados'
-            });
-            return;
+            totalPeso = 0;
         }
         const ubicacion = await Ubicacion.findOne({ where: { idUbicacion: id, }, });
         if (!ubicacion) {
