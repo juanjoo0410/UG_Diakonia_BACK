@@ -7,6 +7,7 @@ import {
     getProductosUndSinPrecio,
     getProductoById,
     updateProducto,
+    updatePrecios,
     deleteProducto
 } from "../controllers/productoController";
 import { checkJwt } from "../middlewares/session";
@@ -20,6 +21,7 @@ router.get('/byUbicacion/:id', checkJwt, getProductosConStockByUbicacion);
 router.get('/sinPrecio/:id', checkJwt, getProductosUndSinPrecio);
 router.get('/:id', checkJwt, getProductoById);
 router.put('/', checkJwt, updateProducto);
+router.put('/precios', checkJwt, updatePrecios);
 router.delete('/:id', checkJwt, deleteProducto);
 
 export default router;

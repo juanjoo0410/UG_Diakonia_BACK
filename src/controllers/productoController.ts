@@ -126,9 +126,11 @@ const getProductosConStockByUbicacion = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const productos = await Producto.findAll({
-            where: { estado: true, precioTiendita: {
-                [Op.gt]: 0 // Filtra solo aquellos con precioTiendita mayor a 0
-              } },
+            where: {
+                estado: true, precioTiendita: {
+                    [Op.gt]: 0 // Filtra solo aquellos con precioTiendita mayor a 0
+                }
+            },
             include: [
                 {
                     model: Stock,
@@ -154,33 +156,33 @@ const getProductosUndSinPrecio = async (req: Request, res: Response) => {
         //const { idP, idU } = req.body;
         const productos = await Stock.findAll({
             where: {
-              idBodega: id,
-              stock: { [Op.gt]: 0 },
+                idBodega: id,
+                stock: { [Op.gt]: 0 },
             },
             attributes: ['idProducto',
-                [fn('SUM', Sequelize.col('stock')), 'totalStock']], 
+                [fn('SUM', Sequelize.col('stock')), 'totalStock']],
             group: [
                 'idProducto'],
             include: [
-              {
-                model: Producto,
-                as: 'producto',
-                attributes: ['descripcion', 'precioTiendita', 'prest'], // Campos específicos de la tabla Productos
-                include: [
-                  {
-                    model: GrupoProducto,
-                    as: 'grupoProducto',
-                    attributes: ['nombre'],
-                  },
-                  {
-                    model: SubgrupoProducto,
-                    as: 'subgrupoProducto',
-                    attributes: ['nombre'],
-                  },
-                ],
-              },
+                {
+                    model: Producto,
+                    as: 'producto',
+                    attributes: ['descripcion', 'precioTiendita', 'prest'], // Campos específicos de la tabla Productos
+                    include: [
+                        {
+                            model: GrupoProducto,
+                            as: 'grupoProducto',
+                            attributes: ['nombre'],
+                        },
+                        {
+                            model: SubgrupoProducto,
+                            as: 'subgrupoProducto',
+                            attributes: ['nombre'],
+                        },
+                    ],
+                },
             ],
-          });
+        });
         res.status(200).json({ status: true, value: productos });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -254,40 +256,35 @@ const updateProducto = async (req: Request & { user?: any }, res: Response) => {
     }
 };
 
-const actualizarPrecios = async (req: Request & { user?: any }, res: Response) => {
+const updatePrecios = async (
+    req: Request & { user?: any }, res: Response) => {
+    const transaction = await sequelize.transaction();
     try {
-      const { productos } = req.body; // Lista de productos con id y nuevoPrecio
-  
-      if (!Array.isArray(productos) || productos.length === 0) {
-        return res.status(400).json({ status: false, message: 'Debe enviar una lista de productos válida.' });
-      }
-  
-      // Validar que cada producto tenga id y nuevoPrecio
-      for (const producto of productos) {
-        if (!producto.id || !producto.nuevoPrecio) {
-          return res.status(400).json({
-            status: false,
-            message: 'Cada producto debe tener un id y un nuevoPrecio.',
-          });
+        const productos = req.body;
+
+        if (!Array.isArray(productos) || productos.length === 0) {
+            res.status(400).json({ status: false, message: 'Debe enviar una lista de productos válida.' });
+            return;
         }
-      }
-  
-      // Procesar actualización
-      const actualizaciones = productos.map((producto) => {
-        return Producto.update(
-          { precioTiendita: producto.nuevoPrecio }, // Campo a actualizar
-          { where: { idProducto: producto.id } }    // Condición para la actualización
-        );
-      });
-  
-      await Promise.all(actualizaciones); // Ejecutar todas las actualizaciones en paralelo
-  
-      res.json({ status: true, message: 'Precios actualizados correctamente.' });
+
+        const actualizaciones = productos.map((producto) => {
+            return Producto.update(
+                { precioTiendita: producto.precioTiendita },
+                { where: { idProducto: producto.idProducto } })
+        });
+        await Promise.all(actualizaciones);
+        await transaction.commit();
+        await registrarBitacora(req, 'ACTUALIZACION_PRECIOS', entidad,
+            `Se actualizaron los precios de los productos de Tiendita.`);
+        res.json({
+            status: true,
+            message: 'Precios actualizados correctamente.'
+        });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ status: false, message: 'Ocurrió un error al actualizar los precios.' });
+        await transaction.rollback();
+        return handleHttp(res, 'ERROR_PUT', error);
     }
-  };
+};
 
 const deleteProducto = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
@@ -321,5 +318,6 @@ export {
     getProductosUndSinPrecio,
     getProductoById,
     updateProducto,
+    updatePrecios,
     deleteProducto
 }

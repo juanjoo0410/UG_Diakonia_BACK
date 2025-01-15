@@ -9,7 +9,7 @@ import { ComprobanteVentaDt } from '../models/comprobanteVentaDtModel';
 import { Cliente } from '../models/clienteModel';
 import { actualizarStock } from '../utils/stockService';
 import { agregarKardex } from '../utils/kardexService';
-import { Op } from 'sequelize';
+import { col, fn, Op } from 'sequelize';
 
 const entidad = 'COMPROBANTE_VENTA';
 
@@ -22,6 +22,7 @@ const createComprobanteVenta = async (
         if (!comprobanteVenta.comprobanteVentaDt ||
             !Array.isArray(comprobanteVenta.comprobanteVentaDt) ||
             comprobanteVenta.comprobanteVentaDt.length === 0) {
+            await transaction.rollback();
             res.status(400).json({
                 status: false,
                 message: "Detalle del comprobante es requerido"
@@ -98,6 +99,28 @@ const getComprobantesVenta = async (req: Request, res: Response) => {
     }
 };
 
+const getVentasByTipoPago = async (req: Request, res: Response) => {
+    try {
+        const inicioMes = new Date();
+        inicioMes.setDate(1);
+        inicioMes.setHours(0, 0, 0, 0);
+        const finMes = new Date();
+
+        const ventasPorTipoPago = await ComprobanteVenta.findAll({
+            attributes: ["tipoPago", [fn("SUM", col("total")), "total"]],
+            where: { fecha: { [Op.between]: [inicioMes, finMes] } },
+            group: ["tipoPago"],
+        });
+
+        res.status(200).json({
+            status: true,
+            value: ventasPorTipoPago
+        });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
 const getComprobanteVentaById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
@@ -126,5 +149,6 @@ const getComprobanteVentaById = async (req: Request, res: Response) => {
 export {
     createComprobanteVenta,
     getComprobantesVenta,
+    getVentasByTipoPago,
     getComprobanteVentaById
 }

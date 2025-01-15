@@ -31,7 +31,7 @@ Bitacora.init(
             }
         },
         accion: {
-            type: DataTypes.STRING(20),
+            type: DataTypes.STRING(25),
             allowNull: false
         },
         entidad: {
