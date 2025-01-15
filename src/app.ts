@@ -9,7 +9,7 @@ const app = express();
 
 connectDB();
 app.use(cors({
-    origin: "http://54.172.159.36*"
+    origin: "http://54.172.159.35*"
 }));
 app.use(express.json())
 app.use(router);
