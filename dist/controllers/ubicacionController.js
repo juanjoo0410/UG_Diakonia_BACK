@@ -129,13 +129,9 @@ exports.getUbicacionById = getUbicacionById;
 const getEspacioDisponible = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
-        const totalPeso = yield stockModel_1.Stock.sum('pesoTotal', { where: { idUbicacion: id, }, });
+        let totalPeso = yield stockModel_1.Stock.sum('pesoTotal', { where: { idUbicacion: id, }, });
         if (totalPeso === null) {
-            res.status(404).json({
-                status: false,
-                message: 'No se encontraron registros para los parámetros proporcionados'
-            });
-            return;
+            totalPeso = 0;
         }
         const ubicacion = yield ubicacionModel_1.Ubicacion.findOne({ where: { idUbicacion: id, }, });
         if (!ubicacion) {

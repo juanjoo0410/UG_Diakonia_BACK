@@ -37,7 +37,7 @@ const createUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             });
             const form = {
                 nombre: 'Webmaster',
-                email: 'jecheverria@alessa.com.ec',
+                email: newUsuario.correo,
                 asunto: 'Sistema Diakonia: Registro de usuario exitoso',
                 mensaje: `<p>Estimado(a) <strong>${newUsuario.nombre}</strong>, su cuenta ha sido creada con éxito.</p>
                         <p>A continuación, encontrará sus credenciales de acceso:</p>
@@ -46,7 +46,7 @@ const createUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         <li><strong>Contraseña temporal:</strong> ${clave}</li>
                         </ul>
                         <p>Por motivos de seguridad, el sistema le solicitará cambiar su contraseña al iniciar sesión por primera vez.</p>
-                        <p<strong>Webmaster</strong></p>`
+                        <p><strong>Webmaster</strong></p>`
             };
             yield (0, sendEmail_1.sendNotify)(form);
             yield (0, bitacoraService_1.registrarBitacora)(req, 'CREACIÓN', entidad, `Se creó el usuario ${newUsuario.nombre}.`);
