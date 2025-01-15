@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const bitacoraController_1 = require("../controllers/bitacoraController");
+const session_1 = require("../middlewares/session");
+const router = (0, express_1.Router)();
+router.get('/acciones', session_1.checkJwt, bitacoraController_1.getAcciones);
+router.get('/entidades', session_1.checkJwt, bitacoraController_1.getEntidades);
+router.post('/', session_1.checkJwt, bitacoraController_1.getBitacora);
+exports.default = router;

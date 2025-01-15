@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const ingresoController_1 = require("../controllers/ingresoController");
+const session_1 = require("../middlewares/session");
+const router = (0, express_1.Router)();
+router.post('/', session_1.checkJwt, ingresoController_1.createIngreso);
+router.get('/', session_1.checkJwt, ingresoController_1.getIngresos);
+router.get('/:id', session_1.checkJwt, ingresoController_1.getIngresoById);
+exports.default = router;

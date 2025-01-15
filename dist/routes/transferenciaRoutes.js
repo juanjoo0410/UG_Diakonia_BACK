@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const transferenciaController_1 = require("../controllers/transferenciaController");
+const session_1 = require("../middlewares/session");
+const router = (0, express_1.Router)();
+router.post('/', session_1.checkJwt, transferenciaController_1.createTransferencia);
+router.get('/', session_1.checkJwt, transferenciaController_1.getTransferencias);
+router.get('/:id', session_1.checkJwt, transferenciaController_1.getTransferenciaById);
+exports.default = router;
