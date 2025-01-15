@@ -105,9 +105,12 @@ const getVentasByTipoPago = async (req: Request, res: Response) => {
         inicioMes.setDate(1);
         inicioMes.setHours(0, 0, 0, 0);
         const finMes = new Date();
+        finMes.setMonth(finMes.getMonth() + 1); // Siguiente mes
+        finMes.setDate(0); // Último día del mes
+        finMes.setHours(23, 59, 59, 999);
 
         const ventasPorTipoPago = await ComprobanteVenta.findAll({
-            attributes: ["tipoPago", [fn("SUM", col("total")), "total"]],
+            attributes: [["tipoPago", "name"], [fn("SUM", col("total")), "value"]],
             where: { fecha: { [Op.between]: [inicioMes, finMes] } },
             group: ["tipoPago"],
         });
@@ -115,6 +118,35 @@ const getVentasByTipoPago = async (req: Request, res: Response) => {
         res.status(200).json({
             status: true,
             value: ventasPorTipoPago
+        });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
+const getTotalVentasMensual = async (req: Request, res: Response) => {
+    try {
+        const inicioMes = new Date();
+        inicioMes.setDate(1);
+        inicioMes.setHours(0, 0, 0, 0);
+        const finMes = new Date();
+        finMes.setMonth(finMes.getMonth() + 1); // Siguiente mes
+        finMes.setDate(0); // Último día del mes
+        finMes.setHours(23, 59, 59, 999);
+
+        const totalVentas = await ComprobanteVenta.findOne({
+            attributes: [[fn('SUM', col('total')), 'totalVentas']],
+            where: {
+                fecha: {
+                    [Op.between]: [inicioMes, finMes],
+                },
+            },
+            raw: true,
+        });
+
+        res.status(200).json({
+            status: true,
+            value: totalVentas
         });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -149,6 +181,7 @@ const getComprobanteVentaById = async (req: Request, res: Response) => {
 export {
     createComprobanteVenta,
     getComprobantesVenta,
+    getTotalVentasMensual,
     getVentasByTipoPago,
     getComprobanteVentaById
 }

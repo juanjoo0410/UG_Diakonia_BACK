@@ -8,6 +8,7 @@ export interface IEgreso{
     idBeneficiario?: number
     totalPeso: number;
     estado?: boolean;
+    fecha?: Date;
     egresoDt?: EgresoDt[];
     tipoTransaccion?: TipoTransaccion;
 }

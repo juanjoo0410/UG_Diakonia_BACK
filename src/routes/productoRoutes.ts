@@ -2,9 +2,11 @@ import { Router } from "express";
 import {
     createProducto,
     getProductos,
+    getTotalProductos,
     getProductosConStock,
     getProductosConStockByUbicacion,
     getProductosUndSinPrecio,
+    getSalidaEntradaAnual,
     getProductoById,
     updateProducto,
     updatePrecios,
@@ -16,9 +18,11 @@ const router = Router();
 
 router.post('/', checkJwt, createProducto);
 router.get('/', checkJwt, getProductos);
+router.get('/total', checkJwt, getTotalProductos);
 router.get('/conStock', checkJwt, getProductosConStock);
 router.get('/byUbicacion/:id', checkJwt, getProductosConStockByUbicacion);
 router.get('/sinPrecio/:id', checkJwt, getProductosUndSinPrecio);
+router.get('/anual', checkJwt, getSalidaEntradaAnual);
 router.get('/:id', checkJwt, getProductoById);
 router.put('/', checkJwt, updateProducto);
 router.put('/precios', checkJwt, updatePrecios);

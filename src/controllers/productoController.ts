@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { handleHttp } from '../utils/handleError';
 import { registrarBitacora } from '../utils/bitacoraService';
-import { fn, Op, Sequelize } from 'sequelize';
+import { col, fn, Op, Sequelize } from 'sequelize';
 import { IProducto } from '../interfaces/IProducto';
 import { Producto } from '../models/productoModel';
 import sequelize from '../config/db';
@@ -10,6 +10,8 @@ import { GrupoProducto } from '../models/grupoProductoModel';
 import { SubgrupoProducto } from '../models/subgrupoProductoModel';
 import { Categoria } from '../models/categoriaModel';
 import { Stock } from '../models/stockModel';
+import { Ingreso } from '../models/ingresoModel';
+import { Egreso } from '../models/egresoModel';
 
 const entidad = 'PRODUCTO';
 
@@ -77,6 +79,19 @@ const getProductos = async (req: Request, res: Response) => {
             ]
         });
         res.status(200).json({ value: productos });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
+const getTotalProductos = async (req: Request, res: Response) => {
+    try {
+        const totalProductos = await Producto.count({
+            where: {
+                estado: true,
+            },
+        });
+        res.status(200).json({ status: true, value: totalProductos });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
     }
@@ -189,6 +204,45 @@ const getProductosUndSinPrecio = async (req: Request, res: Response) => {
     }
 };
 
+const getSalidaEntradaAnual = async (req: Request, res: Response) => {
+    try {
+        const year = new Date().getFullYear();
+        const inicioAño = `${year}-01-01`;
+        const finAño = `${year}-12-31`;
+
+        const ingresos = await Ingreso.findAll({
+            attributes: [
+                [fn('MONTH', col('fecha')), 'mes'],
+                [fn('SUM', col('totalPeso')), 'totalPesoIng'],
+            ],
+            where: {
+                fecha: {
+                    [Op.between]: [inicioAño, finAño],
+                },
+            },
+            group: [fn('MONTH', col('fecha'))],
+            raw: true, // Para que devuelva un objeto plano
+        });
+
+        const egresos = await Egreso.findAll({
+            attributes: [
+                [fn('MONTH', col('fecha')), 'mes'],
+                [fn('SUM', col('totalPeso')), 'totalPesoEg'],
+            ],
+            where: {
+                fecha: {
+                    [Op.between]: [inicioAño, finAño],
+                },
+            },
+            group: [fn('MONTH', col('fecha'))],
+            raw: true,
+        });
+
+        res.status(200).json({ status: true, value: {ingresos: ingresos, egresos: egresos} });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
 
 const getProductoById = async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -313,9 +367,11 @@ const deleteProducto = async (req: Request & { user?: any }, res: Response) => {
 export {
     createProducto,
     getProductos,
+    getTotalProductos,
     getProductosConStock,
     getProductosConStockByUbicacion,
     getProductosUndSinPrecio,
+    getSalidaEntradaAnual,
     getProductoById,
     updateProducto,
     updatePrecios,

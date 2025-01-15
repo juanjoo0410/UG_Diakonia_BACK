@@ -10,6 +10,7 @@ export class Ingreso extends Model<IIngreso> implements IIngreso {
     public idDonante?: number;
     public totalPeso!: number;
     public estado?: boolean;
+    public fecha?: Date;
     public tipoTransaccion?: TipoTransaccion | undefined;
 }
 
@@ -26,12 +27,13 @@ Ingreso.init(
         descripcion: { type: DataTypes.STRING(500), allowNull: false },
         idDonante: { type: DataTypes.INTEGER, allowNull: false },
         totalPeso: { type: DataTypes.DECIMAL(10,2), allowNull: false },
-        estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
+        estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
+        fecha: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, },
     },
     {
         sequelize,
         tableName: 'ingresos',
-        timestamps: true
+        timestamps: false
     }
 );
 

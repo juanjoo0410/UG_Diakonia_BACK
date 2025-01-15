@@ -50,6 +50,19 @@ const getDonantes = async (req: Request, res: Response) => {
     }
 };
 
+const getTotalDonantes = async (req: Request, res: Response) => {
+    try {
+        const totalDonantes = await Donante.count({
+            where: {
+                estado: true,
+            },
+        });
+        res.status(200).json({ status: true, value: totalDonantes });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
 const getDonanteById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
@@ -134,6 +147,7 @@ const deleteDonante = async (req: Request & { user?: any }, res: Response) => {
 export {
     createDonante,
     getDonantes,
+    getTotalDonantes,
     getDonanteById,
     updateDonante,
     deleteDonante

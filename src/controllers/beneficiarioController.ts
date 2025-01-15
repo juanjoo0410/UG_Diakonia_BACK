@@ -56,6 +56,33 @@ const getBeneficiarios = async (req: Request, res: Response) => {
     }
 };
 
+const getTotalBeneficiarios = async (req: Request, res: Response) => {
+    try {
+        const totalBeneficiarios = await Beneficiario.count({
+            where: {
+                estado: true,
+            },
+        });
+        res.status(200).json({ status: true, value: totalBeneficiarios });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
+const getTotalBeneficiariosByInstituciones = async (req: Request, res: Response) => {
+    try {
+        const totalBeneficiarios = await Beneficiario.findAll({
+            where: {
+                estado: true,
+            },
+            attributes: [['nombre', 'name'], ['totalBeneficiarios', 'value']]
+        });
+        res.status(200).json({ status: true, value: totalBeneficiarios });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
 const getBeneficiarioById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
@@ -145,6 +172,8 @@ const deleteBeneficiario = async (req: Request & { user?: any }, res: Response) 
 export {
     createBeneficiario,
     getBeneficiarios,
+    getTotalBeneficiarios,
+    getTotalBeneficiariosByInstituciones,
     getBeneficiarioById,
     updateBeneficiario,
     deleteBeneficiario
