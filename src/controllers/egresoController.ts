@@ -84,10 +84,6 @@ const getEgresos = async (req: Request, res: Response) => {
                 model: TipoTransaccion,
                 as: 'tipoTransaccion',
                 attributes: ['nombre']
-            }, {
-                model: Beneficiario,
-                as: 'beneficiario',
-                attributes: ['nombre']
             }]
         });
         res.status(200).json({ status: true, value: egreso });

@@ -84,10 +84,6 @@ const getIngresos = async (req: Request, res: Response) => {
                 model: TipoTransaccion,
                 as: 'tipoTransaccion',
                 attributes: ['nombre']
-            }, {
-                model: Donante,
-                as: 'donante',
-                attributes: ['nombre']
             }]
         });
         res.status(200).json({ status: true, value: ingreso });

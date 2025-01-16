@@ -9,7 +9,7 @@ import { checkJwt } from "../middlewares/session";
 const router = Router();
 
 router.post('/', checkJwt, createIngreso);
-router.get('/', checkJwt, getIngresos);
+router.post('/fecha', checkJwt, getIngresos);
 router.get('/:id', checkJwt, getIngresoById);
 
 export default router;
