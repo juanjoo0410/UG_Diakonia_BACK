@@ -183,7 +183,8 @@ const getProductosUndSinPrecio = async (req: Request, res: Response) => {
                 {
                     model: Producto,
                     as: 'producto',
-                    attributes: ['descripcion', 'precioTiendita', 'prest'], // Campos específicos de la tabla Productos
+                    attributes: ['descripcion', 'precioTiendita', 'prest'],
+                    where: [{prest: 'UND'}],
                     include: [
                         {
                             model: GrupoProducto,

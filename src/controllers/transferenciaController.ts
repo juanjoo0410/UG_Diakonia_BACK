@@ -31,8 +31,6 @@ const createTransferencia = async (
         const newTransferencia = await Transferencia.create(
             {
                 descripcion: transferencia.descripcion,
-                idBodegaOrigen: transferencia.idBodegaOrigen,
-                idBodegaDestino: transferencia.idBodegaDestino,
                 totalPeso: transferencia.totalPeso,
             },
             { transaction }
@@ -102,16 +100,7 @@ const getTransferencias = async (req: Request, res: Response) => {
                 fecha: {
                     [Op.between]: [fechaInicio, fechaFin], // Filtrar entre las fechas
                 },
-            },
-            include: [{
-                model: Bodega,
-                as: 'bodegaOrigen',
-                attributes: ['nombre']
-            }, {
-                model: Bodega,
-                as: 'bodegaDestino',
-                attributes: ['nombre']
-            }]
+            }
         });
         res.status(200).json({ status: true, value: transferencias });
     } catch (error) {

@@ -4,8 +4,6 @@ import { ITransferenciaDt } from "./ITransferenciaDt";
 export interface ITransferencia{
     idTransferencia?: number;
     descripcion: string;
-    idBodegaOrigen: number;
-    idBodegaDestino: number;
     totalPeso: number;
     estado?: boolean;
     fecha?: Date;

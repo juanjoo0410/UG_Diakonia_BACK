@@ -6,8 +6,6 @@ import { Bodega } from './bodegaModel';
 export class Transferencia extends Model<ITransferencia> implements ITransferencia {
     public idTransferencia?: number;
     public descripcion!: string;
-    public idBodegaOrigen!: number;
-    public idBodegaDestino!: number;
     public totalPeso!: number;
     public estado?: boolean;
     public fecha?: Date;
@@ -19,20 +17,6 @@ Transferencia.init(
     {
         idTransferencia: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
         descripcion: { type: DataTypes.STRING(500), allowNull: false },
-        idBodegaOrigen: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: 'bodegas',
-                key: 'idBodega'
-            }
-        },
-        idBodegaDestino: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: 'bodegas',
-                key: 'idBodega'
-            }
-        },
         totalPeso: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
         fecha: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, },
