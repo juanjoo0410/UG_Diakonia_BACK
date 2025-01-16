@@ -38,6 +38,7 @@ const createComprobanteVenta = async (
                 descuento: comprobanteVenta.descuento,
                 valorCupon: comprobanteVenta.valorCupon,
                 total: comprobanteVenta.total,
+                usuario: comprobanteVenta.usuario
             },
             { transaction }
         );
@@ -80,7 +81,9 @@ const createComprobanteVenta = async (
 
 const getComprobantesVenta = async (req: Request, res: Response) => {
     const { fechaInicio, fechaFin } = req.body;
+    console.log(fechaInicio +"-"+ fechaFin);
     try {
+        console.log(fechaInicio +"-"+ fechaFin);
         const comprobanteVenta = await ComprobanteVenta.findAll({
             where: {
                 estado: true,
@@ -144,7 +147,6 @@ const getTotalVentasMensual = async (req: Request, res: Response) => {
             },
             raw: true,
         });
-
         res.status(200).json({
             status: true,
             value: totalVentas

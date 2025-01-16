@@ -7,6 +7,7 @@ export class Transferencia extends Model<ITransferencia> implements ITransferenc
     public idTransferencia?: number;
     public descripcion!: string;
     public totalPeso!: number;
+    public usuario!: string;
     public estado?: boolean;
     public fecha?: Date;
     public bodegaOrigen?: Bodega | undefined;
@@ -18,6 +19,7 @@ Transferencia.init(
         idTransferencia: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
         descripcion: { type: DataTypes.STRING(500), allowNull: false },
         totalPeso: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+        usuario: { type: DataTypes.STRING(75), allowNull: false, },
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
         fecha: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, },
     },

@@ -35,6 +35,7 @@ const createIngreso = async (
                 descripcion: ingreso.descripcion,
                 idDonante: ingreso.idDonante ?? 0,
                 totalPeso: ingreso.totalPeso,
+                usuario: ingreso.usuario
             },
             { transaction }
         );

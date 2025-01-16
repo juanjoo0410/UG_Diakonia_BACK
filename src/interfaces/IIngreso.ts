@@ -7,6 +7,7 @@ export interface IIngreso{
     descripcion: string;
     idDonante?: number;
     totalPeso: number;
+    usuario: string;
     estado?: boolean;
     fecha?: Date;
     ingresoDt?: IngresoDt[];

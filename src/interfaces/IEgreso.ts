@@ -7,6 +7,7 @@ export interface IEgreso{
     descripcion: string;
     idBeneficiario?: number
     totalPeso: number;
+    usuario: string;
     estado?: boolean;
     fecha?: Date;
     egresoDt?: EgresoDt[];

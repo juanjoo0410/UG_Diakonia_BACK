@@ -35,6 +35,7 @@ const createEgreso = async (
                 descripcion: egreso.descripcion,
                 idBeneficiario: egreso.idBeneficiario ?? 0,
                 totalPeso: egreso.totalPeso,
+                usuario: egreso.usuario
             },
             { transaction }
         );

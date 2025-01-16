@@ -32,6 +32,7 @@ const createTransferencia = async (
             {
                 descripcion: transferencia.descripcion,
                 totalPeso: transferencia.totalPeso,
+                usuario: transferencia.usuario
             },
             { transaction }
         );

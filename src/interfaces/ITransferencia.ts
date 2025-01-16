@@ -5,6 +5,7 @@ export interface ITransferencia{
     idTransferencia?: number;
     descripcion: string;
     totalPeso: number;
+    usuario: string;
     estado?: boolean;
     fecha?: Date;
     transferenciaDt?: ITransferenciaDt[];
