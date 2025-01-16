@@ -8,6 +8,9 @@ import { IngresoDt } from '../models/ingresoDtModel';
 import { IIngresoDt } from '../interfaces/IIngresoDt';
 import { actualizarStock } from '../utils/stockService';
 import { agregarKardex } from '../utils/kardexService';
+import { Op } from 'sequelize';
+import { TipoTransaccion } from '../models/tipoTransaccionModel';
+import { Donante } from '../models/donanteModel';
 
 const entidad = 'INGRESO';
 
@@ -68,9 +71,26 @@ const createIngreso = async (
 };
 
 const getIngresos = async (req: Request, res: Response) => {
+    const { fechaInicio, fechaFin } = req.body;
     try {
-        const ingreso = await Ingreso.findAll({ where: { estado: true } });
-        res.status(200).json({ value: ingreso });
+        const ingreso = await Ingreso.findAll({
+            where: {
+                estado: true,
+                fecha: {
+                    [Op.between]: [fechaInicio, fechaFin], // Filtrar entre las fechas
+                },
+            },
+            include: [{
+                model: TipoTransaccion,
+                as: 'tipoTransaccion',
+                attributes: ['nombre']
+            }, {
+                model: Donante,
+                as: 'donante',
+                attributes: ['nombre']
+            }]
+        });
+        res.status(200).json({ status: true, value: ingreso });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
     }

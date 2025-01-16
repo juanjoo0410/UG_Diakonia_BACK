@@ -8,6 +8,7 @@ export interface IComprobanteVenta{
     banco: string;
     subtotal: number;
     descuento: number;
+    valorCupon: number;
     total: number;
     estado?: boolean;
     fecha?: Date;

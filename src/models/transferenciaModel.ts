@@ -10,6 +10,7 @@ export class Transferencia extends Model<ITransferencia> implements ITransferenc
     public idBodegaDestino!: number;
     public totalPeso!: number;
     public estado?: boolean;
+    public fecha?: Date;
     public bodegaOrigen?: Bodega | undefined;
     public bodegaDestino?: Bodega | undefined;
 }
@@ -33,12 +34,13 @@ Transferencia.init(
             }
         },
         totalPeso: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
-        estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
+        estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
+        fecha: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, },
     },
     {
         sequelize,
         tableName: 'transferencias',
-        timestamps: true
+        timestamps: false
     }
 );
 

@@ -8,6 +8,9 @@ import { IEgresoDt } from '../interfaces/IEgresoDt';
 import { EgresoDt } from '../models/egresoDtModel';
 import { actualizarStock } from '../utils/stockService';
 import { agregarKardex } from '../utils/kardexService';
+import { Op } from 'sequelize';
+import { TipoTransaccion } from '../models/tipoTransaccionModel';
+import { Beneficiario } from '../models/beneficiarioModel';
 
 const entidad = 'EGRESO';
 
@@ -68,9 +71,26 @@ const createEgreso = async (
 };
 
 const getEgresos = async (req: Request, res: Response) => {
+    const { fechaInicio, fechaFin } = req.body;
     try {
-        const egreso = await Egreso.findAll({ where: { estado: true } });
-        res.status(200).json({ value: egreso });
+        const egreso = await Egreso.findAll({
+            where: {
+                estado: true,
+                fecha: {
+                    [Op.between]: [fechaInicio, fechaFin], // Filtrar entre las fechas
+                },
+            },
+            include: [{
+                model: TipoTransaccion,
+                as: 'tipoTransaccion',
+                attributes: ['nombre']
+            }, {
+                model: Beneficiario,
+                as: 'beneficiario',
+                attributes: ['nombre']
+            }]
+        });
+        res.status(200).json({ status: true, value: egreso });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
     }

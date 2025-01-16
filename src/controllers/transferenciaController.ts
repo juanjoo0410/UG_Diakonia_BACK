@@ -8,6 +8,8 @@ import { ITransferenciaDt } from '../interfaces/ITransferenciaDt';
 import { TransferenciaDt } from '../models/transferenciaDtModel';
 import { actualizarStock } from '../utils/stockService';
 import { agregarKardex } from '../utils/kardexService';
+import { Op } from 'sequelize';
+import { Bodega } from '../models/bodegaModel';
 
 const entidad = 'TRANSFERENCIA';
 
@@ -92,9 +94,26 @@ const createTransferencia = async (
 };
 
 const getTransferencias = async (req: Request, res: Response) => {
+    const { fechaInicio, fechaFin } = req.body;
     try {
-        const transferencias = await Transferencia.findAll({ where: { estado: true } });
-        res.status(200).json({ value: transferencias });
+        const transferencias = await Transferencia.findAll({
+            where: {
+                estado: true,
+                fecha: {
+                    [Op.between]: [fechaInicio, fechaFin], // Filtrar entre las fechas
+                },
+            },
+            include: [{
+                model: Bodega,
+                as: 'bodegaOrigen',
+                attributes: ['nombre']
+            }, {
+                model: Bodega,
+                as: 'bodegaDestino',
+                attributes: ['nombre']
+            }]
+        });
+        res.status(200).json({ status: true, value: transferencias });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
     }

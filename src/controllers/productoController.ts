@@ -12,6 +12,7 @@ import { Categoria } from '../models/categoriaModel';
 import { Stock } from '../models/stockModel';
 import { Ingreso } from '../models/ingresoModel';
 import { Egreso } from '../models/egresoModel';
+import { ComprobanteVenta } from '../models/comprobanteVentaModel';
 
 const entidad = 'PRODUCTO';
 

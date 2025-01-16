@@ -10,6 +10,7 @@ export class ComprobanteVenta extends Model<IComprobanteVenta> implements ICompr
     public banco!: string;
     public subtotal!: number;
     public descuento!: number;
+    public valorCupon!: number;
     public total!: number;
     public estado?: boolean;
     public fecha?: Date;
@@ -30,6 +31,7 @@ ComprobanteVenta.init(
         banco: { type: DataTypes.STRING(75), allowNull: false, },
         subtotal: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
         descuento: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+        valorCupon: { type: DataTypes.INTEGER, allowNull: false },
         total: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
         fecha: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, },

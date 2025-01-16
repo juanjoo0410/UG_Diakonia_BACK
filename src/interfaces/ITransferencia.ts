@@ -8,6 +8,7 @@ export interface ITransferencia{
     idBodegaDestino: number;
     totalPeso: number;
     estado?: boolean;
+    fecha?: Date;
     transferenciaDt?: ITransferenciaDt[];
     bodegaOrigen?: IBodega;
     bodegaDestino?: IBodega;
