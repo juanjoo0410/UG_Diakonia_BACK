@@ -76,7 +76,6 @@ const getIngresos = async (req: Request, res: Response) => {
     try {
         const ingreso = await Ingreso.findAll({
             where: {
-                estado: true,
                 fecha: {
                     [Op.between]: [fechaInicio, fechaFin], // Filtrar entre las fechas
                 },
@@ -118,8 +117,49 @@ const getIngresoById = async (req: Request, res: Response) => {
     }
 };
 
+const deleteIngreso = async (req: Request & { user?: any }, res: Response) => {
+    const { id } = req.params;
+    const transaction = await sequelize.transaction();
+    try {
+        const ingreso = await Ingreso.findByPk(id);
+        const ingresoDt = await IngresoDt.findAll({ where: {idIngreso : id}});
+        if (!ingreso) {
+            await transaction.rollback();
+            res.status(404).json({
+                status: false,
+                message: 'Ingreso no encontrado. Imposible anular.'
+            });
+            return;
+        }
+
+        ingreso.estado = false;
+        await ingreso.save({transaction});
+        await IngresoDt.update({ estado: false }, { where: { idIngreso: id }, transaction });
+
+        const documento = {
+            idDocumento: ingreso.idIngreso,
+            tipo: entidad,
+            detalle: `Anulación: ${ingreso?.descripcion}.`,
+            esIngreso: false
+        }
+        await actualizarStock(ingresoDt, documento.esIngreso, transaction);
+        await agregarKardex(documento, ingresoDt, transaction);
+        await transaction.commit();
+        res.status(200).json({
+            status: true,
+            message: 'Ingreso anulado exitosamente'
+        });
+        await registrarBitacora(req, 'ANULACIÓN', entidad,
+            `Se anuló el ingreso No. ${ingreso.idIngreso}.`);
+    } catch (error) {
+        await transaction.rollback();
+        handleHttp(res, 'ERROR_DELETE', error);
+    }
+};
+
 export {
     createIngreso,
     getIngresos,
-    getIngresoById
+    getIngresoById,
+    deleteIngreso
 }

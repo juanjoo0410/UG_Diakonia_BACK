@@ -76,7 +76,6 @@ const getEgresos = async (req: Request, res: Response) => {
     try {
         const egreso = await Egreso.findAll({
             where: {
-                estado: true,
                 fecha: {
                     [Op.between]: [fechaInicio, fechaFin], // Filtrar entre las fechas
                 },
@@ -118,8 +117,49 @@ const getEgresoById = async (req: Request, res: Response) => {
     }
 };
 
+const deleteEgreso = async (req: Request & { user?: any }, res: Response) => {
+    const { id } = req.params;
+    const transaction = await sequelize.transaction();
+    try {
+        const egreso = await Egreso.findByPk(id);
+        const egresoDt = await EgresoDt.findAll({ where: {idEgreso : id}});
+        if (!egreso) {
+            await transaction.rollback();
+            res.status(404).json({
+                status: false,
+                message: 'Egreso no encontrado. Imposible anular.'
+            });
+            return;
+        }
+
+        egreso.estado = false;
+        await egreso.save({transaction});
+        await EgresoDt.update({ estado: false }, { where: { idEgreso: id }, transaction });
+
+        const documento = {
+            idDocumento: egreso.idEgreso,
+            tipo: entidad,
+            detalle: `Anulación: ${egreso?.descripcion}.`,
+            esIngreso: true
+        }
+        await actualizarStock(egresoDt, documento.esIngreso, transaction);
+        await agregarKardex(documento, egresoDt, transaction);
+        await transaction.commit();
+        res.status(200).json({
+            status: true,
+            message: 'Ingreso anulado exitosamente'
+        });
+        await registrarBitacora(req, 'ANULACIÓN', entidad,
+            `Se anuló el ingreso No. ${egreso.idEgreso}.`);
+    } catch (error) {
+        await transaction.rollback();
+        handleHttp(res, 'ERROR_DELETE', error);
+    }
+};
+
 export {
     createEgreso,
     getEgresos,
-    getEgresoById
+    getEgresoById,
+    deleteEgreso
 }
