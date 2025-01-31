@@ -87,7 +87,6 @@ const getComprobantesVenta = async (req: Request, res: Response) => {
         console.log(fechaInicio + "-" + fechaFin);
         const comprobanteVenta = await ComprobanteVenta.findAll({
             where: {
-                estado: true,
                 fecha: {
                     [Op.between]: [fechaInicio, fechaFin], // Filtrar entre las fechas
                 },
@@ -192,10 +191,52 @@ const getComprobanteVentaById = async (req: Request, res: Response) => {
     }
 };
 
+const deleteComprobanteVenta = async (req: Request & { user?: any }, res: Response) => {
+    const { id } = req.params;
+    const transaction = await sequelize.transaction();
+    try {
+        const comprobante = await ComprobanteVenta.findByPk(id);
+        const comprobanteDt = await ComprobanteVentaDt.findAll({ where: {idComprobanteVenta : id}});
+        if (!comprobante) {
+            await transaction.rollback();
+            res.status(404).json({
+                status: false,
+                message: 'Comprobante no encontrado. Imposible anular.'
+            });
+            return;
+        }
+
+        comprobante.estado = false;
+        await comprobante.save({transaction});
+        await ComprobanteVentaDt.update({ estado: false }, { where: { idComprobanteVenta: id }, transaction });
+
+        const cliente = await Cliente.findByPk(comprobante.idCliente);
+        const documento = {
+            idDocumento: comprobante.idComprobanteVenta,
+            tipo: entidad,
+            detalle: `Anulación Comprobante de cliente: ${cliente?.nombre}.`,
+            esIngreso: true
+        }
+        await actualizarStock(comprobanteDt, true, transaction);
+        await agregarKardex(documento, comprobanteDt, transaction);
+        await transaction.commit();
+        res.status(200).json({
+            status: true,
+            message: 'Comprobante anulado exitosamente'
+        });
+        await registrarBitacora(req, 'ANULACIÓN', entidad,
+            `Se anuló el comprobante No. ${comprobante.idComprobanteVenta}.`);
+    } catch (error) {
+        await transaction.rollback();
+        handleHttp(res, 'ERROR_DELETE', error);
+    }
+};
+
 export {
     createComprobanteVenta,
     getComprobantesVenta,
     getTotalVentasMensual,
     getVentasByTipoPago,
-    getComprobanteVentaById
+    getComprobanteVentaById,
+    deleteComprobanteVenta
 }
