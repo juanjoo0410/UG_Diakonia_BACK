@@ -168,10 +168,10 @@ const deleteEgreso = async (req: Request & { user?: any }, res: Response) => {
         await transaction.commit();
         res.status(200).json({
             status: true,
-            message: 'Ingreso anulado exitosamente'
+            message: 'Egreso anulado exitosamente'
         });
         await registrarBitacora(req, 'ANULACIÓN', entidad,
-            `Se anuló el ingreso No. ${egreso.idEgreso}.`);
+            `Se anuló el Egreso No. ${egreso.idEgreso}.`);
     } catch (error) {
         await transaction.rollback();
         handleHttp(res, 'ERROR_DELETE', error);
