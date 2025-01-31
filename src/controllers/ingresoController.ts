@@ -11,6 +11,7 @@ import { agregarKardex } from '../utils/kardexService';
 import { Op } from 'sequelize';
 import { TipoTransaccion } from '../models/tipoTransaccionModel';
 import { Donante } from '../models/donanteModel';
+import { Producto } from '../models/productoModel';
 
 const entidad = 'INGRESO';
 
@@ -84,6 +85,15 @@ const getIngresos = async (req: Request, res: Response) => {
                 model: TipoTransaccion,
                 as: 'tipoTransaccion',
                 attributes: ['nombre']
+            },
+            {
+                model: IngresoDt,
+                as: 'ingDetalles',
+                include: [{
+                    model: Producto,
+                    as: 'producto',
+                    attributes: ['descripcion']
+                }]
             }]
         });
         res.status(200).json({ status: true, value: ingreso });
@@ -122,7 +132,7 @@ const deleteIngreso = async (req: Request & { user?: any }, res: Response) => {
     const transaction = await sequelize.transaction();
     try {
         const ingreso = await Ingreso.findByPk(id);
-        const ingresoDt = await IngresoDt.findAll({ where: {idIngreso : id}});
+        const ingresoDt = await IngresoDt.findAll({ where: { idIngreso: id } });
         if (!ingreso) {
             await transaction.rollback();
             res.status(404).json({
@@ -133,7 +143,7 @@ const deleteIngreso = async (req: Request & { user?: any }, res: Response) => {
         }
 
         ingreso.estado = false;
-        await ingreso.save({transaction});
+        await ingreso.save({ transaction });
         await IngresoDt.update({ estado: false }, { where: { idIngreso: id }, transaction });
 
         const documento = {

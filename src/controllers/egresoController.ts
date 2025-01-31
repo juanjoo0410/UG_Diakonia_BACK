@@ -11,6 +11,7 @@ import { agregarKardex } from '../utils/kardexService';
 import { Op } from 'sequelize';
 import { TipoTransaccion } from '../models/tipoTransaccionModel';
 import { Beneficiario } from '../models/beneficiarioModel';
+import { Producto } from '../models/productoModel';
 
 const entidad = 'EGRESO';
 
@@ -84,6 +85,15 @@ const getEgresos = async (req: Request, res: Response) => {
                 model: TipoTransaccion,
                 as: 'tipoTransaccion',
                 attributes: ['nombre']
+            },
+            {
+                model: EgresoDt,
+                as: 'egDetalles',
+                include: [{
+                    model: Producto,
+                    as: 'producto',
+                    attributes: ['descripcion']
+                }]
             }]
         });
         res.status(200).json({ status: true, value: egreso });
@@ -122,7 +132,7 @@ const deleteEgreso = async (req: Request & { user?: any }, res: Response) => {
     const transaction = await sequelize.transaction();
     try {
         const egreso = await Egreso.findByPk(id);
-        const egresoDt = await EgresoDt.findAll({ where: {idEgreso : id}});
+        const egresoDt = await EgresoDt.findAll({ where: { idEgreso: id } });
         if (!egreso) {
             await transaction.rollback();
             res.status(404).json({
@@ -133,7 +143,7 @@ const deleteEgreso = async (req: Request & { user?: any }, res: Response) => {
         }
 
         egreso.estado = false;
-        await egreso.save({transaction});
+        await egreso.save({ transaction });
         await EgresoDt.update({ estado: false }, { where: { idEgreso: id }, transaction });
 
         const documento = {
