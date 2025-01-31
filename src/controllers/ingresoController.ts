@@ -12,6 +12,8 @@ import { Op } from 'sequelize';
 import { TipoTransaccion } from '../models/tipoTransaccionModel';
 import { Donante } from '../models/donanteModel';
 import { Producto } from '../models/productoModel';
+import { Bodega } from '../models/bodegaModel';
+import { Ubicacion } from '../models/ubicacionModel';
 
 const entidad = 'INGRESO';
 
@@ -93,6 +95,16 @@ const getIngresos = async (req: Request, res: Response) => {
                     model: Producto,
                     as: 'producto',
                     attributes: ['descripcion']
+                },
+                {
+                    model: Bodega,
+                    as: 'bodega',
+                    attributes: ['nombre']
+                },
+                {
+                    model: Ubicacion,
+                    as: 'ubicacion',
+                    attributes: ['codigo']
                 }]
             }]
         });

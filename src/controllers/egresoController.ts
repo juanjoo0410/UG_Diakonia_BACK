@@ -10,8 +10,9 @@ import { actualizarStock } from '../utils/stockService';
 import { agregarKardex } from '../utils/kardexService';
 import { Op } from 'sequelize';
 import { TipoTransaccion } from '../models/tipoTransaccionModel';
-import { Beneficiario } from '../models/beneficiarioModel';
 import { Producto } from '../models/productoModel';
+import { Bodega } from '../models/bodegaModel';
+import { Ubicacion } from '../models/ubicacionModel';
 
 const entidad = 'EGRESO';
 
@@ -93,6 +94,16 @@ const getEgresos = async (req: Request, res: Response) => {
                     model: Producto,
                     as: 'producto',
                     attributes: ['descripcion']
+                },
+                {
+                    model: Bodega,
+                    as: 'bodega',
+                    attributes: ['nombre']
+                },
+                {
+                    model: Ubicacion,
+                    as: 'ubicacion',
+                    attributes: ['codigo']
                 }]
             }]
         });
