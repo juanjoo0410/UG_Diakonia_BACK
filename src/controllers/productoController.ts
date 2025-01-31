@@ -218,6 +218,7 @@ const getSalidaEntradaAnual = async (req: Request, res: Response) => {
                 [fn('SUM', col('totalPeso')), 'totalPesoIng'],
             ],
             where: {
+                estado: true,
                 fecha: {
                     [Op.between]: [inicioAño, finAño],
                 },
@@ -232,6 +233,7 @@ const getSalidaEntradaAnual = async (req: Request, res: Response) => {
                 [fn('SUM', col('totalPeso')), 'totalPesoEg'],
             ],
             where: {
+                estado: true,
                 fecha: {
                     [Op.between]: [inicioAño, finAño],
                 },

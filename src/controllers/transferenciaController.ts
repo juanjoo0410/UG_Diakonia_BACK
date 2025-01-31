@@ -10,6 +10,8 @@ import { actualizarStock } from '../utils/stockService';
 import { agregarKardex } from '../utils/kardexService';
 import { Op } from 'sequelize';
 import { Bodega } from '../models/bodegaModel';
+import { Producto } from '../models/productoModel';
+import { Ubicacion } from '../models/ubicacionModel';
 
 const entidad = 'TRANSFERENCIA';
 
@@ -47,7 +49,7 @@ const createTransferencia = async (
                 cantidad: detalle.cantidad,
                 peso: detalle.peso
             }));
-        
+
         await TransferenciaDt.bulkCreate(detalles, { transaction });
         const documento = {
             idDocumento: newTransferencia.idTransferencia,
@@ -101,7 +103,36 @@ const getTransferencias = async (req: Request, res: Response) => {
                 fecha: {
                     [Op.between]: [fechaInicio, fechaFin], // Filtrar entre las fechas
                 },
-            }
+            },
+            include: [{
+                model: TransferenciaDt,
+                as: 'transfDetalles',
+                include: [{
+                    model: Producto,
+                    as: 'producto',
+                    attributes: ['descripcion']
+                },
+                {
+                    model: Bodega,
+                    as: 'bodegaOrigen',
+                    attributes: ['nombre']
+                },
+                {
+                    model: Ubicacion,
+                    as: 'ubicacionOrigen',
+                    attributes: ['codigo']
+                },
+                {
+                    model: Bodega,
+                    as: 'bodegaDestino',
+                    attributes: ['nombre']
+                },
+                {
+                    model: Ubicacion,
+                    as: 'ubicacionDestino',
+                    attributes: ['codigo']
+                }]
+            }]
         });
         res.status(200).json({ status: true, value: transferencias });
     } catch (error) {
