@@ -99,7 +99,6 @@ const getTransferencias = async (req: Request, res: Response) => {
     try {
         const transferencias = await Transferencia.findAll({
             where: {
-                estado: true,
                 fecha: {
                     [Op.between]: [fechaInicio, fechaFin], // Filtrar entre las fechas
                 },
@@ -165,8 +164,70 @@ const getTransferenciaById = async (req: Request, res: Response) => {
     }
 };
 
+const deleteTransferenia = async (req: Request & { user?: any }, res: Response) => {
+    const { id } = req.params;
+    const transaction = await sequelize.transaction();
+    try {
+        const transferencia = await Transferencia.findByPk(id);
+        const transferenciaDt = await TransferenciaDt.findAll({ where: { idTransferencia: id } });
+        if (!transferencia) {
+            await transaction.rollback();
+            res.status(404).json({
+                status: false,
+                message: 'Transferencia no encontrada. Imposible anular.'
+            });
+            return;
+        }
+
+        transferencia.estado = false;
+        await transferencia.save({ transaction });
+        await TransferenciaDt.update({ estado: false }, { where: { idTransferencia: id }, transaction });
+
+        const documento = {
+            idDocumento: transferencia.idTransferencia,
+            tipo: entidad,
+            detalle: `Anulación: ${transferencia.descripcion}.`,
+            esIngreso: false
+        }
+        const detallesEg = transferenciaDt.map((
+            detalle: any) => ({
+                idProducto: detalle.idProducto,
+                idBodega: detalle.idBodegaOrigen,
+                idUbicacion: detalle.idUbicacionOrigen,
+                cantidad: detalle.cantidad,
+                peso: detalle.peso
+            }));
+        const detallesIng = transferenciaDt.map((
+            detalle: any) => ({
+                idProducto: detalle.idProducto,
+                idBodega: detalle.idBodegaDestino,
+                idUbicacion: detalle.idUbicacionDestino,
+                cantidad: detalle.cantidad,
+                peso: detalle.peso
+            }));
+        await actualizarStock(detallesEg, documento.esIngreso, transaction);
+        await agregarKardex(documento, detallesEg, transaction);
+
+        documento.esIngreso = true;
+        documento.detalle = `Anulación: ${transferencia.descripcion}`
+        await actualizarStock(detallesIng, documento.esIngreso, transaction);
+        await agregarKardex(documento, detallesIng, transaction);
+        await transaction.commit();
+        res.status(200).json({
+            status: true,
+            message: 'Transferencia anulada exitosamente'
+        });
+        await registrarBitacora(req, 'ANULACIÓN', entidad,
+            `Se anuló la transferencia No. ${transferencia.idTransferencia}.`);
+    } catch (error) {
+        await transaction.rollback();
+        handleHttp(res, 'ERROR_DELETE', error);
+    }
+};
+
 export {
     createTransferencia,
     getTransferencias,
-    getTransferenciaById
+    getTransferenciaById,
+    deleteTransferenia
 }
