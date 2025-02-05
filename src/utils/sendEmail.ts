@@ -1,13 +1,22 @@
 import "dotenv/config";
 import nodemailer from 'nodemailer';
+import { Parametro } from "../models/parametroModel";
 
 export const sendNotify = async (form: any) => {
     try {
+        const emailService = await Parametro.findOne({ where: { codigo: "SYS-CORREO-SERVICE" } });
+        const emailUser = await Parametro.findOne({ where: { codigo: "SYS-CORREO-USER" } });
+        const emailPass = await Parametro.findOne({ where: { codigo: "SYS-CORREO-PASS-APP" } });
+
+        if (!emailService || !emailUser || !emailPass) {
+            console.error("Error: No se encontraron los parámetros de correo en la base de datos.");
+            return;
+        }
         const transporter = nodemailer.createTransport({
-            service: process.env.EMAIL_SERVICE,
+            service: emailService.valor,
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
+                user: emailUser.valor,
+                pass: emailPass.valor
             }
         });
         const mailOptions = {

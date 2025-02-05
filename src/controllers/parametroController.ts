@@ -114,6 +114,47 @@ const updateParametro = async (req: Request & { user?: any }, res: Response) => 
     }
 };
 
+const updateParametros = async (req: Request & { user?: any }, res: Response) => {
+    const transaction = await sequelize.transaction();
+    try {
+        const parametros = req.body;
+
+        if (!Array.isArray(parametros) || parametros.length === 0) {
+            res.status(400).json({
+                status: false,
+                message: "La lista de parámetros es inválida o está vacía"
+            });
+            return;
+        }
+
+        const actualizados: any[] = [];
+        const errores: any[] = [];
+
+        for (const parametro of parametros) {
+            const { codigo, valor } = parametro;
+            const parametroExistente = await Parametro.findOne({ where: { codigo }, transaction });
+
+            if (!parametroExistente) {
+                errores.push({ codigo, message: "Parámetro no encontrado" });
+                continue;
+            }
+            parametroExistente.valor = valor;
+            await parametroExistente.save({ transaction });
+            actualizados.push(parametroExistente);
+        }
+        await transaction.commit();
+        res.status(200).json({
+            status: true,
+            message: "Parámetros actualizados exitosamente"
+        });
+        await registrarBitacora(req, 'ACTUALIZACIÓN', entidad,
+            `Se actualizó la configuración del sistema`);
+    } catch (error) {
+        await transaction.rollback();
+        handleHttp(res, "ERROR_PUT", error);
+    }
+};
+
 const deleteParametro = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
@@ -144,5 +185,6 @@ export {
     getParametroById,
     getParametroByCodigo,
     updateParametro,
+    updateParametros,
     deleteParametro
 }
