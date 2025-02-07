@@ -10,6 +10,7 @@ export interface IComprobanteVenta{
     descuento: number;
     valorCupon: number;
     total: number;
+    totalPeso: number;
     usuario: string;
     estado?: boolean;
     fecha?: Date;

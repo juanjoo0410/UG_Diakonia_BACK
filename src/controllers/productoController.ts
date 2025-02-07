@@ -242,7 +242,22 @@ const getSalidaEntradaAnual = async (req: Request, res: Response) => {
             raw: true,
         });
 
-        res.status(200).json({ status: true, value: {ingresos: ingresos, egresos: egresos} });
+        const ventas = await ComprobanteVenta.findAll({
+            attributes: [
+                [fn('MONTH', col('fecha')), 'mes'],
+                [fn('SUM', col('totalPeso')), 'totalPesoVent'],
+            ],
+            where: {
+                estado: true,
+                fecha: {
+                    [Op.between]: [inicioAño, finAño],
+                },
+            },
+            group: [fn('MONTH', col('fecha'))],
+            raw: true,
+        });
+
+        res.status(200).json({ status: true, value: {ingresos, egresos, ventas} });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
     }

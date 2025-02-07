@@ -39,6 +39,7 @@ const createComprobanteVenta = async (
                 descuento: comprobanteVenta.descuento,
                 valorCupon: comprobanteVenta.valorCupon,
                 total: comprobanteVenta.total,
+                totalPeso: comprobanteVenta.totalPeso,
                 usuario: comprobanteVenta.usuario
             },
             { transaction }
