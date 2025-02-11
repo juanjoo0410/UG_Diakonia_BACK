@@ -13,6 +13,8 @@ import { Stock } from '../models/stockModel';
 import { Ingreso } from '../models/ingresoModel';
 import { Egreso } from '../models/egresoModel';
 import { ComprobanteVenta } from '../models/comprobanteVentaModel';
+import { Bodega } from '../models/bodegaModel';
+import { Ubicacion } from '../models/ubicacionModel';
 
 const entidad = 'PRODUCTO';
 
@@ -184,7 +186,7 @@ const getProductosUndSinPrecio = async (req: Request, res: Response) => {
                     model: Producto,
                     as: 'producto',
                     attributes: ['descripcion', 'precioTiendita', 'prest'],
-                    where: [{prest: 'UND'}],
+                    where: [{ prest: 'UND' }],
                     include: [
                         {
                             model: GrupoProducto,
@@ -257,9 +259,47 @@ const getSalidaEntradaAnual = async (req: Request, res: Response) => {
             raw: true,
         });
 
-        res.status(200).json({ status: true, value: {ingresos, egresos, ventas} });
+        res.status(200).json({ status: true, value: { ingresos, egresos, ventas } });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
+const getProductosTopVencidos = async (req: Request, res: Response) => {
+    try {
+        const productos = await Producto.findAll({
+            attributes: [
+                'codigo',
+                'descripcion',
+                'fechaCaducidad'
+            ],
+            where: {
+                estado: true,
+                fechaCaducidad: { [Op.not]: null as unknown as Date }
+            },
+            include: {
+                model: Stock,
+                as: 'stocks',
+                attributes: ['stock'],
+                include:
+                    [{
+                        model: Bodega,
+                        as: 'bodega',
+                        attributes: ['nombre',]
+                    },
+                    {
+                        model: Ubicacion,
+                        as: 'ubicacion',
+                        attributes: ['codigo']
+                    }]
+            },
+            order: [['fechaCaducidad', 'ASC'], ['idProducto', 'ASC']],
+            limit: 5
+        });
+
+        res.status(200).json({ status: true, value: productos });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_VENCIDOS', error);
     }
 };
 
@@ -391,6 +431,7 @@ export {
     getProductosConStockByUbicacion,
     getProductosUndSinPrecio,
     getSalidaEntradaAnual,
+    getProductosTopVencidos,
     getProductoById,
     updateProducto,
     updatePrecios,

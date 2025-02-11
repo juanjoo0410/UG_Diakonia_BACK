@@ -10,11 +10,11 @@ const entidad = 'TIPO_ORGANIZACION';
 const getStock = async (req: Request, res: Response) => {
     try {
         const stock = await Stock.findAll({
-            where: { estado: true },
+            where: { estado: true},
             include: [{
                 model: Producto,
                 as: 'producto',
-                attributes: ['codigo', 'descripcion', 'sku']
+                attributes: ['codigo', 'descripcion', 'sku', 'lote', 'fechaCaducidad']
             }, {
                 model: Bodega,
                 as: 'bodega',
@@ -23,7 +23,8 @@ const getStock = async (req: Request, res: Response) => {
                 model: Ubicacion,
                 as: 'ubicacion',
                 attributes: ['codigo', 'capacidadMaxima']
-            }]
+            }],
+            order: [[{ model: Producto, as: 'producto' }, 'descripcion', 'ASC']]
         });
         res.status(200).json({ status: true, value: stock });
     } catch (error) {
