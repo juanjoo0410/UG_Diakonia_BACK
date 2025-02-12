@@ -281,6 +281,7 @@ const getProductosTopVencidos = async (req: Request, res: Response) => {
                 model: Stock,
                 as: 'stocks',
                 attributes: ['stock'],
+                where: { stock: { [Op.gt]: 0 } },
                 include:
                     [{
                         model: Bodega,
