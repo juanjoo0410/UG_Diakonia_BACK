@@ -185,7 +185,7 @@ const getProductosUndSinPrecio = async (req: Request, res: Response) => {
                 {
                     model: Producto,
                     as: 'producto',
-                    attributes: ['descripcion', 'precioTiendita', 'prest'],
+                    attributes: ['descripcion', 'precioTiendita', 'prest', 'sku'],
                     where: [{ prest: 'UND' }],
                     include: [
                         {
