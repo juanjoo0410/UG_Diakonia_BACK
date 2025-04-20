@@ -6,6 +6,7 @@ import {
     getProductosConStock,
     getProductosConStockByUbicacion,
     getProductosUndSinPrecio,
+    getProductosPlanificacion,
     getSalidaEntradaAnual,
     getProductosTopVencidos,
     getProductoById,
@@ -23,6 +24,7 @@ router.get('/total', checkJwt, getTotalProductos);
 router.get('/conStock', checkJwt, getProductosConStock);
 router.get('/byUbicacion/:id', checkJwt, getProductosConStockByUbicacion);
 router.get('/sinPrecio/:id', checkJwt, getProductosUndSinPrecio);
+router.get('/planificacion/:id', checkJwt, getProductosPlanificacion);
 router.get('/anual', checkJwt, getSalidaEntradaAnual);
 router.get('/topVencidos', checkJwt, getProductosTopVencidos);
 router.get('/:id', checkJwt, getProductoById);

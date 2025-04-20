@@ -185,7 +185,7 @@ const getProductosUndSinPrecio = async (req: Request, res: Response) => {
                 {
                     model: Producto,
                     as: 'producto',
-                    attributes: ['descripcion', 'precioTiendita', 'prest', 'sku'],
+                    attributes: ['descripcion', 'precioTiendita', 'prest', 'fechaCaducidad', 'sku'], //quitar sku y fecha
                     where: [{ prest: 'UND' }],
                     include: [
                         {
@@ -200,6 +200,44 @@ const getProductosUndSinPrecio = async (req: Request, res: Response) => {
                         },
                     ],
                 },
+            ],
+        });
+        res.status(200).json({ status: true, value: productos });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
+const getProductosPlanificacion = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const whereConditions: any = { stock: { [Op.gt]: 0 } };
+        if (id != '0') whereConditions.idBodega = id;
+
+        const productos = await Stock.findAll({
+            where: whereConditions,
+            attributes: ['idProducto', 'stock'],
+            include: [
+                {
+                    model: Producto,
+                    as: 'producto',
+                    attributes: ['descripcion', 'fechaCaducidad', 'sku']
+                },
+                {
+                    model: Bodega,
+                    as: 'bodega',
+                    attributes: ['codigo'],
+                    where: { venta: false }
+                },
+                {
+                    model: Ubicacion,
+                    as: 'ubicacion',
+                    attributes: ['codigo']
+                },
+            ],
+            order: [
+                [Sequelize.col('producto.fechaCaducidad'), 'ASC'], // Ordenar por fechaCaducidad de menor a mayor
+                //[Sequelize.col('idProducto'), 'ASC'], // Opcional: ordenar por idProducto si hay productos sin fecha
             ],
         });
         res.status(200).json({ status: true, value: productos });
@@ -431,6 +469,7 @@ export {
     getProductosConStock,
     getProductosConStockByUbicacion,
     getProductosUndSinPrecio,
+    getProductosPlanificacion,
     getSalidaEntradaAnual,
     getProductosTopVencidos,
     getProductoById,
