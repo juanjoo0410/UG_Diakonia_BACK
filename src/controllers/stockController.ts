@@ -5,7 +5,7 @@ import { Producto } from '../models/productoModel';
 import { Bodega } from '../models/bodegaModel';
 import { Ubicacion } from '../models/ubicacionModel';
 
-const entidad = 'TIPO_ORGANIZACION';
+const entidad = 'STOCK';
 
 const getStock = async (req: Request, res: Response) => {
     try {
@@ -18,7 +18,34 @@ const getStock = async (req: Request, res: Response) => {
             }, {
                 model: Bodega,
                 as: 'bodega',
-                attributes: ['nombre']
+                attributes: ['nombre'],
+                where: { venta: false }
+            }, {
+                model: Ubicacion,
+                as: 'ubicacion',
+                attributes: ['codigo', 'capacidadMaxima']
+            }],
+            order: [[{ model: Producto, as: 'producto' }, 'descripcion', 'ASC']]
+        });
+        res.status(200).json({ status: true, value: stock });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
+const getStockVentas = async (req: Request, res: Response) => {
+    try {
+        const stock = await Stock.findAll({
+            where: { estado: true},
+            include: [{
+                model: Producto,
+                as: 'producto',
+                attributes: ['codigo', 'descripcion', 'sku', 'lote', 'fechaCaducidad']
+            }, {
+                model: Bodega,
+                as: 'bodega',
+                attributes: ['nombre'],
+                where: { venta: true }
             }, {
                 model: Ubicacion,
                 as: 'ubicacion',
@@ -49,5 +76,6 @@ const getStockProductoByUbicacion = async (req: Request, res: Response) => {
 
 export {
     getStock,
+    getStockVentas,
     getStockProductoByUbicacion
 }

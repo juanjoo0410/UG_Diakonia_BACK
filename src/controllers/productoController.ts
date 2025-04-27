@@ -236,8 +236,8 @@ const getProductosPlanificacion = async (req: Request, res: Response) => {
                 },
             ],
             order: [
-                [Sequelize.col('producto.fechaCaducidad'), 'ASC'], // Ordenar por fechaCaducidad de menor a mayor
-                //[Sequelize.col('idProducto'), 'ASC'], // Opcional: ordenar por idProducto si hay productos sin fecha
+                [Sequelize.literal(`CASE WHEN producto.fechaCaducidad IS NULL THEN 1 ELSE 0 END`), 'ASC'],
+                [Sequelize.col('producto.fechaCaducidad'), 'ASC']
             ],
         });
         res.status(200).json({ status: true, value: productos });
