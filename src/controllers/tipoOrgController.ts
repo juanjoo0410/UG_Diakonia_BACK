@@ -44,9 +44,7 @@ const createTipoOrg = async (
 
 const getTiposOrg = async (req: Request, res: Response) => {
     try {
-        const tiposOrg = await TipoOrg.findAll({
-            where: { estado: true }
-        });
+        const tiposOrg = await TipoOrg.findAll();
         res.status(200).json({ value: tiposOrg });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -109,7 +107,7 @@ const updateTipoOrg = async (req: Request & { user?: any }, res: Response) => {
     }
 };
 
-const deleteTipoOrg = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusTipoOrg = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const tipoOrg = await TipoOrg.findByPk(id);
@@ -120,20 +118,25 @@ const deleteTipoOrg = async (req: Request & { user?: any }, res: Response) => {
             });
             return;
         }
-        const beneficiario = await Beneficiario.findOne({ where: { idTipoOrg: tipoOrg.idTipoOrg } });
-        if (beneficiario) {
-            res.status(404).json({
-                status: false,
-                message: 'Existen beneficiarios asignados a este tipo de organizacion. Imposible eliminar.'
-            });
-            return;
+        let status = true;
+        if (tipoOrg.estado) {
+            status = false;
+            const beneficiario = await Beneficiario.findOne({ where: { idTipoOrg: tipoOrg.idTipoOrg } });
+            if (beneficiario) {
+                res.status(404).json({
+                    status: false,
+                    message: 'Existen beneficiarios asignados a este tipo de organizacion. Imposible desactivar.'
+                });
+                return;
+            }
         }
-        tipoOrg.estado = false; // Marcar como anulado
+        
+        tipoOrg.estado = status;
         await tipoOrg.save();
-        await registrarBitacora(req, 'ELIMINACIÓN', entidad, `Se eliminó el tipo de organización ${tipoOrg.nombre}.`);
+        await registrarBitacora(req, 'CAMBIO ESTADO', entidad, `Se cambió el estado del tipo de organización ${tipoOrg.nombre}.`);
         res.status(200).json({
             status: true,
-            message: 'Tipo de organización eliminado correctamente'
+            message: 'Estado del Tipo de organización actualizado correctamente'
         });
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
@@ -145,5 +148,5 @@ export {
     getTiposOrg,
     getTipoOrgById,
     updateTipoOrg,
-    deleteTipoOrg
+    updateStatusTipoOrg as deleteTipoOrg
 }
