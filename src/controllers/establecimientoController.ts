@@ -46,7 +46,6 @@ const createEstablecimiento = async (
 const getEstablecimientos = async (req: Request, res: Response) => {
     try {
         const establecimientos = await Establecimiento.findAll({
-            where: { estado: true },
             include: [{
                 model: Donante,
                 as: 'donante',
@@ -104,7 +103,7 @@ const updateEstablecimiento = async (req: Request & { user?: any }, res: Respons
     }
 };
 
-const deleteEstablecimiento = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusEstablecimiento = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const establecimiento = await Establecimiento.findByPk(id);
@@ -113,12 +112,14 @@ const deleteEstablecimiento = async (req: Request & { user?: any }, res: Respons
             message: 'Establecimiento no encontrado'
         });
         else {
-            establecimiento.estado = false; // Marcar como anulado
+            let status = true;
+            if (establecimiento.estado) status = false;
+            establecimiento.estado = status; // Marcar como anulado
             await establecimiento.save();
-            await registrarBitacora(req, 'ELIMINACIÓN', entidad, `Se eliminó el establecimiento ${establecimiento.nombre}.`);
+            await registrarBitacora(req, 'CAMBIO ESTADO', entidad, `Se cambió el estado del establecimiento ${establecimiento.nombre}.`);
             res.status(200).json({
                 status: true,
-                message: 'Establecimiento eliminado correctamente'
+                message: 'Estado de Establecimiento actualizado correctamente'
             });
         }
     } catch (error) {
@@ -131,5 +132,5 @@ export {
     getEstablecimientos,
     getEstablecimientoById,
     updateEstablecimiento,
-    deleteEstablecimiento
+    updateStatusEstablecimiento as deleteEstablecimiento
 }

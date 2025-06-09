@@ -43,7 +43,7 @@ const createDonante = async (
 
 const getDonantes = async (req: Request, res: Response) => {
     try {
-        const donantes = await Donante.findAll({ where: { estado: true } });
+        const donantes = await Donante.findAll();
         res.status(200).json({ value: donantes });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -112,32 +112,36 @@ const updateDonante = async (req: Request & { user?: any }, res: Response) => {
     }
 };
 
-const deleteDonante = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusDonante = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const donante = await Donante.findByPk(id);
         if (!donante) {
             res.status(404).json({
                 status: false,
-                message: 'Donante no encontrado. Imposible eliminar.'
+                message: 'Donante no encontrado. Imposible cambiar estado.'
             });
             return;
         };
-        const establecimientos = await Establecimiento.findOne({ where: { idDonante: donante.idDonante } });
-        if (establecimientos) {
-            res.status(404).json({
-                status: false,
-                message: 'Existen establecimientos asignados a este donante. Imposible eliminar.'
-            });
-            return;
-        };
-        donante.estado = false; // Marcar como anulado
+        let status = true;
+        if (donante.estado) {
+            status = false;
+            const establecimientos = await Establecimiento.findOne({ where: { idDonante: donante.idDonante } });
+            if (establecimientos) {
+                res.status(404).json({
+                    status: false,
+                    message: 'Existen establecimientos asignados a este donante. Imposible eliminar.'
+                });
+                return;
+            };
+        }        
+        donante.estado = status; // Marcar como anulado
         await donante.save();
-        await registrarBitacora(req, 'ELIMINACIÓN', entidad,
-            `Se eliminó el donante ${donante.nombre}.`);
+        await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
+            `Se cambió el estado del donante ${donante.nombre}.`);
         res.status(200).json({
             status: true,
-            message: 'Donante eliminado correctamente'
+            message: 'Estado de Donante actualizado correctamente'
         });
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
@@ -150,5 +154,5 @@ export {
     getTotalDonantes,
     getDonanteById,
     updateDonante,
-    deleteDonante
+    updateStatusDonante as deleteDonante
 }
