@@ -49,7 +49,7 @@ const createBeneficiario = async (
 
 const getBeneficiarios = async (req: Request, res: Response) => {
     try {
-        const beneficiarios = await Beneficiario.findAll({ where: { estado: true } });
+        const beneficiarios = await Beneficiario.findAll();
         res.status(200).json({ value: beneficiarios });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -145,24 +145,27 @@ const updateBeneficiario = async (req: Request & { user?: any }, res: Response) 
     }
 };
 
-const deleteBeneficiario = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusBeneficiario = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const beneficiario = await Beneficiario.findByPk(id);
         if (!beneficiario) {
             res.status(404).json({
                 status: false,
-                message: 'Beneficiario no encontrado. Imposible eliminar.'
+                message: 'Beneficiario no encontrado. Imposible cambiar de estado.'
             });
             return;
         }
-        beneficiario.estado = false; // Marcar como anulado
+
+        let status = true;
+        if (beneficiario.estado)  status = false;
+        beneficiario.estado = status;
         await beneficiario.save();
-        await registrarBitacora(req, 'ELIMINACIÓN', entidad,
-            `Se eliminó el beneficiario ${beneficiario.nombre}.`);
+        await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
+            `Se cambió el estado del beneficiario ${beneficiario.nombre}.`);
         res.status(200).json({
             status: true,
-            message: 'Beneficiario eliminado correctamente'
+            message: 'Estado de Beneficiario actualizado correctamente'
         });
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
@@ -176,5 +179,5 @@ export {
     getTotalBeneficiariosByInstituciones,
     getBeneficiarioById,
     updateBeneficiario,
-    deleteBeneficiario
+    updateStatusBeneficiario as deleteBeneficiario
 }

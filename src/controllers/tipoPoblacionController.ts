@@ -42,7 +42,7 @@ const createTipoPoblacion = async (
 
 const getTiposPoblacion = async (req: Request, res: Response) => {
     try {
-        const tipoPoblacion = await TipoPoblacion.findAll({ where: { estado: true } });
+        const tipoPoblacion = await TipoPoblacion.findAll();
         res.status(200).json({ value: tipoPoblacion });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -91,7 +91,7 @@ const updateTipoPoblacion = async (req: Request & { user?: any }, res: Response)
     }
 };
 
-const deleteTipoPoblacion = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusTipoPoblacion = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const tipoPoblacion = await TipoPoblacion.findByPk(id);
@@ -102,21 +102,26 @@ const deleteTipoPoblacion = async (req: Request & { user?: any }, res: Response)
             });
             return;
         }
-        const beneficiario = await Beneficiario.findOne({ where: { idTipoPoblacion: tipoPoblacion.idTipoPoblacion } });
-        if (beneficiario) {
-            res.status(404).json({
-                status: false,
-                message: 'Existen beneficiarios asignados a este tipo de población. Imposible eliminar.'
-            });
-            return;
+        let status = true;
+        if (tipoPoblacion.estado) {
+            status = false;
+            const beneficiario = await Beneficiario.findOne({ where: { idTipoPoblacion: tipoPoblacion.idTipoPoblacion } });
+            if (beneficiario) {
+                res.status(404).json({
+                    status: false,
+                    message: 'Existen beneficiarios asignados a este tipo de población. Imposible desactivar.'
+                });
+                return;
+            }
         }
-        tipoPoblacion.estado = false; // Marcar como anulado
+        
+        tipoPoblacion.estado = status;
         await tipoPoblacion.save();
-        await registrarBitacora(req, 'ELIMINACIÓN', entidad,
-            `Se eliminó el tipo de poblacion ${tipoPoblacion.nombre}.`);
+        await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
+            `Se cambió el estado del tipo de población ${tipoPoblacion.nombre}.`);
         res.status(200).json({
             status: true,
-            message: 'Tipo de población eliminado correctamente'
+            message: 'Estado de Tipo de población actualizado correctamente'
         });
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
@@ -128,5 +133,5 @@ export {
     getTiposPoblacion,
     getTipoPoblacionById,
     updateTipoPoblacion,
-    deleteTipoPoblacion
+    updateStatusTipoPoblacion as deleteTipoPoblacion
 }
