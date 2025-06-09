@@ -41,7 +41,7 @@ const createCliente = async (
 
 const getClientes = async (req: Request, res: Response) => {
     try {
-        const clientes = await Cliente.findAll({ where: { estado: true } });
+        const clientes = await Cliente.findAll();
         res.status(200).json({ value: clientes });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -97,24 +97,26 @@ const updateCliente = async (req: Request & { user?: any }, res: Response) => {
     }
 };
 
-const deleteCliente = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusCliente = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const cliente = await Cliente.findByPk(id);
         if (!cliente) {
             res.status(404).json({
                 status: false,
-                message: 'Cliente no encontrado. Imposible eliminar.'
+                message: 'Cliente no encontrado. Imposible cambiar de estado.'
             });
             return;
         }
-        cliente.estado = false; // Marcar como anulado
+        let status = true;
+        if (cliente.estado) status = false;
+        cliente.estado = status;
         await cliente.save();
-        await registrarBitacora(req, 'ELIMINACIÓN', entidad,
-            `Se eliminó el cliente ${cliente.nombre}.`);
+        await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
+            `Se cambió estado del cliente ${cliente.nombre}.`);
         res.status(200).json({
             status: true,
-            message: 'Cliente eliminado correctamente'
+            message: 'Estado del Cliente actualizado correctamente'
         });
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
@@ -126,5 +128,5 @@ export {
     getClientes,
     getClienteById,
     updateCliente,
-    deleteCliente
+    updateStatusCliente as deleteCliente
 }

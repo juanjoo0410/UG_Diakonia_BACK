@@ -62,7 +62,6 @@ const createProducto = async (
 const getProductos = async (req: Request, res: Response) => {
     try {
         const productos = await Producto.findAll({
-            where: { estado: true },
             include: [
                 {
                     model: GrupoProducto,
@@ -438,24 +437,26 @@ const updatePrecios = async (
     }
 };
 
-const deleteProducto = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusProducto = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const producto = await Producto.findByPk(id);
         if (!producto) {
             res.status(404).json({
                 status: false,
-                message: 'Producto no encontrado. Imposible eliminar.'
+                message: 'Producto no encontrado. Imposible cambiar de estado.'
             });
             return;
         }
-        producto.estado = false; // Marcar como anulado
+        let status = true;
+        if (producto.estado) status = false;
+        producto.estado = status; // Marcar como anulado
         await producto.save();
-        await registrarBitacora(req, 'ELIMINACIÓN', entidad,
-            `Se eliminó el producto ${producto.descripcion}.`);
+        await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
+            `Se cambió estado del producto ${producto.descripcion}.`);
         res.status(200).json({
             status: true,
-            message: 'Producto eliminado correctamente'
+            message: 'Estado de Producto actualizado correctamente'
         });
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
@@ -475,5 +476,5 @@ export {
     getProductoById,
     updateProducto,
     updatePrecios,
-    deleteProducto
+    updateStatusProducto as deleteProducto
 }
