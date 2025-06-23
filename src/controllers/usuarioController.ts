@@ -49,7 +49,6 @@ const createUsuario = async (req: Request & { user?: any }, res: Response) => {
 const getUsuarios = async (req: Request, res: Response) => {
     try {
         const usuarios = await Usuario.findAll({
-            where: { anulado: false },
             include: [{
                 model: Rol,
                 as: 'rol',
@@ -105,7 +104,7 @@ const updateUsuario = async (req: Request & { user?: any }, res: Response) => {
     }
 };
 
-const deleteUsuario = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusUsuario = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     console.log(id);
     try {
@@ -115,15 +114,17 @@ const deleteUsuario = async (req: Request & { user?: any }, res: Response) => {
             message: 'Usuario no encontrado'
         });
         else {
-            usuario.anulado = true; // Marcar como anulado
+            let anulado = true;
+            if (usuario.anulado) anulado = false;
+            usuario.anulado = anulado; // Marcar como anulado
             await usuario.save();
 
             res.status(200).json({
                 status: true,
-                message: 'Usuario eliminado correctamente'
+                message: 'Estado de Usuario actualizado correctamente'
             });
-            await registrarBitacora(req, 'ELIMINACIÓN', entidad,
-                `Se eliminó el usuario ${usuario.nombre}.`);
+            await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
+                `Se cambió el estado del usuario ${usuario.nombre}.`);
         }
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
@@ -135,5 +136,5 @@ export {
     getUsuarios,
     getUsuarioById,
     updateUsuario,
-    deleteUsuario
+    updateStatusUsuario as deleteUsuario
 };

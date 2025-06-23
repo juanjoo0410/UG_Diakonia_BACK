@@ -126,7 +126,7 @@ const updateStatusDonante = async (req: Request & { user?: any }, res: Response)
         let status = true;
         if (donante.estado) {
             status = false;
-            const establecimientos = await Establecimiento.findOne({ where: { idDonante: donante.idDonante } });
+            const establecimientos = await Establecimiento.findOne({ where: { estado: true, idDonante: donante.idDonante } });
             if (establecimientos) {
                 res.status(404).json({
                     status: false,

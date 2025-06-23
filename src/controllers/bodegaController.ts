@@ -44,7 +44,7 @@ const createBodega = async (
 
 const getBodegas = async (req: Request, res: Response) => {
     try {
-        const bodegas = await Bodega.findAll({ where: { estado: true } });
+        const bodegas = await Bodega.findAll();
         res.status(200).json({ value: bodegas });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -121,32 +121,49 @@ const updateBodega = async (req: Request & { user?: any }, res: Response) => {
     }
 };
 
-const deleteBodega = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusBodega = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const bodega = await Bodega.findByPk(id);
         if (!bodega) {
             res.status(404).json({
                 status: false,
-                message: 'Bodega no encontrada. Imposible eliminar.'
+                message: 'Bodega no encontrada. Imposible cambiar de estado.'
             });
             return;
         }
-        const ubicacion = await Ubicacion.findOne({ where: { idBodega: bodega.idBodega } });
-        if (ubicacion) {
-            res.status(404).json({
-                status: false,
-                message: 'Existen ubicaciones asignadas a esta bodega. Imposible eliminar.'
+        let status = true;
+        if (bodega.estado){
+            status = false;
+            const stock = await Stock.findOne({
+                where: {
+                    idBodega: id,
+                    stock: { [Op.gt]: 0 },
+                }
             });
-            return;
-        }
-        bodega.estado = false; // Marcar como anulado
+            if (stock) {
+                res.status(404).json({
+                    status: false,
+                    message: 'La bodega dispone de stock. Imposible desactivar.'
+                });
+                return;
+            }
+            const ubicacion = await Ubicacion.findOne({ where: { estado: true, idBodega: bodega.idBodega } });
+            if (ubicacion) {
+                res.status(404).json({
+                    status: false,
+                    message: 'Existen ubicaciones asignadas a esta bodega. Imposible desactivar.'
+                });
+                return;
+            }
+        } 
+        bodega.estado = status; // Marcar como anulado
         await bodega.save();
-        await registrarBitacora(req, 'ELIMINACIÓN', entidad,
-            `Se eliminó la bodega ${bodega.nombre}.`);
+        await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
+            `Se cambió estado de la bodega ${bodega.nombre}.`);
         res.status(200).json({
             status: true,
-            message: 'Bodega eliminada correctamente'
+            message: 'Estado de Bodega actualizado correctamente'
         });
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
@@ -159,5 +176,5 @@ export {
     getBodegasConStockPorProducto,
     getBodegaById,
     updateBodega,
-    deleteBodega
+    updateStatusBodega as deleteBodega
 }

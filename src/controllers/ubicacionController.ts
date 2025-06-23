@@ -40,7 +40,6 @@ const createUbicacion = async (
 const getUbicaciones = async (req: Request, res: Response) => {
     try {
         const ubicaciones = await Ubicacion.findAll({
-            where: { estado: true },
             include: [{
                 model: Bodega,
                 as: 'bodega',
@@ -166,7 +165,7 @@ const updateUbicacion = async (req: Request & { user?: any }, res: Response) => 
     }
 };
 
-const deleteUbicacion = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusUbicacion = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const ubicacion = await Ubicacion.findByPk(id);
@@ -177,13 +176,30 @@ const deleteUbicacion = async (req: Request & { user?: any }, res: Response) => 
             });
             return;
         }
-        ubicacion.estado = false; // Marcar como anulado
+        let status = true;
+        if (ubicacion.estado) {
+            status = false;
+            const stock = await Stock.findOne({
+                where: {
+                    idUbicacion: id,
+                    stock: { [Op.gt]: 0 },
+                }
+            });
+            if (stock) {
+                res.status(404).json({
+                    status: false,
+                    message: 'La ubicación dispone de stock. Imposible desactivar.'
+                });
+                return;
+            }
+        }
+        ubicacion.estado = status; // Marcar como anulado
         await ubicacion.save();
-        await registrarBitacora(req, 'ELIMINACIÓN', entidad,
-            `Se eliminó la ubicación ${ubicacion.codigo}.`);
+        await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
+            `Se cambió estado de la ubicación ${ubicacion.codigo}.`);
         res.status(200).json({
             status: true,
-            message: 'Ubicación eliminada correctamente'
+            message: 'Estado de Ubicación actualizada correctamente'
         });
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
@@ -198,5 +214,5 @@ export {
     getUbicacionById,
     getEspacioDisponible,
     updateUbicacion,
-    deleteUbicacion
+    updateStatusUbicacion as deleteUbicacion
 }

@@ -45,7 +45,6 @@ const createCategoria = async (
 const getCategorias = async (req: Request, res: Response) => {
     try {
         const categorias = await Categoria.findAll({
-            where: { estado: true },
             include: [
                 {
                     model: GrupoProducto,
@@ -135,32 +134,36 @@ const updateCategoria = async (req: Request & { user?: any }, res: Response) => 
     }
 };
 
-const deleteCategoria = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusCategoria = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const categoria = await Categoria.findByPk(id);
         if (!categoria) {
             res.status(404).json({
                 status: false,
-                message: 'Categoría no encontrada. Imposible eliminar.'
+                message: 'Categoría no encontrada.'
             });
             return;
         }
-        const producto = await Producto.findOne({ where: { idCategoria: categoria.idCategoria } });
-        if (producto) {
-            res.status(404).json({
-                status: false,
-                message: 'Existen productos asignados a esta categoría. Imposible eliminar.'
-            });
-            return;
+        let status = true;
+        if (categoria.estado) {
+            status = false;
+            const producto = await Producto.findOne({ where: { estado: true, idCategoria: categoria.idCategoria } });
+            if (producto) {
+                res.status(404).json({
+                    status: false,
+                    message: 'Existen productos asignados a esta categoría. Imposible desactivar.'
+                });
+                return;
+            }
         }
-        categoria.estado = false; // Marcar como anulado
+        categoria.estado = status; // Marcar como anulado
         await categoria.save();
-        await registrarBitacora(req, 'ELIMINACIÓN', entidad,
-            `Se eliminó la categoría ${categoria.nombre}.`);
+        await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
+            `Se cambió estado de la categoría ${categoria.nombre}.`);
         res.status(200).json({
             status: true,
-            message: 'Categoría eliminada correctamente'
+            message: 'Estado de la Categoría actualizada correctamente'
         });
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
@@ -173,5 +176,5 @@ export {
     getCategoriasByIdSubgrupo,
     getCategoriaById,
     updateCategoria,
-    deleteCategoria
+    updateStatusCategoria as deleteCategoria
 }
