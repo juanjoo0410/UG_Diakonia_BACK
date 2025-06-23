@@ -7,6 +7,7 @@ import { Op } from 'sequelize';
 import { Menu } from '../models/menuModel';
 import { Submenu } from '../models/submenuModel';
 import { registrarBitacora } from '../utils/bitacoraService';
+import { Usuario } from '../models/usuarioModel';
 
 // Crear un nuevo rol
 const createRol = async (req: Request & { user?: any }, res: Response) => {
@@ -49,7 +50,6 @@ const createRol = async (req: Request & { user?: any }, res: Response) => {
 const getRoles = async (req: Request, res: Response) => {
     try {
         const roles = await Rol.findAll({
-            where: { anulado: false },
             include: [{
                 model: RolSubmenu,
                 as: 'roles_submenus',
@@ -151,7 +151,7 @@ const updateRol = async (req: Request & { user?: any }, res: Response) => {
 };
 
 // Eliminar (anular) un rol por ID
-const deleteRol = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusRol = async (req: Request & { user?: any }, res: Response) => {
     const transaction = await sequelize.transaction();
     try {
         const { idRol } = req.params;
@@ -161,7 +161,17 @@ const deleteRol = async (req: Request & { user?: any }, res: Response) => {
             res.status(404).json({ message: 'Rol no encontrado' });
         }
         else {
-            rol.anulado = true; // Marcar como anulado
+            let anulado = true;
+            const usuario = await Usuario.findOne({ where: { anulado: false, idRol: rol.idRol } });
+            if (usuario) {
+                res.status(404).json({
+                    status: false,
+                    message: 'Existen usuarios asignados a este rol. Imposible desactivar.'
+                });
+                return;
+            }
+            if (rol.anulado) anulado = false;
+            rol.anulado = anulado; // Marcar como anulado
             await rol.save({ transaction });
 
             await RolSubmenu.destroy({
@@ -169,10 +179,10 @@ const deleteRol = async (req: Request & { user?: any }, res: Response) => {
                 transaction,
             });
             await transaction.commit();
-            await registrarBitacora(req, 'ELIMINACIÓN', 'ROL', `Se eliminó el rol ${rol.nombre}.`);
+            await registrarBitacora(req, 'CAMBIO ESTADO', 'ROL', `Se cambió de estado el rol ${rol.nombre}.`);
             res.status(200).json({
                 status: true,
-                message: 'Rol anulado y permisos eliminados con éxito'
+                message: 'Estado de Rol actualizado con éxito'
             });
         }
     } catch (error) {
@@ -185,5 +195,5 @@ export {
     getRoles,
     getRolById,
     updateRol,
-    deleteRol
+    updateStatusRol as deleteRol
 };

@@ -177,7 +177,22 @@ const updateStatusUbicacion = async (req: Request & { user?: any }, res: Respons
             return;
         }
         let status = true;
-        if (ubicacion.estado) status = false;
+        if (ubicacion.estado) {
+            status = false;
+            const stock = await Stock.findOne({
+                where: {
+                    idUbicacion: id,
+                    stock: { [Op.gt]: 0 },
+                }
+            });
+            if (stock) {
+                res.status(404).json({
+                    status: false,
+                    message: 'La ubicación dispone de stock. Imposible desactivar.'
+                });
+                return;
+            }
+        }
         ubicacion.estado = status; // Marcar como anulado
         await ubicacion.save();
         await registrarBitacora(req, 'CAMBIO ESTADO', entidad,

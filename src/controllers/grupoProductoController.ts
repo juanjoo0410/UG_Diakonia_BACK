@@ -117,7 +117,7 @@ const updateStatusGrupoProducto = async (req: Request & { user?: any }, res: Res
         if (grupoProducto.estado) {
             status = false;
             const subgrupoProducto = await SubgrupoProducto.findOne({
-                where: { idGrupoProducto: grupoProducto.idGrupoProducto }
+                where: { estado: true, idGrupoProducto: grupoProducto.idGrupoProducto }
             });
             if (subgrupoProducto) {
                 res.status(404).json({
@@ -127,7 +127,7 @@ const updateStatusGrupoProducto = async (req: Request & { user?: any }, res: Res
                 return;
             }
             const producto = await Producto.findOne({
-                where: { idGrupoProducto: grupoProducto.idGrupoProducto }
+                where: { estado: true, idGrupoProducto: grupoProducto.idGrupoProducto }
             });
             if (producto) {
                 res.status(404).json({

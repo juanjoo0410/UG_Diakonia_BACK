@@ -4,13 +4,14 @@ import { Stock } from '../models/stockModel';
 import { Producto } from '../models/productoModel';
 import { Bodega } from '../models/bodegaModel';
 import { Ubicacion } from '../models/ubicacionModel';
+import { Sequelize } from 'sequelize';
 
 const entidad = 'STOCK';
 
 const getStock = async (req: Request, res: Response) => {
     try {
         const stock = await Stock.findAll({
-            where: { estado: true},
+            where: { estado: true },
             include: [{
                 model: Producto,
                 as: 'producto',
@@ -25,7 +26,10 @@ const getStock = async (req: Request, res: Response) => {
                 as: 'ubicacion',
                 attributes: ['codigo', 'capacidadMaxima']
             }],
-            order: [[{ model: Producto, as: 'producto' }, 'descripcion', 'ASC']]
+            order: [
+                [Sequelize.literal(`CASE WHEN producto.fechaCaducidad IS NULL THEN 1 ELSE 0 END`), 'ASC'],
+                [Sequelize.col('producto.fechaCaducidad'), 'ASC']
+            ],
         });
         res.status(200).json({ status: true, value: stock });
     } catch (error) {
@@ -36,7 +40,7 @@ const getStock = async (req: Request, res: Response) => {
 const getStockVentas = async (req: Request, res: Response) => {
     try {
         const stock = await Stock.findAll({
-            where: { estado: true},
+            where: { estado: true },
             include: [{
                 model: Producto,
                 as: 'producto',
@@ -51,7 +55,10 @@ const getStockVentas = async (req: Request, res: Response) => {
                 as: 'ubicacion',
                 attributes: ['codigo', 'capacidadMaxima']
             }],
-            order: [[{ model: Producto, as: 'producto' }, 'descripcion', 'ASC']]
+            order: [
+                [Sequelize.literal(`CASE WHEN producto.fechaCaducidad IS NULL THEN 1 ELSE 0 END`), 'ASC'],
+                [Sequelize.col('producto.fechaCaducidad'), 'ASC']
+            ],
         });
         res.status(200).json({ status: true, value: stock });
     } catch (error) {

@@ -105,7 +105,7 @@ const updateStatusTipoPoblacion = async (req: Request & { user?: any }, res: Res
         let status = true;
         if (tipoPoblacion.estado) {
             status = false;
-            const beneficiario = await Beneficiario.findOne({ where: { idTipoPoblacion: tipoPoblacion.idTipoPoblacion } });
+            const beneficiario = await Beneficiario.findOne({ where: { estado: true, idTipoPoblacion: tipoPoblacion.idTipoPoblacion } });
             if (beneficiario) {
                 res.status(404).json({
                     status: false,

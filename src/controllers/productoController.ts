@@ -453,7 +453,7 @@ const updateStatusProducto = async (req: Request & { user?: any }, res: Response
             status = false;
             const stock = await Stock.findOne({
                 where: {
-                    idBodega: id,
+                    idProducto: id,
                     stock: { [Op.gt]: 0 },
                 }
             });

@@ -144,7 +144,7 @@ const updateStatusSubgrupoProducto = async (req: Request & { user?: any }, res: 
         let status = true;
         if (subgrupoProducto.estado) {
             status = false;
-            const producto = await Producto.findOne({ where: { idSubgrupoProducto: subgrupoProducto.idSubgrupoProducto } });
+            const producto = await Producto.findOne({ where: { estado: true, idSubgrupoProducto: subgrupoProducto.idSubgrupoProducto } });
             if (producto) {
                 res.status(404).json({
                     status: false,

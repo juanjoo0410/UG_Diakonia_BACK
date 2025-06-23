@@ -135,7 +135,20 @@ const updateStatusBodega = async (req: Request & { user?: any }, res: Response) 
         let status = true;
         if (bodega.estado){
             status = false;
-            const ubicacion = await Ubicacion.findOne({ where: { idBodega: bodega.idBodega } });
+            const stock = await Stock.findOne({
+                where: {
+                    idBodega: id,
+                    stock: { [Op.gt]: 0 },
+                }
+            });
+            if (stock) {
+                res.status(404).json({
+                    status: false,
+                    message: 'La bodega dispone de stock. Imposible desactivar.'
+                });
+                return;
+            }
+            const ubicacion = await Ubicacion.findOne({ where: { estado: true, idBodega: bodega.idBodega } });
             if (ubicacion) {
                 res.status(404).json({
                     status: false,
