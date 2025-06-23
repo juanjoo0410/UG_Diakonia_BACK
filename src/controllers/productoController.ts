@@ -449,7 +449,22 @@ const updateStatusProducto = async (req: Request & { user?: any }, res: Response
             return;
         }
         let status = true;
-        if (producto.estado) status = false;
+        if (producto.estado) {
+            status = false;
+            const stock = await Stock.findOne({
+                where: {
+                    idBodega: id,
+                    stock: { [Op.gt]: 0 },
+                }
+            });
+            if (stock) {
+                res.status(404).json({
+                    status: false,
+                    message: 'El producto dispone de stock. Imposible desactivar.'
+                });
+                return;
+            }
+        }
         producto.estado = status; // Marcar como anulado
         await producto.save();
         await registrarBitacora(req, 'CAMBIO ESTADO', entidad,

@@ -47,7 +47,6 @@ const createSubgrupoProducto = async (
 const getSubgruposProducto = async (req: Request, res: Response) => {
     try {
         const subgruposProducto = await SubgrupoProducto.findAll({
-            where: { estado: true },
             include: [{
                 model: GrupoProducto,
                 as: 'grupoProducto',
@@ -131,7 +130,7 @@ const updateSubgrupoProducto = async (req: Request & { user?: any }, res: Respon
     }
 };
 
-const deleteSubgrupoProducto = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusSubgrupoProducto = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const subgrupoProducto = await SubgrupoProducto.findByPk(id);
@@ -142,21 +141,25 @@ const deleteSubgrupoProducto = async (req: Request & { user?: any }, res: Respon
             });
             return;
         }
-        const producto = await Producto.findOne({ where: { idSubgrupoProducto: subgrupoProducto.idSubgrupoProducto } });
-        if (producto) {
-            res.status(404).json({
-                status: false,
-                message: 'Existen productos asignados a este subgrupo. Imposible eliminar.'
-            });
-            return;
+        let status = true;
+        if (subgrupoProducto.estado) {
+            status = false;
+            const producto = await Producto.findOne({ where: { idSubgrupoProducto: subgrupoProducto.idSubgrupoProducto } });
+            if (producto) {
+                res.status(404).json({
+                    status: false,
+                    message: 'Existen productos asignados a este subgrupo. Imposible desactivar.'
+                });
+                return;
+            }
         }
-        subgrupoProducto.estado = false; // Marcar como anulado
+        subgrupoProducto.estado = status; // Marcar como anulado
         await subgrupoProducto.save();
-        await registrarBitacora(req, 'ELIMINACIÓN', entidad,
-            `Se eliminó el subgrupo de producto ${subgrupoProducto.nombre}.`);
+        await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
+            `Se cambió estado del subgrupo de producto ${subgrupoProducto.nombre}.`);
         res.status(200).json({
             status: true,
-            message: 'Subgrupo de producto eliminado correctamente'
+            message: 'Estado de Subgrupo de producto actualizado correctamente'
         });
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
@@ -169,5 +172,5 @@ export {
     getSubgruposByIdGrupo,
     getSubgrupoProductoById,
     updateSubgrupoProducto,
-    deleteSubgrupoProducto
+    updateStatusSubgrupoProducto as deleteSubgrupoProducto
 }

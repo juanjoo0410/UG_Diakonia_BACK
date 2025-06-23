@@ -34,7 +34,7 @@ const createTipoTransaccion = async (
 
 const getTiposTransaccion = async (req: Request, res: Response) => {
     try {
-        const tiposTransaccion = await TipoTransaccion.findAll({ where: { estado: true } });
+        const tiposTransaccion = await TipoTransaccion.findAll();
         res.status(200).json({ value: tiposTransaccion });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -125,24 +125,26 @@ const updateTipoTransaccion = async (req: Request & { user?: any }, res: Respons
     }
 };
 
-const deleteTipoTransaccion = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusTipoTransaccion = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const tipoTransaccion = await TipoTransaccion.findByPk(id);
         if (!tipoTransaccion) {
             res.status(404).json({
                 status: false,
-                message: 'Tipo de transaccion no encontrado. Imposible eliminar.'
+                message: 'Tipo de transaccion no encontrado. Imposible desactivar.'
             });
             return;
         }
-        tipoTransaccion.estado = false; // Marcar como anulado
+        let status = true;
+        if (tipoTransaccion.estado) status = false;
+        tipoTransaccion.estado = status; // Marcar como anulado
         await tipoTransaccion.save();
-        await registrarBitacora(req, 'ELIMINACIÓN', entidad,
-            `Se eliminó el tipo de transaccion ${tipoTransaccion.nombre}.`);
+        await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
+            `Se cambió estado del tipo de transacción ${tipoTransaccion.nombre}.`);
         res.status(200).json({
             status: true,
-            message: 'Tipo de transaccion eliminado correctamente'
+            message: 'Estado del Tipo de transacción actualizada correctamente'
         });
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
@@ -156,5 +158,5 @@ export {
     getTiposTransaccionByEgreso,
     getTipoTransaccionById,
     updateTipoTransaccion,
-    deleteTipoTransaccion
+    updateStatusTipoTransaccion as deleteTipoTransaccion
 }

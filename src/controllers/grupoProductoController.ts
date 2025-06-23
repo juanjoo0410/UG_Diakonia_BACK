@@ -43,7 +43,7 @@ const createGrupoProducto = async (
 
 const getGruposProducto = async (req: Request, res: Response) => {
     try {
-        const gruposProducto = await GrupoProducto.findAll({ where: { estado: true } });
+        const gruposProducto = await GrupoProducto.findAll();
         res.status(200).json({ value: gruposProducto });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
@@ -102,44 +102,48 @@ const updateGrupoProducto = async (req: Request & { user?: any }, res: Response)
     }
 };
 
-const deleteGrupoProducto = async (req: Request & { user?: any }, res: Response) => {
+const updateStatusGrupoProducto = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const grupoProducto = await GrupoProducto.findByPk(id);
         if (!grupoProducto) {
             res.status(404).json({
                 status: false,
-                message: 'Grupo de producto no encontrado. Imposible eliminar.'
+                message: 'Grupo de producto no encontrado. Imposible cambiar de estado.'
             });
             return;
         }
-        const subgrupoProducto = await SubgrupoProducto.findOne({
-            where: {
-                idGrupoProducto: grupoProducto.idGrupoProducto
+        let status = true;
+        if (grupoProducto.estado) {
+            status = false;
+            const subgrupoProducto = await SubgrupoProducto.findOne({
+                where: { idGrupoProducto: grupoProducto.idGrupoProducto }
+            });
+            if (subgrupoProducto) {
+                res.status(404).json({
+                    status: false,
+                    message: 'Existen subgrupos de producto asignados a este grupo. Imposible desactivar.'
+                });
+                return;
             }
-        });
-        if (subgrupoProducto) {
-            res.status(404).json({
-                status: false,
-                message: 'Existen subgrupos de producto asignados a este grupo. Imposible eliminar.'
+            const producto = await Producto.findOne({
+                where: { idGrupoProducto: grupoProducto.idGrupoProducto }
             });
-            return;
+            if (producto) {
+                res.status(404).json({
+                    status: false,
+                    message: 'Existen productos asignados a este grupo. Imposible desactivar.'
+                });
+                return;
+            }
         }
-        const producto = await Producto.findOne({ where: { idGrupoProducto: grupoProducto.idGrupoProducto } });
-        if (producto) {
-            res.status(404).json({
-                status: false,
-                message: 'Existen productos asignados a este grupo. Imposible eliminar.'
-            });
-            return;
-        }
-        grupoProducto.estado = false; // Marcar como anulado
+        grupoProducto.estado = status;
         await grupoProducto.save();
-        await registrarBitacora(req, 'ELIMINACIÓN', entidad,
-            `Se eliminó el grupo de producto ${grupoProducto.nombre}.`);
+        await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
+            `Se cambió estado del grupo de producto ${grupoProducto.nombre}.`);
         res.status(200).json({
             status: true,
-            message: 'Grupo de producto eliminado correctamente'
+            message: 'Estado de Grupo de producto actualizado correctamente'
         });
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
@@ -151,5 +155,5 @@ export {
     getGruposProducto,
     getGrupoProductoById,
     updateGrupoProducto,
-    deleteGrupoProducto
+    updateStatusGrupoProducto as deleteGrupoProducto
 }
