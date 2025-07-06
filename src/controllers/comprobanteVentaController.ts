@@ -126,7 +126,7 @@ const getVentasByTipoPago = async (req: Request, res: Response) => {
 
         const ventasPorTipoPago = await ComprobanteVenta.findAll({
             attributes: [["tipoPago", "name"], [fn("SUM", col("total")), "value"]],
-            where: { fecha: { [Op.between]: [inicioMes, finMes] } },
+            where: { estado: true, fecha: { [Op.between]: [inicioMes, finMes] } },
             group: ["tipoPago"],
         });
 
@@ -152,6 +152,7 @@ const getTotalVentasMensual = async (req: Request, res: Response) => {
         const totalVentas = await ComprobanteVenta.findOne({
             attributes: [[fn('SUM', col('total')), 'totalVentas']],
             where: {
+                estado: true,
                 fecha: {
                     [Op.between]: [inicioMes, finMes],
                 },
