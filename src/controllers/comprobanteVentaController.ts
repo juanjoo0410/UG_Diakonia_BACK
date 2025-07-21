@@ -6,7 +6,7 @@ import { IComprobanteVenta } from '../interfaces/IComprobanteVenta';
 import { ComprobanteVenta } from '../models/comprobanteVentaModel';
 import { IComprobanteVentaDt } from '../interfaces/IComprobanteVentaDt';
 import { ComprobanteVentaDt } from '../models/comprobanteVentaDtModel';
-import { Cliente } from '../models/clienteModel';
+import { Beneficiario } from '../models/beneficiarioModel';
 import { actualizarStock } from '../utils/stockService';
 import { agregarKardex } from '../utils/kardexService';
 import { col, fn, Op } from 'sequelize';
@@ -32,7 +32,7 @@ const createComprobanteVenta = async (
         }
         const newComprobanteVenta = await ComprobanteVenta.create(
             {
-                idCliente: comprobanteVenta.idCliente,
+                idBeneficiario: comprobanteVenta.idBeneficiario,
                 tipoPago: comprobanteVenta.tipoPago,
                 banco: comprobanteVenta.banco,
                 subtotal: comprobanteVenta.subtotal,
@@ -44,7 +44,7 @@ const createComprobanteVenta = async (
             },
             { transaction }
         );
-        const cliente = await Cliente.findByPk(comprobanteVenta.idCliente);
+        const beneficiario = await Beneficiario.findByPk(comprobanteVenta.idBeneficiario);
         const detalles = comprobanteVenta.comprobanteVentaDt.map((
             detalle: Omit<IComprobanteVentaDt, 'idComprobanteVentaDt' | 'estado'>) => ({
                 idComprobanteVenta: newComprobanteVenta.idComprobanteVenta ?? 0,
@@ -61,7 +61,7 @@ const createComprobanteVenta = async (
         const documento = {
             idDocumento: newComprobanteVenta.idComprobanteVenta,
             tipo: entidad,
-            detalle: `Venta a cliente: ${cliente?.nombre}.`,
+            detalle: `Venta a beneficiario: ${beneficiario?.nombre}.`,
             esIngreso: false
         }
         await ComprobanteVentaDt.bulkCreate(detalles, { transaction });
@@ -93,8 +93,8 @@ const getComprobantesVenta = async (req: Request, res: Response) => {
                 },
             },
             include: [{
-                model: Cliente,
-                as: 'cliente',
+                model: Beneficiario,
+                as: 'beneficiario',
                 attributes: ['codigo', 'identificacion', 'nombre', 'esEmpleado']
             },
             {
@@ -212,11 +212,11 @@ const deleteComprobanteVenta = async (req: Request & { user?: any }, res: Respon
         await comprobante.save({transaction});
         await ComprobanteVentaDt.update({ estado: false }, { where: { idComprobanteVenta: id }, transaction });
 
-        const cliente = await Cliente.findByPk(comprobante.idCliente);
+        const beneficiario = await Beneficiario.findByPk(comprobante.idBeneficiario);
         const documento = {
             idDocumento: comprobante.idComprobanteVenta,
             tipo: entidad,
-            detalle: `Anulación Comprobante de cliente: ${cliente?.nombre}.`,
+            detalle: `Anulación Comprobante de beneficiario: ${beneficiario?.nombre}.`,
             esIngreso: true
         }
         await actualizarStock(comprobanteDt, true, transaction);

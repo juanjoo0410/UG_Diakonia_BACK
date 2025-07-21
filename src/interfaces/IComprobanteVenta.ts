@@ -1,9 +1,9 @@
-import { ICliente } from "./ICliente";
+import { IBeneficiario } from "./IBeneficiario";
 import { IComprobanteVentaDt } from "./IComprobanteVentaDt";
 
 export interface IComprobanteVenta{
     idComprobanteVenta?: number;
-    idCliente: number;
+    idBeneficiario: number;
     tipoPago: string;
     banco: string;
     subtotal: number;
@@ -15,5 +15,5 @@ export interface IComprobanteVenta{
     estado?: boolean;
     fecha?: Date;
     comprobanteVentaDt?: IComprobanteVentaDt[];
-    cliente?: ICliente;
+    beneficiario?: IBeneficiario;
 }

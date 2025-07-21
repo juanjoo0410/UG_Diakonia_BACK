@@ -7,7 +7,7 @@ export class Egreso extends Model<IEgreso> implements IEgreso {
     public idEgreso?: number;
     public idTipoTransaccion!: number;
     public descripcion!: string;
-    public idBeneficiario?: number
+    public idInstitucion?: number
     public totalPeso!: number;
     public usuario!: string;
     public estado?: boolean;
@@ -26,7 +26,7 @@ Egreso.init(
             }
         },
         descripcion: { type: DataTypes.STRING(500), allowNull: false },
-        idBeneficiario: { type: DataTypes.INTEGER, allowNull: false, },
+        idInstitucion: { type: DataTypes.INTEGER, allowNull: false, },
         totalPeso: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
         usuario: { type: DataTypes.STRING(75), allowNull: false, },
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },

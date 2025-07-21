@@ -3,7 +3,7 @@ import { Clasificacion } from '../models/clasificacionModel';
 import { handleHttp } from '../utils/handleError';
 import { IClasificacion } from '../interfaces/IClasificacion';
 import { registrarBitacora } from '../utils/bitacoraService';
-import { Beneficiario } from '../models/beneficiarioModel';
+import { Institucion } from '../models/institucionModel';
 
 const entidad = 'CLASIFICACION';
 
@@ -96,13 +96,13 @@ const deleteidClasificacion = async (req: Request & { user?: any }, res: Respons
             });
             return;
         }
-        const beneficiario = await Beneficiario.findOne({
+        const institucion = await Institucion.findOne({
             where: { idClasificacion: clasificacion.idClasificacion }
         });
-        if (beneficiario) {
+        if (institucion) {
             res.status(404).json({
                 status: false,
-                message: 'Existen tipos de organizaciones asignados a esta clase. Imposible eliminar.'
+                message: 'Existen instituciones asignadas a esta clase. Imposible eliminar.'
             });
             return;
         }

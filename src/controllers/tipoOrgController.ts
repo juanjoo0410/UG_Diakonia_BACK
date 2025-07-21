@@ -3,7 +3,7 @@ import { TipoOrg } from '../models/tipoOrgModel';
 import { handleHttp } from '../utils/handleError';
 import { ITipoOrg } from '../interfaces/ITipoOrg';
 import { registrarBitacora } from '../utils/bitacoraService';
-import { Beneficiario } from '../models/beneficiarioModel';
+import { Institucion } from '../models/institucionModel';
 import sequelize from '../config/db';
 import { generarCodigo } from '../utils/contadorService';
 
@@ -121,11 +121,11 @@ const updateStatusTipoOrg = async (req: Request & { user?: any }, res: Response)
         let status = true;
         if (tipoOrg.estado) {
             status = false;
-            const beneficiario = await Beneficiario.findOne({ where: { estado: true, idTipoOrg: tipoOrg.idTipoOrg } });
-            if (beneficiario) {
+            const institucion = await Institucion.findOne({ where: { estado: true, idTipoOrg: tipoOrg.idTipoOrg } });
+            if (institucion) {
                 res.status(404).json({
                     status: false,
-                    message: 'Existen beneficiarios asignados a este tipo de organizacion. Imposible desactivar.'
+                    message: 'Existen instituciones asignadas a este tipo de organización. Imposible desactivar.'
                 });
                 return;
             }

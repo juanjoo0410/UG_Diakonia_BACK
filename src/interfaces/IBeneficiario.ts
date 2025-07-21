@@ -1,24 +1,13 @@
-import { IClasificacion } from "./IClasificacion";
-import { ITipoOrg } from "./ITipoOrg";
-import { ITipoPoblacion } from "./ITipoPoblacion";
-
 export interface IBeneficiario{
     idBeneficiario?: number;
     codigo: string;
     identificacion: string;
     nombre: string;
-    tipoBeneficiario: string;
-    idTipoOrg: number;
-    idTipoPoblacion: number;
-    idClasificacion: number;
-    actividad: string;
-    totalBeneficiarios: number;
+    estadoCivil: string;
+    sexo: string;
     direccion: string;
     telefono: string;
     correo: string;
-    nombreContacto: string;
+    esEmpleado: boolean;
     estado?: boolean;
-    tipoOrg?: ITipoOrg;
-    tipoPoblacion?: ITipoPoblacion;
-    clasificacion?: IClasificacion;
 }

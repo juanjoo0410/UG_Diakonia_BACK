@@ -2,18 +2,16 @@ import { Router } from "express";
 import {
     create,
     getAll,
-    getTotal,
     getById,
     update,
     updateStatus
-} from "../controllers/beneficiarioController";
+} from "../controllers/sectorController";
 import { checkJwt } from "../middlewares/session";
 
 const router = Router();
 
 router.post('/', checkJwt, create);
 router.get('/', checkJwt, getAll);
-router.get('/total', checkJwt, getTotal);
 router.get('/:id', checkJwt, getById);
 router.put('/', checkJwt, update);
 router.delete('/:id', checkJwt, updateStatus);

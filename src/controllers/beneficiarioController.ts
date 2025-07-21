@@ -1,53 +1,45 @@
 import { Request, Response } from 'express';
-import { Beneficiario } from '../models/beneficiarioModel';
 import { handleHttp } from '../utils/handleError';
-import { IBeneficiario } from '../interfaces/IBeneficiario';
 import { registrarBitacora } from '../utils/bitacoraService';
-import { Op } from 'sequelize';
-import sequelize from '../config/db';
+import { IBeneficiario } from '../interfaces/IBeneficiario';
+import { Beneficiario } from '../models/beneficiarioModel';
 import { generarCodigo } from '../utils/contadorService';
+import sequelize from '../config/db';
 
 const entidad = 'BENEFICIARIO';
 
-const createBeneficiario = async (
+const create = async (
     req: Request<{}, {}, Omit<IBeneficiario, 'idBeneficiario' | 'estado'>> & { user?: any },
     res: Response) => {
-        const transaction = await sequelize.transaction();
+    const transaction = await sequelize.transaction();
     try {
         const beneficiario: Omit<IBeneficiario, 'idBeneficiario' | 'estado'> = req.body;
-        const checkIs = await Beneficiario.findOne({
-            where: {
-                [Op.or]: [
-                    { identificacion: beneficiario.identificacion },
-                    { nombre: { [Op.like]: `%${beneficiario.nombre}%` } },
-                ],
-            }
-        });
+        const checkIs = await Beneficiario.findOne({ where: { identificacion: beneficiario.identificacion } });
         if (checkIs) {
             await transaction.rollback();
             res.status(400).json({
                 status: false,
-                message: 'La Identificación/Ruc o el nombre del beneficiario ya existen en la base datos.'
+                message: 'La Identificación/Ruc del beneficiario ya existe'
             });
-            return;
-        } 
-        beneficiario.codigo = await generarCodigo('beneficiarios', transaction);
-        const newBeneficiario = await Beneficiario.create(beneficiario);
-        await transaction.commit();
-        res.status(201).json({
-            status: true,
-            message: 'Beneficiario agregado exitosamente.',
-            value: newBeneficiario
-        });
-        await registrarBitacora(req, 'CREACIÓN', entidad,
-            `Se creó el beneficiario ${beneficiario.nombre}.`);
+        } else {
+            beneficiario.codigo = await generarCodigo('beneficiarios', transaction);
+            const newBeneficiario = await Beneficiario.create(beneficiario);
+            await transaction.commit();
+            res.status(201).json({
+                status: true,
+                message: `Beneficiario con código ${newBeneficiario.codigo} agregado exitosamente.`,
+                value: newBeneficiario
+            });
+            await registrarBitacora(req, 'CREACIÓN', entidad,
+                `Se creó el beneficiario ${beneficiario.nombre}.`);
+        }
     } catch (error) {
         await transaction.rollback();
         return handleHttp(res, 'ERROR_POST', error);
     }
 };
 
-const getBeneficiarios = async (req: Request, res: Response) => {
+const getAll = async (req: Request, res: Response) => {
     try {
         const beneficiarios = await Beneficiario.findAll();
         res.status(200).json({ value: beneficiarios });
@@ -56,34 +48,20 @@ const getBeneficiarios = async (req: Request, res: Response) => {
     }
 };
 
-const getTotalBeneficiarios = async (req: Request, res: Response) => {
+const getTotal = async (req: Request, res: Response) => {
     try {
-        const totalBeneficiarios = await Beneficiario.count({
+        const total = await Beneficiario.count({
             where: {
                 estado: true,
             },
         });
-        res.status(200).json({ status: true, value: totalBeneficiarios });
+        res.status(200).json({ status: true, value: total });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
     }
 };
 
-const getTotalBeneficiariosByInstituciones = async (req: Request, res: Response) => {
-    try {
-        const totalBeneficiarios = await Beneficiario.findAll({
-            where: {
-                estado: true,
-            },
-            attributes: [['nombre', 'name'], ['totalBeneficiarios', 'value']]
-        });
-        res.status(200).json({ status: true, value: totalBeneficiarios });
-    } catch (error) {
-        handleHttp(res, 'ERROR_GET_ALL', error);
-    }
-};
-
-const getBeneficiarioById = async (req: Request, res: Response) => {
+const getById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const beneficiario = await Beneficiario.findByPk(id);
@@ -100,52 +78,39 @@ const getBeneficiarioById = async (req: Request, res: Response) => {
     }
 };
 
-const updateBeneficiario = async (req: Request & { user?: any }, res: Response) => {
+const update = async (req: Request & { user?: any }, res: Response) => {
     try {
         const beneficiario: IBeneficiario = req.body;
         const checkIs = await Beneficiario.findByPk(beneficiario.idBeneficiario);
-        if (!checkIs) {
-            res.status(404).json({
-                status: false,
-                message: 'Beneficiario no encontrado'
-            });
-            return;
-        }
-        if (beneficiario.nombre != checkIs.nombre) {
-            const nameExist = await Beneficiario.findOne({ where: { nombre: beneficiario.nombre } });
-            if (nameExist) {
-                res.status(404).json({
-                    status: false,
-                    message: 'El nomnre del Beneficiario ya existe'
-                });
-                return;
-            }
-        }
-        checkIs.nombre = beneficiario.nombre;
-        checkIs.tipoBeneficiario = beneficiario.tipoBeneficiario;
-        checkIs.idTipoOrg = beneficiario.idTipoOrg;
-        checkIs.idTipoPoblacion = beneficiario.idTipoPoblacion;
-        checkIs.idClasificacion = beneficiario.idClasificacion;
-        checkIs.actividad = beneficiario.actividad;
-        checkIs.totalBeneficiarios = beneficiario.totalBeneficiarios;
-        checkIs.direccion = beneficiario.direccion;
-        checkIs.telefono = beneficiario.telefono;
-        checkIs.correo = beneficiario.correo;
-        checkIs.nombreContacto = beneficiario.nombreContacto;
-        await checkIs.save();
-        await registrarBitacora(req, 'MODIFICACIÓN', entidad,
-            `Se actualizó información del beneficiario ${beneficiario.nombre}.`)
-        res.status(200).json({
-            status: true,
-            message: 'Datos de beneficiario actualizados exitosamente',
-            value: checkIs
+        if (!checkIs) res.status(404).json({
+            status: false,
+            message: 'Beneficiario no encontrado'
         });
+        else {
+            checkIs.codigo = beneficiario.codigo;
+            checkIs.identificacion = beneficiario.identificacion;
+            checkIs.nombre = beneficiario.nombre;
+            checkIs.estadoCivil = beneficiario.estadoCivil;
+            checkIs.sexo = beneficiario.sexo;
+            checkIs.direccion = beneficiario.direccion;
+            checkIs.telefono = beneficiario.telefono;
+            checkIs.correo = beneficiario.correo;
+            checkIs.esEmpleado = beneficiario.esEmpleado;
+            await checkIs.save();
+            await registrarBitacora(req, 'MODIFICACIÓN', entidad,
+                `Se actualizó información del beneficiario ${beneficiario.nombre}.`)
+            res.status(200).json({
+                status: true,
+                message: 'Datos de beneficiario actualizados exitosamente',
+                value: checkIs
+            });
+        }
     } catch (error) {
         handleHttp(res, 'ERROR_PUT', error);
     }
 };
 
-const updateStatusBeneficiario = async (req: Request & { user?: any }, res: Response) => {
+const updateStatus = async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.params;
     try {
         const beneficiario = await Beneficiario.findByPk(id);
@@ -156,16 +121,15 @@ const updateStatusBeneficiario = async (req: Request & { user?: any }, res: Resp
             });
             return;
         }
-
         let status = true;
-        if (beneficiario.estado)  status = false;
+        if (beneficiario.estado) status = false;
         beneficiario.estado = status;
         await beneficiario.save();
         await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
-            `Se cambió el estado del beneficiario ${beneficiario.nombre}.`);
+            `Se cambió estado del beneficiario ${beneficiario.nombre}.`);
         res.status(200).json({
             status: true,
-            message: 'Estado de Beneficiario actualizado correctamente'
+            message: 'Estado del Beneficiario actualizado correctamente'
         });
     } catch (error) {
         handleHttp(res, 'ERROR_DELETE', error);
@@ -173,11 +137,10 @@ const updateStatusBeneficiario = async (req: Request & { user?: any }, res: Resp
 };
 
 export {
-    createBeneficiario,
-    getBeneficiarios,
-    getTotalBeneficiarios,
-    getTotalBeneficiariosByInstituciones,
-    getBeneficiarioById,
-    updateBeneficiario,
-    updateStatusBeneficiario as deleteBeneficiario
+    create,
+    getAll,
+    getTotal,
+    getById,
+    update,
+    updateStatus
 }

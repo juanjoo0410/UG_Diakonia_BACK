@@ -5,7 +5,7 @@ export interface IEgreso{
     idEgreso?: number;
     idTipoTransaccion: number;
     descripcion: string;
-    idBeneficiario?: number
+    idInstitucion?: number
     totalPeso: number;
     usuario: string;
     estado?: boolean;
