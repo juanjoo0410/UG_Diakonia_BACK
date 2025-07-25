@@ -6,7 +6,7 @@ import {
     getById,
     update,
     updateStatus
-} from "../controllers/beneficiarioController";
+} from "../controllers/proyectoController";
 import { checkJwt } from "../middlewares/session";
 
 const router = Router();

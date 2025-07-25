@@ -1,11 +1,11 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from "../config/db";
 import { IComprobanteVenta } from '../interfaces/IComprobanteVenta';
-import { Cliente } from './clienteModel';
+import { Beneficiario } from './beneficiarioModel';
 
 export class ComprobanteVenta extends Model<IComprobanteVenta> implements IComprobanteVenta {
     public idComprobanteVenta?: number;
-    public idCliente!: number;
+    public idBeneficiario!: number;
     public tipoPago!: string;
     public banco!: string;
     public subtotal!: number;
@@ -16,17 +16,17 @@ export class ComprobanteVenta extends Model<IComprobanteVenta> implements ICompr
     public usuario!: string;
     public estado?: boolean;
     public fecha?: Date;
-    public cliente?: Cliente | undefined;
+    public beneficiario?: Beneficiario | undefined;
 }
 
 ComprobanteVenta.init(
     {
         idComprobanteVenta: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-        idCliente: {
+        idBeneficiario: {
             type: DataTypes.INTEGER,
             references: {
-                model: 'clientes',
-                key: 'idCliente'
+                model: 'beneficiarios',
+                key: 'idBeneficiario'
             }
         },
         tipoPago: { type: DataTypes.STRING(25), allowNull: false },
@@ -47,7 +47,7 @@ ComprobanteVenta.init(
     }
 );
 
-ComprobanteVenta.belongsTo(Cliente, {
-    foreignKey: 'idCliente',
-    as: 'cliente'
+ComprobanteVenta.belongsTo(Beneficiario, {
+    foreignKey: 'idBeneficiario',
+    as: 'beneficiario'
 });

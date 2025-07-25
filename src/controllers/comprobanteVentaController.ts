@@ -6,7 +6,7 @@ import { IComprobanteVenta } from '../interfaces/IComprobanteVenta';
 import { ComprobanteVenta } from '../models/comprobanteVentaModel';
 import { IComprobanteVentaDt } from '../interfaces/IComprobanteVentaDt';
 import { ComprobanteVentaDt } from '../models/comprobanteVentaDtModel';
-import { Cliente } from '../models/clienteModel';
+import { Beneficiario } from '../models/beneficiarioModel';
 import { actualizarStock } from '../utils/stockService';
 import { agregarKardex } from '../utils/kardexService';
 import { col, fn, Op } from 'sequelize';
@@ -32,7 +32,7 @@ const createComprobanteVenta = async (
         }
         const newComprobanteVenta = await ComprobanteVenta.create(
             {
-                idCliente: comprobanteVenta.idCliente,
+                idBeneficiario: comprobanteVenta.idBeneficiario,
                 tipoPago: comprobanteVenta.tipoPago,
                 banco: comprobanteVenta.banco,
                 subtotal: comprobanteVenta.subtotal,
@@ -44,7 +44,7 @@ const createComprobanteVenta = async (
             },
             { transaction }
         );
-        const cliente = await Cliente.findByPk(comprobanteVenta.idCliente);
+        const beneficiario = await Beneficiario.findByPk(comprobanteVenta.idBeneficiario);
         const detalles = comprobanteVenta.comprobanteVentaDt.map((
             detalle: Omit<IComprobanteVentaDt, 'idComprobanteVentaDt' | 'estado'>) => ({
                 idComprobanteVenta: newComprobanteVenta.idComprobanteVenta ?? 0,
@@ -61,7 +61,7 @@ const createComprobanteVenta = async (
         const documento = {
             idDocumento: newComprobanteVenta.idComprobanteVenta,
             tipo: entidad,
-            detalle: `Venta a cliente: ${cliente?.nombre}.`,
+            detalle: `Venta a beneficiario: ${beneficiario?.nombre}.`,
             esIngreso: false
         }
         await ComprobanteVentaDt.bulkCreate(detalles, { transaction });
@@ -83,9 +83,7 @@ const createComprobanteVenta = async (
 
 const getComprobantesVenta = async (req: Request, res: Response) => {
     const { fechaInicio, fechaFin } = req.body;
-    console.log(fechaInicio + "-" + fechaFin);
     try {
-        console.log(fechaInicio + "-" + fechaFin);
         const comprobanteVenta = await ComprobanteVenta.findAll({
             where: {
                 fecha: {
@@ -93,8 +91,8 @@ const getComprobantesVenta = async (req: Request, res: Response) => {
                 },
             },
             include: [{
-                model: Cliente,
-                as: 'cliente',
+                model: Beneficiario,
+                as: 'beneficiario',
                 attributes: ['codigo', 'identificacion', 'nombre', 'esEmpleado']
             },
             {
@@ -115,14 +113,20 @@ const getComprobantesVenta = async (req: Request, res: Response) => {
 };
 
 const getVentasByTipoPago = async (req: Request, res: Response) => {
+    const { mes, anio } = req.body;
+    const mesNum = parseInt(mes as string);
+    const anioNum = parseInt(anio as string);
     try {
-        const inicioMes = new Date();
-        inicioMes.setDate(1);
-        inicioMes.setHours(0, 0, 0, 0);
-        const finMes = new Date();
-        finMes.setMonth(finMes.getMonth() + 1); // Siguiente mes
-        finMes.setDate(0); // Último día del mes
-        finMes.setHours(23, 59, 59, 999);
+        if (isNaN(mesNum) || isNaN(anioNum)) {
+            res.status(400).json({
+                status: false,
+                message: "Mes y año inválidos."
+            });
+            return;
+        }
+
+        const inicioMes = new Date(anioNum, mesNum - 1, 1, 0, 0, 0, 0);
+        const finMes = new Date(anioNum, mesNum, 0, 23, 59, 59, 999);
 
         const ventasPorTipoPago = await ComprobanteVenta.findAll({
             attributes: [["tipoPago", "name"], [fn("SUM", col("total")), "value"]],
@@ -140,14 +144,20 @@ const getVentasByTipoPago = async (req: Request, res: Response) => {
 };
 
 const getTotalVentasMensual = async (req: Request, res: Response) => {
+    const { mes, anio } = req.body;
+    const mesNum = parseInt(mes as string);
+    const anioNum = parseInt(anio as string);
     try {
-        const inicioMes = new Date();
-        inicioMes.setDate(1);
-        inicioMes.setHours(0, 0, 0, 0);
-        const finMes = new Date();
-        finMes.setMonth(finMes.getMonth() + 1); // Siguiente mes
-        finMes.setDate(0); // Último día del mes
-        finMes.setHours(23, 59, 59, 999);
+        if (isNaN(mesNum) || isNaN(anioNum)) {
+            res.status(400).json({
+                status: false,
+                message: "Mes y año inválidos."
+            });
+            return;
+        }
+
+        const inicioMes = new Date(anioNum, mesNum - 1, 1, 0, 0, 0, 0);
+        const finMes = new Date(anioNum, mesNum, 0, 23, 59, 59, 999);
 
         const totalVentas = await ComprobanteVenta.findOne({
             attributes: [[fn('SUM', col('total')), 'totalVentas']],
@@ -198,7 +208,7 @@ const deleteComprobanteVenta = async (req: Request & { user?: any }, res: Respon
     const transaction = await sequelize.transaction();
     try {
         const comprobante = await ComprobanteVenta.findByPk(id);
-        const comprobanteDt = await ComprobanteVentaDt.findAll({ where: {idComprobanteVenta : id}});
+        const comprobanteDt = await ComprobanteVentaDt.findAll({ where: { idComprobanteVenta: id } });
         if (!comprobante) {
             await transaction.rollback();
             res.status(404).json({
@@ -209,14 +219,14 @@ const deleteComprobanteVenta = async (req: Request & { user?: any }, res: Respon
         }
 
         comprobante.estado = false;
-        await comprobante.save({transaction});
+        await comprobante.save({ transaction });
         await ComprobanteVentaDt.update({ estado: false }, { where: { idComprobanteVenta: id }, transaction });
 
-        const cliente = await Cliente.findByPk(comprobante.idCliente);
+        const beneficiario = await Beneficiario.findByPk(comprobante.idBeneficiario);
         const documento = {
             idDocumento: comprobante.idComprobanteVenta,
             tipo: entidad,
-            detalle: `Anulación Comprobante de cliente: ${cliente?.nombre}.`,
+            detalle: `Anulación Comprobante de beneficiario: ${beneficiario?.nombre}.`,
             esIngreso: true
         }
         await actualizarStock(comprobanteDt, true, transaction);

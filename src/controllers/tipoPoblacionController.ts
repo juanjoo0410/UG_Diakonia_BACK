@@ -3,7 +3,7 @@ import { TipoPoblacion } from '../models/tipoPoblacionModel';
 import { handleHttp } from '../utils/handleError';
 import { ITipoPoblacion } from '../interfaces/ITipoPoblacion';
 import { registrarBitacora } from '../utils/bitacoraService';
-import { Beneficiario } from '../models/beneficiarioModel';
+import { Institucion } from '../models/institucionModel';
 import sequelize from '../config/db';
 import { generarCodigo } from '../utils/contadorService';
 
@@ -105,11 +105,11 @@ const updateStatusTipoPoblacion = async (req: Request & { user?: any }, res: Res
         let status = true;
         if (tipoPoblacion.estado) {
             status = false;
-            const beneficiario = await Beneficiario.findOne({ where: { estado: true, idTipoPoblacion: tipoPoblacion.idTipoPoblacion } });
-            if (beneficiario) {
+            const institucion = await Institucion.findOne({ where: { estado: true, idTipoPoblacion: tipoPoblacion.idTipoPoblacion } });
+            if (institucion) {
                 res.status(404).json({
                     status: false,
-                    message: 'Existen beneficiarios asignados a este tipo de población. Imposible desactivar.'
+                    message: 'Existen instituciones asignadas a este tipo de población. Imposible desactivar.'
                 });
                 return;
             }
