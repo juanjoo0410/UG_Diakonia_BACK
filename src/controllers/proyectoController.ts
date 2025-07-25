@@ -58,6 +58,19 @@ const getAll = async (req: Request, res: Response) => {
   }
 };
 
+const getTotal = async (req: Request, res: Response) => {
+    try {
+        const totaProyectos = await Proyecto.count({
+            where: {
+                estado: true,
+            },
+        });
+        res.status(200).json({ status: true, value: totaProyectos });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
 const getById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
@@ -152,6 +165,7 @@ const updateStatus = async (req: Request & { user?: any }, res: Response) => {
 export {
   create,
   getAll,
+  getTotal,
   getById,
   update,
   updateStatus

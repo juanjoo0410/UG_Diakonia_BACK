@@ -79,8 +79,8 @@ Institucion.init(
             }
         },
         nombreContacto: { type: DataTypes.STRING(100), allowNull: false },
-        telefono: { type: DataTypes.STRING(25), allowNull: false },
-        correo: { type: DataTypes.STRING(100), allowNull: false },        
+        telefono: { type: DataTypes.STRING(100), allowNull: false },
+        correo: { type: DataTypes.STRING(200), allowNull: false },        
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
     },
     {

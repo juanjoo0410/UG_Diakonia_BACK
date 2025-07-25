@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
     create,
     getAll,
+    getTotal,
     getById,
     update,
     updateStatus
@@ -12,6 +13,7 @@ const router = Router();
 
 router.post('/', checkJwt, create);
 router.get('/', checkJwt, getAll);
+router.get('/total', checkJwt, getTotal);
 router.get('/:id', checkJwt, getById);
 router.put('/', checkJwt, update);
 router.delete('/:id', checkJwt, updateStatus);

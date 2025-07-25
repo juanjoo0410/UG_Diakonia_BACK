@@ -83,9 +83,7 @@ const createComprobanteVenta = async (
 
 const getComprobantesVenta = async (req: Request, res: Response) => {
     const { fechaInicio, fechaFin } = req.body;
-    console.log(fechaInicio + "-" + fechaFin);
     try {
-        console.log(fechaInicio + "-" + fechaFin);
         const comprobanteVenta = await ComprobanteVenta.findAll({
             where: {
                 fecha: {
@@ -115,14 +113,20 @@ const getComprobantesVenta = async (req: Request, res: Response) => {
 };
 
 const getVentasByTipoPago = async (req: Request, res: Response) => {
+    const { mes, anio } = req.body;
+    const mesNum = parseInt(mes as string);
+    const anioNum = parseInt(anio as string);
     try {
-        const inicioMes = new Date();
-        inicioMes.setDate(1);
-        inicioMes.setHours(0, 0, 0, 0);
-        const finMes = new Date();
-        finMes.setMonth(finMes.getMonth() + 1); // Siguiente mes
-        finMes.setDate(0); // Último día del mes
-        finMes.setHours(23, 59, 59, 999);
+        if (isNaN(mesNum) || isNaN(anioNum)) {
+            res.status(400).json({
+                status: false,
+                message: "Mes y año inválidos."
+            });
+            return;
+        }
+
+        const inicioMes = new Date(anioNum, mesNum - 1, 1, 0, 0, 0, 0);
+        const finMes = new Date(anioNum, mesNum, 0, 23, 59, 59, 999);
 
         const ventasPorTipoPago = await ComprobanteVenta.findAll({
             attributes: [["tipoPago", "name"], [fn("SUM", col("total")), "value"]],
@@ -140,14 +144,20 @@ const getVentasByTipoPago = async (req: Request, res: Response) => {
 };
 
 const getTotalVentasMensual = async (req: Request, res: Response) => {
+    const { mes, anio } = req.body;
+    const mesNum = parseInt(mes as string);
+    const anioNum = parseInt(anio as string);
     try {
-        const inicioMes = new Date();
-        inicioMes.setDate(1);
-        inicioMes.setHours(0, 0, 0, 0);
-        const finMes = new Date();
-        finMes.setMonth(finMes.getMonth() + 1); // Siguiente mes
-        finMes.setDate(0); // Último día del mes
-        finMes.setHours(23, 59, 59, 999);
+        if (isNaN(mesNum) || isNaN(anioNum)) {
+            res.status(400).json({
+                status: false,
+                message: "Mes y año inválidos."
+            });
+            return;
+        }
+
+        const inicioMes = new Date(anioNum, mesNum - 1, 1, 0, 0, 0, 0);
+        const finMes = new Date(anioNum, mesNum, 0, 23, 59, 59, 999);
 
         const totalVentas = await ComprobanteVenta.findOne({
             attributes: [[fn('SUM', col('total')), 'totalVentas']],
@@ -198,7 +208,7 @@ const deleteComprobanteVenta = async (req: Request & { user?: any }, res: Respon
     const transaction = await sequelize.transaction();
     try {
         const comprobante = await ComprobanteVenta.findByPk(id);
-        const comprobanteDt = await ComprobanteVentaDt.findAll({ where: {idComprobanteVenta : id}});
+        const comprobanteDt = await ComprobanteVentaDt.findAll({ where: { idComprobanteVenta: id } });
         if (!comprobante) {
             await transaction.rollback();
             res.status(404).json({
@@ -209,7 +219,7 @@ const deleteComprobanteVenta = async (req: Request & { user?: any }, res: Respon
         }
 
         comprobante.estado = false;
-        await comprobante.save({transaction});
+        await comprobante.save({ transaction });
         await ComprobanteVentaDt.update({ estado: false }, { where: { idComprobanteVenta: id }, transaction });
 
         const beneficiario = await Beneficiario.findByPk(comprobante.idBeneficiario);

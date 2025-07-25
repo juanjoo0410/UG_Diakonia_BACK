@@ -13,8 +13,8 @@ const router = Router();
 
 router.post('/', checkJwt, createComprobanteVenta);
 router.post('/fecha', checkJwt, getComprobantesVenta);
-router.get('/ventas', checkJwt, getVentasByTipoPago);
-router.get('/total', checkJwt, getTotalVentasMensual);
+router.post('/ventas', checkJwt, getVentasByTipoPago);
+router.post('/total', checkJwt, getTotalVentasMensual);
 router.get('/:id', checkJwt, getComprobanteVentaById);
 router.delete('/:id', checkJwt, deleteComprobanteVenta);
 

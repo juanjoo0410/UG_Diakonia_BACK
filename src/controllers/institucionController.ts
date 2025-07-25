@@ -76,13 +76,17 @@ const getTotal = async (req: Request, res: Response) => {
 
 const getTotalBeneficiariosByInstituciones = async (req: Request, res: Response) => {
     try {
-        const totalBeneficiarios = await Institucion.findAll({
-            where: {
-                estado: true,
-            },
-            attributes: [['nombre', 'name'], ['totalBeneficiarios', 'value']]
+        const topInstituciones = await Institucion.findAll({
+            where: { estado: true },
+            attributes: [['nombre', 'name'], ['totalBeneficiarios', 'value']],
+            order: [['totalBeneficiarios', 'DESC']],
+            limit: 5
         });
-        res.status(200).json({ status: true, value: totalBeneficiarios });
+
+        res.status(200).json({
+            status: true,
+            value: topInstituciones
+        });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
     }
@@ -199,7 +203,7 @@ const importJson = async (
         const mapTipoOrg = new Map(tiposOrg.map(t => [limpiarTildes(t.nombre), t.idTipoOrg]));
         const mapTipoPoblacion = new Map(tiposPoblacion.map(t => [limpiarTildes(t.nombre), t.idTipoPoblacion]));
         const mapClasificacion = new Map(clasificaciones.map(c => [limpiarTildes(c.nombre), c.idClasificacion]));
-        const mapSector = new Map(sectores.map(s => [limpiarTildes(s.nombre), s.idSector]));        
+        const mapSector = new Map(sectores.map(s => [limpiarTildes(s.nombre), s.idSector]));
 
         for (const row of institucionesExcel) {
             const identificacion = row.ruc?.trim();
