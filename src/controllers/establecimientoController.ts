@@ -18,6 +18,7 @@ const createEstablecimiento = async (
         const checkIs = await Establecimiento.findOne({
             where: { nombre: establecimiento.nombre, }
         });
+
         if (checkIs) {
             await transaction.rollback();
             res.status(400).json({
@@ -26,7 +27,7 @@ const createEstablecimiento = async (
             });
             return;
         }
-       
+
         establecimiento.codigo = await generarCodigo('establecimientos', transaction);
         const newEstablecimiento = await Establecimiento.create(establecimiento);
         await transaction.commit();
@@ -84,11 +85,17 @@ const updateEstablecimiento = async (req: Request & { user?: any }, res: Respons
             message: 'Establecimiento no encontrado'
         });
         else {
-            checkIs.codigo = establecimiento.codigo;
             checkIs.nombre = establecimiento.nombre;
+            checkIs.representanteLegal = establecimiento.representanteLegal;
             checkIs.idDonante = establecimiento.idDonante;
             checkIs.direccion = establecimiento.direccion;
+            checkIs.direccionUrl = establecimiento.direccionUrl;
+            checkIs.latitud = establecimiento.latitud;
+            checkIs.longitud = establecimiento.longitud;
+            checkIs.idSector = establecimiento.idSector;
+            checkIs.nombreContacto = establecimiento.nombreContacto;
             checkIs.telefono = establecimiento.telefono;
+            checkIs.correo = establecimiento.correo;
             await checkIs.save();
             await registrarBitacora(req, 'MODIFICACIÓN', entidad,
                 `Se actualizó información del establecimiento ${establecimiento.nombre}.`)

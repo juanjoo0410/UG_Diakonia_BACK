@@ -14,7 +14,7 @@ export class Proyecto extends Model<IProyecto> implements IProyecto {
     public indefinido!: boolean;
     public presupuesto!: number;
     public estado?: boolean;
-    public proyectoInstitucion?: ProyectoInstitucion[] | undefined;
+    public proyectosInstituciones?: ProyectoInstitucion[] | undefined;
 }
 
 Proyecto.init(
@@ -24,7 +24,7 @@ Proyecto.init(
         nombre: { type: DataTypes.STRING(150), allowNull: false },
         descripcion: { type: DataTypes.STRING(300), allowNull: false },
         responsable: { type: DataTypes.STRING(150), allowNull: false },
-        fechaInicio: { type: DataTypes.DATE, allowNull: true },
+        fechaInicio: { type: DataTypes.DATE, allowNull: false },
         fechaFin: { type: DataTypes.DATE, allowNull: true },
         indefinido: { type: DataTypes.BOOLEAN, allowNull: false },
         presupuesto: { type: DataTypes.DECIMAL(12, 2), allowNull: false },
@@ -39,5 +39,5 @@ Proyecto.init(
 
 Proyecto.hasMany(ProyectoInstitucion,{
   foreignKey: 'idProyecto',
-  as: 'proyectos_instituciones'
+  as: 'proyectosInstituciones'
 });

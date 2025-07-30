@@ -24,7 +24,7 @@ const createDonante = async (
                 message: 'La Identificación/Ruc del donante ya existe'
             });
             return;
-        } 
+        }
         donante.codigo = await generarCodigo('donantes', transaction);
         const newdonante = await Donante.create(donante);
         await transaction.commit();
@@ -89,14 +89,10 @@ const updateDonante = async (req: Request & { user?: any }, res: Response) => {
             message: 'Donante no encontrado'
         });
         else {
-            checkIs.codigo = donante.codigo;
-            checkIs.identificacion = donante.identificacion;
             checkIs.nombre = donante.nombre;
             checkIs.tipoPersona = donante.tipoPersona;
-            checkIs.direccion = donante.direccion;
-            checkIs.telefono = donante.telefono;
-            checkIs.correo = donante.correo;
-            checkIs.nombreContacto = donante.nombreContacto;
+            checkIs.identificacion = donante.identificacion;
+            checkIs.representanteLegal = donante.representanteLegal;
             checkIs.abreviatura = donante.abreviatura;
             await checkIs.save();
             await registrarBitacora(req, 'MODIFICACIÓN', entidad,
@@ -134,7 +130,7 @@ const updateStatusDonante = async (req: Request & { user?: any }, res: Response)
                 });
                 return;
             };
-        }        
+        }
         donante.estado = status; // Marcar como anulado
         await donante.save();
         await registrarBitacora(req, 'CAMBIO ESTADO', entidad,

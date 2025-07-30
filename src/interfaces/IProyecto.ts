@@ -11,5 +11,5 @@ export interface IProyecto{
     indefinido: boolean;
     presupuesto: number;   
     estado?: boolean;
-    proyectoInstitucion?: ProyectoInstitucion[];
+    proyectosInstituciones?: ProyectoInstitucion[];
 }
