@@ -6,6 +6,7 @@ import { IProyecto } from '../interfaces/IProyecto';
 import { Proyecto } from '../models/proyectoModel';
 import { generarCodigo } from '../utils/contadorService';
 import { ProyectoInstitucion } from '../models/proyectoInstitucionModel';
+import { Institucion } from '../models/institucionModel';
 
 const entidad = 'PROYECTO';
 
@@ -15,7 +16,7 @@ const create = async (
 ) => {
   const transaction = await sequelize.transaction();
   try {
-    const { proyectoInstitucion, ...datosProyecto } = req.body;
+    const { proyectosInstituciones, ...datosProyecto } = req.body;
 
     const codigo = await generarCodigo('proyectos', transaction);
 
@@ -24,8 +25,8 @@ const create = async (
       codigo,
     }, { transaction });
 
-    if (proyectoInstitucion && proyectoInstitucion.length > 0) {
-      const relaciones = proyectoInstitucion.map(pi => ({
+    if (proyectosInstituciones && proyectosInstituciones.length > 0) {
+      const relaciones = proyectosInstituciones.map(pi => ({
         idProyecto: nuevoProyecto.idProyecto!,
         idInstitucion: pi.idInstitucion
       }));
@@ -51,24 +52,48 @@ const create = async (
 
 const getAll = async (req: Request, res: Response) => {
   try {
-    const proyectos = await Proyecto.findAll();
-    res.status(200).json({ value: proyectos });
+    const proyectos = await Proyecto.findAll({
+      include: [{
+        model: ProyectoInstitucion,
+        as: 'proyectosInstituciones',
+        include: [{
+          model: Institucion,
+          as: 'instituciones',
+          attributes: ['nombre']
+        }]
+      }],
+    });
+
+    const proyectosConNombreInstitucion = proyectos.map((proyecto: any) => {
+      const instituciones = proyecto.proyectosInstituciones.map((pi: any) => ({
+        idProyectoInstitucion: pi.idProyectoInstitucion,
+        idProyecto: pi.idProyecto,
+        idInstitucion: pi.idInstitucion,
+        nombreInstitucion: pi.instituciones?.nombre || 'Desconocido'
+      }));
+
+      return {
+        ...proyecto.toJSON(),
+        proyectosInstituciones: instituciones
+      };
+    });
+    res.status(200).json({ value: proyectosConNombreInstitucion });
   } catch (error) {
     handleHttp(res, 'ERROR_GET_ALL', error);
   }
 };
 
 const getTotal = async (req: Request, res: Response) => {
-    try {
-        const totaProyectos = await Proyecto.count({
-            where: {
-                estado: true,
-            },
-        });
-        res.status(200).json({ status: true, value: totaProyectos });
-    } catch (error) {
-        handleHttp(res, 'ERROR_GET_ALL', error);
-    }
+  try {
+    const totaProyectos = await Proyecto.count({
+      where: {
+        estado: true,
+      },
+    });
+    res.status(200).json({ status: true, value: totaProyectos });
+  } catch (error) {
+    handleHttp(res, 'ERROR_GET_ALL', error);
+  }
 };
 
 const getById = async (req: Request, res: Response) => {
@@ -92,7 +117,7 @@ const update = async (req: Request & { user?: any }, res: Response) => {
   const transaction = await sequelize.transaction();
   try {
     const idProyecto = req.body.idProyecto;
-    const { proyectoInstitucion, ...datosProyecto } = req.body;
+    const { proyectosInstituciones, ...datosProyecto } = req.body;
 
     const proyectoExistente = await Proyecto.findByPk(datosProyecto.idProyecto);
     if (!proyectoExistente) {
@@ -111,9 +136,9 @@ const update = async (req: Request & { user?: any }, res: Response) => {
       transaction
     });
 
-    if (proyectoInstitucion && proyectoInstitucion.length > 0) {
-      const nuevasRelaciones = proyectoInstitucion.map((pi: any) => ({
-        idProyecto,
+    if (proyectosInstituciones && proyectosInstituciones.length > 0) {
+      const nuevasRelaciones = proyectosInstituciones.map((pi: any) => ({
+        idProyecto : idProyecto,
         idInstitucion: pi.idInstitucion
       }));
       await ProyectoInstitucion.bulkCreate(nuevasRelaciones, { transaction });

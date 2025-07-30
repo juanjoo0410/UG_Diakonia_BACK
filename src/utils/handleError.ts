@@ -1,6 +1,7 @@
 import { Response } from "express";
 
 const handleHttp = (res: Response, error: string, errorRaw?: any) => {
+    console.log("ERROR: " + error)
     res.status(500).json({
         error,
         details: errorRaw ? errorRaw.message || errorRaw : null,

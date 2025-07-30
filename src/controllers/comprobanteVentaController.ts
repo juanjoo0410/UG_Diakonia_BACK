@@ -116,6 +116,7 @@ const getVentasByTipoPago = async (req: Request, res: Response) => {
     const { mes, anio } = req.body;
     const mesNum = parseInt(mes as string);
     const anioNum = parseInt(anio as string);
+
     try {
         if (isNaN(mesNum) || isNaN(anioNum)) {
             res.status(400).json({
@@ -128,16 +129,36 @@ const getVentasByTipoPago = async (req: Request, res: Response) => {
         const inicioMes = new Date(anioNum, mesNum - 1, 1, 0, 0, 0, 0);
         const finMes = new Date(anioNum, mesNum, 0, 23, 59, 59, 999);
 
-        const ventasPorTipoPago = await ComprobanteVenta.findAll({
+        const ventas = await ComprobanteVenta.findAll({
             attributes: [["tipoPago", "name"], [fn("SUM", col("total")), "value"]],
-            where: { estado: true, fecha: { [Op.between]: [inicioMes, finMes] } },
-            group: ["tipoPago"],
+            where: {
+                estado: true,
+                fecha: { [Op.between]: [inicioMes, finMes] }
+            },
+            group: ["tipoPago"]
         });
+
+        // Convertimos el resultado a un diccionario
+        const tiposDePago = ['Efectivo', 'Transferencia', 'Crédito'];
+        const ventasDict: { [key: string]: number } = {};
+
+        for (const venta of ventas) {
+            const name = venta.get('name') as string;
+            const value = parseFloat(venta.get('value') as string);
+            ventasDict[name] = value;
+        }
+
+        // Generamos la respuesta asegurando los 3 tipos
+        const resultado = tiposDePago.map(tipo => ({
+            name: tipo,
+            value: ventasDict[tipo] || 0
+        }));
 
         res.status(200).json({
             status: true,
-            value: ventasPorTipoPago
+            value: resultado
         });
+
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
     }
@@ -169,6 +190,7 @@ const getTotalVentasMensual = async (req: Request, res: Response) => {
             },
             raw: true,
         });
+        
         res.status(200).json({
             status: true,
             value: totalVentas
