@@ -41,3 +41,8 @@ Proyecto.hasMany(ProyectoInstitucion,{
   foreignKey: 'idProyecto',
   as: 'proyectosInstituciones'
 });
+
+ProyectoInstitucion.belongsTo(Proyecto, {
+    foreignKey: 'idProyecto',
+    as: 'proyecto'
+});
