@@ -6,6 +6,9 @@ import { registrarBitacora } from '../utils/bitacoraService';
 import { Donante } from '../models/donanteModel';
 import sequelize from '../config/db';
 import { generarCodigo } from '../utils/contadorService';
+import { Contador } from '../models/contadorModel';
+import { limpiarTildes } from '../utils/utilsService';
+import { Sector } from '../models/sectorModel';
 
 const entidad = 'ESTABLECIMIENTO';
 
@@ -134,10 +137,102 @@ const updateStatusEstablecimiento = async (req: Request & { user?: any }, res: R
     }
 };
 
+const importJson = async (
+    req: Request<{}, {}, any[]>,
+    res: Response
+) => {
+    const establecimientosExcel = req.body;
+
+    const transaction = await sequelize.transaction();
+    try {
+        let contadorLocal = await Contador.findOne({
+            where: { nombre: 'establecimientos' },
+            transaction
+        });
+
+        if (!contadorLocal) {
+            res.status(400).json({
+                status: false,
+                message: 'Contador no es válido.'
+            });
+            await transaction.rollback();
+            return;
+        }
+
+        let siguienteValor = contadorLocal.ultimoValor;
+
+        const donante = await Donante.findAll({ where: { estado: true } });
+        const sectores = await Sector.findAll({ where: { estado: true } });
+
+        const mapDonante = new Map(donante.map(t => [limpiarTildes(t.nombre), t.idDonante]));
+        const mapSector = new Map(sectores.map(s => [limpiarTildes(s.nombre), s.idSector]));
+
+        for (const row of establecimientosExcel) {
+            const identificacion = row.ruc?.trim();
+
+            const idDonante = mapDonante.get(limpiarTildes(row.donante));
+            const idSector = mapSector.get(limpiarTildes(row.sector));
+
+            if (!idDonante) {
+                res.status(400).json({
+                    status: false,
+                    message: `El donante ${row.tipoOrganizacion} no es válido o no esta registrado.`
+                });
+                await transaction.rollback();
+                return;
+            };
+
+            if (!idSector) {
+                res.status(400).json({
+                    status: false,
+                    message: `El sector ${row.sector} no es válido o no esta registrado.`
+                });
+                await transaction.rollback();
+                return;
+            };
+
+            siguienteValor += 1;
+            const codigo = `${contadorLocal.prefijo}${siguienteValor.toString().padStart(contadorLocal.numFormato, '0')}`;
+            const nueva = await Establecimiento.create({
+                codigo,
+                nombre: row.nombre.toUpperCase().trim(),
+                idDonante: idDonante,
+                identificacion: row.identificacion?.trim() ? row.identificacion.trim() : null,
+                representanteLegal: row.representanteLegal?.trim() ? row.representanteLegal.trim() : null,
+                direccion: row.direccion.trim(),
+                direccionUrl: (row.direccionUrl?.trim().substring(0, 300)) || '',
+                latitud: Number(row.latitud),
+                longitud: Number(row.longitud),
+                idSector,
+                nombreContacto: row.nombreContacto.trim() || '',
+                telefono: typeof row.telefono === 'string' ? row.telefono.trim() : String(row.telefono || '').trim(),
+                correo: row.correo.trim(),
+                estado: true
+            }, { transaction });
+        }
+        contadorLocal.ultimoValor = siguienteValor;
+        await contadorLocal.save({ transaction });
+
+        await transaction.commit();
+        await registrarBitacora(req, 'CREACIÓN', entidad, `Se importó los establecimientos desde Excel`);
+
+        res.status(201).json({
+            status: true,
+            message: 'Proceso de importación finalizado',
+        });
+
+    } catch (error) {
+        await transaction.rollback();
+        console.log(res);
+        return handleHttp(res, 'ERROR_POST', error);
+    }
+};
+
 export {
     createEstablecimiento,
     getEstablecimientos,
     getEstablecimientoById,
     updateEstablecimiento,
-    updateStatusEstablecimiento as deleteEstablecimiento
+    updateStatusEstablecimiento as deleteEstablecimiento,
+    importJson
 }

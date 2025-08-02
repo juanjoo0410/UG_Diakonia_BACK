@@ -11,6 +11,7 @@ import { TipoPoblacion } from '../models/tipoPoblacionModel';
 import { Clasificacion } from '../models/clasificacionModel';
 import { Sector } from '../models/sectorModel';
 import { limpiarTildes, normalizarFecha } from '../utils/utilsService';
+import { Contador } from '../models/contadorModel';
 
 const entidad = 'INSTITUCIÓN';
 
@@ -195,6 +196,22 @@ const importJson = async (
 
     const transaction = await sequelize.transaction();
     try {
+        let contadorLocal = await Contador.findOne({
+            where: { nombre: 'instituciones' },
+            transaction
+        });
+
+        if (!contadorLocal) {
+            res.status(400).json({
+                status: false,
+                message: 'Contador no es válido.'
+            });
+            await transaction.rollback();
+            return;
+        }
+
+        let siguienteValor = contadorLocal.ultimoValor;
+
         const tiposOrg = await TipoOrg.findAll({ where: { estado: true } });
         const tiposPoblacion = await TipoPoblacion.findAll({ where: { estado: true } });
         const clasificaciones = await Clasificacion.findAll({ where: { estado: true } });
@@ -213,15 +230,44 @@ const importJson = async (
             const idClasificacion = mapClasificacion.get(limpiarTildes(row.clasificacion));
             const idSector = mapSector.get(limpiarTildes(row.sector));
 
-            if (!idTipoOrg || !idClasificacion || !idTipoPoblacion || !idSector) {
+            if (!idTipoOrg) {
                 res.status(400).json({
                     status: false,
-                    message: 'Tipo organización, tipo población, clasificación o sector no válidos'
+                    message: `El tipo de organización ${row.tipoOrganizacion} no es válido o no esta registrado.`
                 });
+                await transaction.rollback();
                 return;
             }
 
-            const codigo = await generarCodigo('instituciones', transaction);
+            if (!idClasificacion) {
+                res.status(400).json({
+                    status: false,
+                    message: `La clasificación ${row.clasificacion} no es válida o no esta registrada.`
+                });
+                await transaction.rollback();
+                return;
+            }
+
+            if (!idTipoPoblacion) {
+                res.status(400).json({
+                    status: false,
+                    message: `El tipo de población ${row.tipoPoblacion} no es válido o no esta registrado.`
+                });
+                await transaction.rollback();
+                return;
+            }
+
+            if (!idSector) {
+                res.status(400).json({
+                    status: false,
+                    message: `El sector ${row.sector} no es válido o no esta registrado.`
+                });
+                await transaction.rollback();
+                return;
+            }
+
+            siguienteValor += 1;
+            const codigo = `${contadorLocal.prefijo}${siguienteValor.toString().padStart(contadorLocal.numFormato, '0')}`;
             const nueva = await Institucion.create({
                 codigo,
                 nombre: row.nombre.toUpperCase().trim(),
@@ -235,16 +281,19 @@ const importJson = async (
                 actividad: row.actividad.trim(),
                 totalBeneficiarios: Number(row.totalBeneficiarios || 0),
                 direccion: row.direccion.trim(),
-                direccionUrl: row.direccionUrl.trim() || '',
+                direccionUrl: (row.direccionUrl?.trim().substring(0, 300)) || '',
                 latitud: Number(row.latitud),
                 longitud: Number(row.longitud),
                 idSector,
                 nombreContacto: row.nombreContacto.trim() || '',
-                telefono: row.telefono.trim(),
+                telefono: typeof row.telefono === 'string' ? row.telefono.trim() : String(row.telefono || '').trim(),
                 correo: row.correo.trim(),
                 estado: true
             }, { transaction });
         }
+        contadorLocal.ultimoValor = siguienteValor;
+        await contadorLocal.save({ transaction });
+
         await transaction.commit();
         await registrarBitacora(req, 'CREACIÓN', entidad, `Se importó las instituciones desde Excel`);
 

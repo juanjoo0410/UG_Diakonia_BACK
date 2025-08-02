@@ -7,6 +7,7 @@ import { Establecimiento } from '../models/establecimientoModel';
 import { Producto } from '../models/productoModel';
 import sequelize from '../config/db';
 import { generarCodigo } from '../utils/contadorService';
+import { Op } from 'sequelize';
 
 const entidad = 'DONANTE';
 
@@ -16,12 +17,19 @@ const createDonante = async (
     const transaction = await sequelize.transaction();
     try {
         const donante: Omit<IDonante, 'idDonante' | 'estado'> = req.body;
-        const checkIs = await Donante.findOne({ where: { identificacion: donante.identificacion } });
+        const checkIs = await Donante.findOne({
+            where: {
+                [Op.or]: [
+                    { identificacion: donante.identificacion },
+                    { abreviatura: donante.abreviatura }
+                ]
+            }
+        });
         if (checkIs) {
             await transaction.rollback();
             res.status(400).json({
                 status: false,
-                message: 'La Identificación/Ruc del donante ya existe'
+                message: 'La Identificación/Ruc o abreviatura del donante ya existe'
             });
             return;
         }
