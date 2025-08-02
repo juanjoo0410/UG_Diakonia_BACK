@@ -4,7 +4,8 @@ import {
     getEstablecimientos,
     getEstablecimientoById,
     updateEstablecimiento,
-    deleteEstablecimiento
+    deleteEstablecimiento,
+    importJson
 } from "../controllers/establecimientoController";
 import { checkJwt } from "../middlewares/session";
 
@@ -15,5 +16,6 @@ router.get('/', checkJwt, getEstablecimientos);
 router.get('/:id', checkJwt, getEstablecimientoById);
 router.put('/', checkJwt, updateEstablecimiento);
 router.delete('/:id', checkJwt, deleteEstablecimiento);
+router.post('/importJson', checkJwt, importJson);
 
 export default router;

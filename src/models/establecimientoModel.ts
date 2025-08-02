@@ -2,6 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from "../config/db";
 import { IEstablecimiento } from '../interfaces/IEstablecimiento';
 import { Donante } from './donanteModel';
+import { Sector } from './sectorModel';
 
 export class Establecimiento extends Model<IEstablecimiento> implements IEstablecimiento {
     public idEstablecimiento?: number;
@@ -20,6 +21,7 @@ export class Establecimiento extends Model<IEstablecimiento> implements IEstable
     public correo!: string;
     public estado?: boolean;
     public donante?: Donante | undefined;
+    public sector?: Sector | undefined;
 }
 
 Establecimiento.init(
@@ -62,4 +64,9 @@ Establecimiento.init(
 Establecimiento.belongsTo(Donante, {
     foreignKey: 'idDonante',
     as: 'donante'
+});
+
+Establecimiento.belongsTo(Sector, {
+    foreignKey: 'idSector',
+    as: 'sector'
 });

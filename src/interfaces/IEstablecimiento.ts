@@ -1,4 +1,5 @@
 import { Donante } from "../models/donanteModel";
+import { Sector } from "../models/sectorModel";
 
 export interface IEstablecimiento {
     idEstablecimiento?: number;
@@ -14,7 +15,8 @@ export interface IEstablecimiento {
     idSector: number;
     nombreContacto: string;
     telefono: string;
-    correo: string;    
+    correo: string;
     estado?: boolean;
     donante?: Donante;
+    sector?: Sector;
 }
