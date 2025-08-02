@@ -26,7 +26,7 @@ Establecimiento.init(
     {
         idEstablecimiento: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
         codigo: { type: DataTypes.STRING(9), allowNull: false },
-        nombre: { type: DataTypes.STRING(13), allowNull: false },
+        nombre: { type: DataTypes.STRING(120), allowNull: false },
         identificacion: { type: DataTypes.STRING(15), allowNull: true },
         representanteLegal: { type: DataTypes.STRING(150), allowNull: true },
         idDonante: {
