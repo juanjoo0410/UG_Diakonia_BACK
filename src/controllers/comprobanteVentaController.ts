@@ -126,8 +126,16 @@ const getVentasByTipoPago = async (req: Request, res: Response) => {
             return;
         }
 
-        const inicioMes = new Date(anioNum, mesNum - 1, 1, 0, 0, 0, 0);
-        const finMes = new Date(anioNum, mesNum, 0, 23, 59, 59, 999);
+        let inicioMes: Date;
+        let finMes: Date;
+
+        if (mesNum === 0) {
+            inicioMes = new Date(anioNum, 0, 1, 0, 0, 0, 0);
+            finMes = new Date(anioNum, 11, 31, 23, 59, 59, 999);
+        } else {
+            inicioMes = new Date(anioNum, mesNum - 1, 1, 0, 0, 0, 0);
+            finMes = new Date(anioNum, mesNum, 0, 23, 59, 59, 999);
+        }
 
         const ventas = await ComprobanteVenta.findAll({
             attributes: [["tipoPago", "name"], [fn("SUM", col("total")), "value"]],
@@ -177,8 +185,16 @@ const getTotalVentasMensual = async (req: Request, res: Response) => {
             return;
         }
 
-        const inicioMes = new Date(anioNum, mesNum - 1, 1, 0, 0, 0, 0);
-        const finMes = new Date(anioNum, mesNum, 0, 23, 59, 59, 999);
+        let inicioMes: Date;
+        let finMes: Date;
+
+        if (mesNum === 0) {
+            inicioMes = new Date(anioNum, 0, 1, 0, 0, 0, 0);
+            finMes = new Date(anioNum, 11, 31, 23, 59, 59, 999);
+        } else {
+            inicioMes = new Date(anioNum, mesNum - 1, 1, 0, 0, 0, 0);
+            finMes = new Date(anioNum, mesNum, 0, 23, 59, 59, 999);
+        }
 
         const totalVentas = await ComprobanteVenta.findOne({
             attributes: [[fn('SUM', col('total')), 'totalVentas']],
@@ -190,7 +206,7 @@ const getTotalVentasMensual = async (req: Request, res: Response) => {
             },
             raw: true,
         });
-        
+
         res.status(200).json({
             status: true,
             value: totalVentas
