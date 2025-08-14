@@ -149,7 +149,7 @@ const forgotPassword = async (req: Request & { user?: any }, res: Response) => {
         });
         const form = {
             nombre: 'Webmaster',
-            email: 'jecheverria@alessa.com.ec',
+            email: user.correo,
             asunto: 'Sistema Diakonia: Recuperación de contraseña',
             mensaje: `<p>Estimado(a) <strong>${user.nombre}</strong>, se ha recibido una solicitud para restablecer su contraseña. A continuación, encontrará su nueva contraseña temporal:</p>
                     <ul>
