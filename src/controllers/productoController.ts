@@ -31,7 +31,6 @@ const createProducto = async (
                 ],
             }
         });
-        console.log("POR AQUI VOY");
         if (checkIs) {
             await transaction.rollback();
             res.status(400).json({
@@ -41,9 +40,7 @@ const createProducto = async (
             });
             return;
         }
-        console.log("NO EXISTE");
         producto.codigo = await generarCodigo('productos', transaction);
-        console.log("SE GENERO CODIGO");
         const newProducto = await Producto.create(producto);
         await transaction.commit();
         res.status(201).json({
