@@ -12,7 +12,7 @@ import { agregarKardex } from '../utils/kardexService';
 import { col, fn, Op } from 'sequelize';
 import { Producto } from '../models/productoModel';
 
-const entidad = 'COMPROBANTE_VENTA';
+const entidad = 'COMPROBANTE_TIENDITA';
 
 const createComprobanteVenta = async (
     req: Request<{}, {}, Omit<IComprobanteVenta, 'idComprobanteVenta' | 'estado'>> & { user?: any },
@@ -61,7 +61,7 @@ const createComprobanteVenta = async (
         const documento = {
             idDocumento: newComprobanteVenta.idComprobanteVenta,
             tipo: entidad,
-            detalle: `Venta a beneficiario: ${beneficiario?.nombre}.`,
+            detalle: `Comprobante: ${beneficiario?.nombre}.`,
             esIngreso: false
         }
         await ComprobanteVentaDt.bulkCreate(detalles, { transaction });
@@ -70,11 +70,11 @@ const createComprobanteVenta = async (
         await transaction.commit();
         res.status(201).json({
             status: true,
-            message: 'Comprobante de venta creado con éxito',
+            message: 'Comprobante creado con éxito',
             value: newComprobanteVenta
         });
         await registrarBitacora(req, 'CREACIÓN', entidad,
-            `Se creó el comprobante de venta ${newComprobanteVenta.idComprobanteVenta}.`);
+            `Se creó el comprobante ${newComprobanteVenta.idComprobanteVenta}.`);
     } catch (error) {
         await transaction.rollback();
         return handleHttp(res, 'ERROR_POST', error);
@@ -230,7 +230,7 @@ const getComprobanteVentaById = async (req: Request, res: Response) => {
         });
         if (!comprobanteVenta) res.status(404).json({
             status: false,
-            message: 'Comprobante de venta no encontrado'
+            message: 'Comprobante no encontrado'
         });
         else res.status(200).json({
             status: true,
@@ -264,7 +264,7 @@ const deleteComprobanteVenta = async (req: Request & { user?: any }, res: Respon
         const documento = {
             idDocumento: comprobante.idComprobanteVenta,
             tipo: entidad,
-            detalle: `Anulación Comprobante de beneficiario: ${beneficiario?.nombre}.`,
+            detalle: `Anulación Comprobante: ${beneficiario?.nombre}.`,
             esIngreso: true
         }
         await actualizarStock(comprobanteDt, true, transaction);
