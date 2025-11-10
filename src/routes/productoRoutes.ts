@@ -12,7 +12,8 @@ import {
     getProductoById,
     updateProducto,
     updatePrecios,
-    deleteProducto
+    updateStatusProducto,
+    generateBarcodeProducto
 } from "../controllers/productoController";
 import { checkJwt } from "../middlewares/session";
 
@@ -30,6 +31,7 @@ router.get('/topVencidos', checkJwt, getProductosTopVencidos);
 router.get('/:id', checkJwt, getProductoById);
 router.put('/', checkJwt, updateProducto);
 router.put('/precios', checkJwt, updatePrecios);
-router.delete('/:id', checkJwt, deleteProducto);
+router.delete('/:id', checkJwt, updateStatusProducto);
+router.put('/barcode', checkJwt, generateBarcodeProducto);
 
 export default router;
