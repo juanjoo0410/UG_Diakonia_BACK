@@ -5,7 +5,7 @@ import { col, fn, Op, Sequelize } from 'sequelize';
 import { IProducto } from '../interfaces/IProducto';
 import { Producto } from '../models/productoModel';
 import sequelize from '../config/db';
-import { generarCodigo } from '../utils/contadorService';
+import { generarCodigo, generarBarcodeEAN13 } from '../utils/contadorService';
 import { GrupoProducto } from '../models/grupoProductoModel';
 import { SubgrupoProducto } from '../models/subgrupoProductoModel';
 import { Categoria } from '../models/categoriaModel';
@@ -41,6 +41,7 @@ const createProducto = async (
             return;
         }
         producto.codigo = await generarCodigo('productos', transaction);
+        producto.codigoBarras = await generarBarcodeEAN13(transaction);
         const newProducto = await Producto.create(producto);
         await transaction.commit();
         res.status(201).json({
@@ -475,6 +476,39 @@ const updateStatusProducto = async (req: Request & { user?: any }, res: Response
     }
 };
 
+const generateBarcodeProducto = async (req: Request & { user?: any }, res: Response) => {
+    const id = req.body.idProducto;
+    console.log('AQUI: ' + id);
+    const transaction = await sequelize.transaction();
+    try {
+        const producto = await Producto.findByPk(id);
+        if (!producto) {
+            res.status(404).json({
+                status: false,
+                message: 'Producto no encontrado. Imposible generar código de barras.'
+            });
+            return;
+        }
+        let barcode = producto.codigoBarras;
+        if (!barcode) {
+            barcode = await generarBarcodeEAN13(transaction);
+        }
+        producto.codigoBarras = barcode;
+        await producto.save();
+        await transaction.commit();
+        await registrarBitacora(req, 'GENERAR CODIGO BARRAS', entidad,
+            `Se genero el código de barras del producto ${producto.descripcion}.`);
+        res.status(200).json({
+            status: true,
+            message: 'Código de barras de Producto generado correctamente',
+            codigoBarras: barcode
+        });
+    } catch (error) {
+        await transaction.rollback();
+        handleHttp(res, 'ERROR_PUT', error);
+    }
+};
+
 export {
     createProducto,
     getProductos,
@@ -488,5 +522,6 @@ export {
     getProductoById,
     updateProducto,
     updatePrecios,
-    updateStatusProducto as deleteProducto
+    updateStatusProducto,
+    generateBarcodeProducto
 }

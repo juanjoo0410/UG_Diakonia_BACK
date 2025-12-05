@@ -20,6 +20,7 @@ export interface IProducto{
     precioTiendita: number;
     noAplicaDescuento: boolean;
     sku: string;
+    codigoBarras?: string;
     estado?: boolean;
     grupoProducto?: IGrupoProducto;
     subgrupoProducto?: ISubgrupoProducto;
