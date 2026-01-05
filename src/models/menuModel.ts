@@ -5,7 +5,7 @@ import { Submenu } from './submenuModel';
 
 // Definimos el modelo sin usar decoradores
 export class Menu extends Model<IMenu> implements IMenu {
-  public idMenu?: number;
+  public idMenu!: number;
   public nombre!: string;
   public icono!: string;
   public ruta?: string;
@@ -17,8 +17,8 @@ Menu.init(
   {
     idMenu: {
       type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true
+      primaryKey: true,
+      allowNull: false
     },
     nombre: {
       type: DataTypes.STRING(45),
