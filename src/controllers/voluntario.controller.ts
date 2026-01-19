@@ -1,9 +1,6 @@
 import { Request, Response } from 'express';
 import { handleHttp } from '../utils/handleError';
 import { registrarBitacora } from '../utils/bitacoraService';
-import { AreaService } from '../services/area.service';
-import { Area } from '../models/Area.model';
-import { IArea } from '../interfaces/area.interface';
 import { VoluntarioService } from '../services/voluntario.service';
 import { IVoluntario } from '../interfaces/voluntario.interface';
 import { Voluntario } from '../models/Voluntario.model';
@@ -132,3 +129,12 @@ export const getById = async (req: Request, res: Response) => {
         handleHttp(res, `ERROR_GET_BY_ID_${entidad}`, error);
     }
 };
+
+export const getTotalRegistros = async (req: Request, res: Response) => {
+    try {
+        const total = await voluntarioService.countActive();
+        res.status(200).json({ status: true, value: total });
+    } catch (error) {
+        handleHttp(res, `ERROR_COUNTING_RECORDS_${entidad}`, error);
+    }
+}

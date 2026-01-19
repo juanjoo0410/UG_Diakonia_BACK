@@ -72,4 +72,25 @@ export const initialMenuData = [
             },
         ]
     },
+
+    {
+        idMenu: 11,
+        nombre: 'Voluntariado',
+        icono: 'front_hand',
+        orden: 4,
+        submenus: [
+            {
+                idSubmenu: 37,
+                nombre: 'Voluntarios',
+                ruta: '/main/pages/voluntariado/voluntarios',
+                orden: 1
+            },
+            {
+                idSubmenu: 38,
+                nombre: 'Asistencia de Voluntarios',
+                ruta: '/main/pages/voluntariado/asistencias',
+                orden: 2
+            }
+        ]
+    }
 ];

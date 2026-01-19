@@ -1,4 +1,4 @@
-import { Model, FindOptions, ModelStatic } from 'sequelize';
+import { Model, FindOptions, ModelStatic, WhereOptions } from 'sequelize';
 
 export abstract class BaseCRUDService<T extends Model> {
     protected readonly ModelClass: ModelStatic<T>;
@@ -13,5 +13,16 @@ export abstract class BaseCRUDService<T extends Model> {
 
     public async getById(id: number | string): Promise<T | null> {
         return this.ModelClass.findByPk(id as any);
+    }
+
+    public async countActive(): Promise<number | 0> {
+        const where: WhereOptions = {};
+        const attributes = this.ModelClass.getAttributes();
+
+        if (attributes['estado']) { where['estado'] = true;}
+        if (attributes['anulado']) { where['anulado'] = false; }
+
+        const total = await this.ModelClass.count({ where });
+        return total;
     }
 }
