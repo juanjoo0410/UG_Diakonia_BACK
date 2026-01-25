@@ -16,7 +16,7 @@ app.use(router);
 async function startServer() {
     try {
         await connectDB();
-/*
+
         //Configuración inicial (RBAC, Admin)
         const rolService = new RolService();
         const rbacService = new RBACService();
@@ -28,7 +28,6 @@ async function startServer() {
         await usuarioService.ensureSuperAdminExists(adminRol);
 
         console.log('✨ Configuración inicial (RBAC, Admin) completada con éxito.');
-*/
         app.listen(PORT, () => {
             console.log(`🚀 API en línea y conectada a la DB en el puerto ${PORT}`);
         });

@@ -20,7 +20,9 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
     public async createAsistenciaVoluntario(asistenciaVoluntarioData: AsistenciaVoluntarioData): Promise<AsistenciaVoluntario> {
         const transaction: Transaction = await sequelize.transaction();
         try {
-            const dateAsistencia = asistenciaVoluntarioData.fecha.toISOString().split('T')[0];
+            const fechaObj = new Date(asistenciaVoluntarioData.fecha);
+            const dateAsistencia = fechaObj.toISOString().split('T')[0];
+
             const checkIs = await this.ModelClass.findOne({
                 where: {
                     idVoluntario: asistenciaVoluntarioData.idVoluntario,
@@ -45,7 +47,7 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
     }
 
     public async getAllAsistenciasByDate(filters: FilterDto): Promise<AsistenciaVoluntario[]> {
-        const { fechaInicio, fechaFin } = filters;        
+        const { fechaInicio, fechaFin } = filters;
         try {
             const asistencias = await this.ModelClass.findAll({
                 where: {
@@ -61,7 +63,7 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
                 {
                     model: Voluntario,
                     as: 'voluntario',
-                    attributes: ['codigo', 'nombre']
+                    attributes: ['codigo', 'nombre', 'identificacion', 'sexo']
                 },
                 {
                     model: TipoJornada,
@@ -81,7 +83,7 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
             });
 
             return asistencias;
-            
+
         } catch (error) {
             throw new Error(`Error en consulta de asistencias: ${error instanceof Error ? error.message : String(error)}`);
         }

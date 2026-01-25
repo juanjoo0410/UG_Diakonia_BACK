@@ -53,7 +53,7 @@ const getEstablecimientos = async (req: Request, res: Response) => {
             include: [{
                 model: Donante,
                 as: 'donante',
-                attributes: ['nombre']
+                attributes: ['nombre','identificacion']
             }]
         });
         res.status(200).json({ value: establecimientos });
