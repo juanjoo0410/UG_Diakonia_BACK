@@ -6,7 +6,7 @@ import { RolSubmenu } from './rolSubmenuModel';
 
 // Definimos el modelo sin usar decoradores
 export class Submenu extends Model<ISubmenu> implements ISubmenu {
-    public idSubmenu?: number;
+    public idSubmenu!: number;
     public idMenu!: number;
     public nombre!: string;
     public ruta!: string;
@@ -18,9 +18,9 @@ export class Submenu extends Model<ISubmenu> implements ISubmenu {
 Submenu.init(
     {
         idSubmenu: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true
+            type: DataTypes.INTEGER,            
+            primaryKey: true,
+            allowNull: false
         },
         idMenu: {
             type: DataTypes.INTEGER,
@@ -35,7 +35,8 @@ Submenu.init(
         },
         ruta: {
             type: DataTypes.STRING(45),
-            allowNull: false
+            allowNull: false,
+            unique: true
         },
         orden: {
             type: DataTypes.INTEGER,

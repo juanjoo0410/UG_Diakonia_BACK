@@ -1,7 +1,7 @@
 import { Menu } from "../models/menuModel";
 
 export interface ISubmenu {
-    idSubmenu?: number;
+    idSubmenu: number;
     idMenu: number;
     nombre: string;
     ruta: string;
