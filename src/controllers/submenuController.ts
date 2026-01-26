@@ -4,8 +4,8 @@ import { Submenu } from '../models/submenuModel';
 
 const createSubmenu = async (req: Request, res: Response) => {
     try {
-        const { idMenu, nombre, ruta, orden } = req.body;
-        const newSubmenu = await Submenu.create({ idMenu, nombre, ruta, orden });
+        const { idSubmenu, idMenu, nombre, ruta, orden } = req.body;
+        const newSubmenu = await Submenu.create({ idSubmenu, idMenu, nombre, ruta, orden });
         res.status(201).json({
             status: true,
             message: 'Submenu agregado',

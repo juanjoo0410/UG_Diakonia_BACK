@@ -4,8 +4,8 @@ import { Menu } from '../models/menuModel';
 
 const createMenu = async (req: Request, res: Response) => {
     try {
-        const { nombre, icono, ruta, orden } = req.body;
-        const newMenu = await Menu.create({ nombre, icono, ruta, orden });
+        const { idMenu, nombre, icono, ruta, orden } = req.body;
+        const newMenu = await Menu.create({ idMenu, nombre, icono, ruta, orden });
         res.status(201).json({
             status: true,
             message: 'Menu agregado',

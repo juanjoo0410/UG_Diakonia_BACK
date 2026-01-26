@@ -7,8 +7,7 @@ const router = Router();
 
 // Función para limpiar el nombre del archivo
 const cleanFileName = (filename: string) => {
-    const file = filename.split('.').shift();
-    return file; // Manejo de undefined en caso de que `shift` devuelva undefined
+    return filename.replace(/\.(ts|js)$/i, '');
 };
 
 // Lee el contenido del directorio y filtra los archivos
@@ -19,6 +18,9 @@ readdirSync(ROUTES_PATH).filter((filename: string) => {
 
         if (cleanName!.includes('Routes')) {
             cleanName = cleanName!.replace('Routes', '');
+        }
+        else if (cleanName!.includes('.routes')) {
+            cleanName = cleanName!.replace('.routes', '');
         }
 
         import(modulePath).then((module) => {
