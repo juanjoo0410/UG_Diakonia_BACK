@@ -138,3 +138,25 @@ export const getTotalRegistros = async (req: Request, res: Response) => {
         handleHttp(res, `ERROR_COUNTING_RECORDS_${entidad}`, error);
     }
 }
+
+export const importJson = async (req: Request, res: Response) => {
+    try {
+        const voluntariosExcel = req.body;
+        const result = await voluntarioService.importVoluntariosJson(voluntariosExcel);
+
+        await registrarBitacora(req, 'CREACIÓN', 'Voluntarios', `Importación desde Excel`);
+
+        res.status(201).json(result);
+    } catch (error: any) {
+        const msg = error.message;
+        
+        if (msg.includes('INVALID') || msg.includes('NOT_FOUND')) {
+            res.status(400).json({
+                status: false,
+                message: msg.replace(/_/g, ' ')
+            });
+        }
+
+        handleHttp(res, 'ERROR_POST_IMPORT', error);
+    }
+};

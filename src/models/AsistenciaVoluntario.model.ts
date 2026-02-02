@@ -16,8 +16,10 @@ export class AsistenciaVoluntario extends Model<IAsistenciaVoluntario> implement
     public idAsistenciaVoluntario?: number;
     public semana!: number;
     public fecha!: Date;
-    public idInstitucion!: number;
+    public idInstitucion?: number;
     public institucion?: IInstitucion | undefined;
+    public familia!: boolean;
+    public voluntarioEducativo!: boolean;
     public idVoluntario!: number;
     public voluntario?: IVoluntario | undefined;
     public idTipoJornada!: number;
@@ -39,11 +41,14 @@ AsistenciaVoluntario.init(
         fecha: { type: DataTypes.DATE, allowNull: true },
         idInstitucion: {
             type: DataTypes.INTEGER,
+            allowNull: true,
             references: {
                 model: 'instituciones',
                 key: 'idInstitucion'
             }
         },
+        familia: { type: DataTypes.BOOLEAN, allowNull: false },
+        voluntarioEducativo: { type: DataTypes.BOOLEAN, allowNull: false },
         idVoluntario: {
             type: DataTypes.INTEGER,
             references: {

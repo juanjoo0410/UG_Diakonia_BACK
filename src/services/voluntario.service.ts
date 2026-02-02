@@ -4,6 +4,9 @@ import { Transaction } from 'sequelize';
 import { BaseCRUDService } from './base-crud.service';
 import { IVoluntario } from '../interfaces/voluntario.interface';
 import { Voluntario } from '../models/Voluntario.model';
+import { Contador } from '../models/contadorModel';
+import { TipoJornada } from '../models/TipoJornada.model';
+import { limpiarTildes } from '../utils/utilsService';
 
 type VoluntarioCreationData = Omit<IVoluntario, 'idVoluntario' | 'estado'>;
 
@@ -45,6 +48,7 @@ export class VoluntarioService extends BaseCRUDService<Voluntario> {
         }
 
         voluntarioToUpdate.codigo = voluntarioData.codigo;
+        voluntarioToUpdate.esExtranjero = voluntarioData.esExtranjero;
         voluntarioToUpdate.identificacion = voluntarioData.identificacion;
         voluntarioToUpdate.nombre = voluntarioData.nombre;
         voluntarioToUpdate.sexo = voluntarioData.sexo;
@@ -67,4 +71,62 @@ export class VoluntarioService extends BaseCRUDService<Voluntario> {
 
         return updatedVoluntario;
     }
+
+    public async importVoluntariosJson(lista: any[]): Promise<any> {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const contadorLocal = await Contador.findOne({
+                where: { nombre: 'voluntarios' },
+                transaction
+            });
+
+            if (!contadorLocal) throw new Error('CONTADOR_NOT_FOUND');
+
+            let siguienteValor = contadorLocal.ultimoValor;
+
+            // Carga de catálogos en paralelo para optimizar
+            const [tiposJornadas] = await Promise.all([
+                TipoJornada.findAll({ where: { estado: true } })
+            ]);
+
+            const mapTipoJornada = new Map(tiposJornadas.map(t => [limpiarTildes(t.nombre), t.idTipoJornada]));
+
+            for (const row of lista) {
+                const idTipoJornada = mapTipoJornada.get(limpiarTildes(row.tipoJornada));
+
+                // Validaciones de negocio
+                if (!idTipoJornada) throw new Error(`TIPO_JORNADA_INVALID:${row.tipoJornada}`);
+
+                siguienteValor += 1;
+                const codigo = `${contadorLocal.prefijo}${siguienteValor.toString().padStart(contadorLocal.numFormato, '0')}`;
+                let identificacion = String(row.identificacion || '').trim();
+
+                if (identificacion.length === 9) {
+                    identificacion = '0' + identificacion;
+                }
+
+                await Voluntario.create({
+                    codigo,
+                    esExtranjero : row.esExtranjero?.trim().toUpperCase() == 'SI' ? true : false,
+                    identificacion: identificacion,
+                    nombre: row.nombre.toUpperCase().trim(),
+                    sexo: row.sexo?.trim(),
+                    idTipoJornada,
+                    recibeKit: row.recibeKit?.trim().toUpperCase() == 'SI' ? true : false,
+                    estado: true
+                }, { transaction });
+            }
+
+            contadorLocal.ultimoValor = siguienteValor;
+            await contadorLocal.save({ transaction });
+
+            await transaction.commit();
+            return { status: true, message: 'Proceso finalizado' };
+
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    };
 }

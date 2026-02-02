@@ -15,11 +15,19 @@ export abstract class BaseCRUDService<T extends Model> {
         return this.ModelClass.findByPk(id as any);
     }
 
+    public async delete(id: number | string, primaryKeyField: string = 'id'): Promise<number> {
+        return this.ModelClass.destroy({
+            where: {
+                [primaryKeyField]: id
+            } as any
+        });
+    }
+
     public async countActive(): Promise<number | 0> {
         const where: WhereOptions = {};
         const attributes = this.ModelClass.getAttributes();
 
-        if (attributes['estado']) { where['estado'] = true;}
+        if (attributes['estado']) { where['estado'] = true; }
         if (attributes['anulado']) { where['anulado'] = false; }
 
         const total = await this.ModelClass.count({ where });

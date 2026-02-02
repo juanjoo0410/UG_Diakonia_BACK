@@ -88,6 +88,7 @@ const update = async (req: Request & { user?: any }, res: Response) => {
         });
         else {
             checkIs.codigo = beneficiario.codigo;
+            checkIs.esExtranjero = beneficiario.esExtranjero;
             checkIs.identificacion = beneficiario.identificacion;
             checkIs.nombre = beneficiario.nombre;
             checkIs.estadoCivil = beneficiario.estadoCivil;
