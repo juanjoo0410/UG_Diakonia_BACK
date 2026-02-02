@@ -9,6 +9,9 @@ export class Empresa extends Model<IEmpresa> implements IEmpresa {
     public representanteLegal!: string;
     public direccion!: string;
     public telefono!: string;
+    public direccionUrl!: string;
+    public latitud!: number;
+    public longitud!: number;
     public rutaLogo!: string;
     public obligadoContabilidad!: boolean;
     public estado?: boolean;
@@ -22,6 +25,9 @@ Empresa.init(
         representanteLegal: { type: DataTypes.STRING(120), allowNull: false },
         direccion: { type: DataTypes.STRING(200), allowNull: false },
         telefono: { type: DataTypes.STRING(25), allowNull: false },
+        direccionUrl: { type: DataTypes.STRING(300), allowNull: false },
+        latitud: { type: DataTypes.DECIMAL(17, 14), allowNull: false },
+        longitud: { type: DataTypes.DECIMAL(17, 14), allowNull: false },        
         rutaLogo: { type: DataTypes.STRING(300), allowNull: false },
         obligadoContabilidad: { type: DataTypes.BOOLEAN, allowNull: false },
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }

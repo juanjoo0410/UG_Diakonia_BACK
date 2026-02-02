@@ -38,8 +38,70 @@ export const create = async (
     }
 };
 
+export const update = async (
+    req: Request<{}, {}, IAsistenciaVoluntario> & { user?: any },
+    res: Response
+) => {
+    const asistenciaData: IAsistenciaVoluntario = req.body;
+    try {
+        const updatedAsistencia = await asistenciaVoluntarioService.updateAsistenciaVoluntario(asistenciaData);
+        res.status(200).json({
+            status: true,
+            message: 'Datos de asistencia actualizados exitosamente',
+            value: updatedAsistencia
+        });
+
+        await registrarBitacora(req, 'MODIFICACIÓN', entidad, `Se actualizó información de la asistencia ${updatedAsistencia.idAsistenciaVoluntario}.`);
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+
+        if (errorMessage === 'ENTIDAD_NO_ENCONTRADA') {
+            res.status(404).json({
+                status: false,
+                message: 'Asistencia no encontrada.'
+            });
+            return;
+        }
+
+        return handleHttp(res, `ERROR_PUT_${entidad}`, error);
+    }
+};
+
+export const deleteById = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const result = await asistenciaVoluntarioService.delete(id, 'idAsistenciaVoluntario');
+
+        if (result === 0) {
+            res.status(404).json({
+                status: false,
+                message: "No se encontró el registro para eliminar."
+            });
+            return;
+        }
+
+        await registrarBitacora(req, 'ELIMINACIÓN', 'Asistencia', `Se eliminó la asistencia ID: ${id}`);
+
+        res.status(200).json({
+            status: true,
+            message: "Registro eliminado permanentemente."
+        });
+
+    } catch (error: any) {
+        if (error.name === 'SequelizeForeignKeyConstraintError') {
+            res.status(409).json({
+                status: false,
+                message: "No se puede eliminar: el registro está siendo usado en otras tablas."
+            });
+        }
+
+        handleHttp(res, 'ERROR_DELETE_ASISTENCIA', error);
+    }
+};
+
 export const getAllByDate = async (
-    req: Request<{}, {}, FilterDto>, 
+    req: Request<{}, {}, FilterDto>,
     res: Response
 ) => {
     const filters: FilterDto = req.body;

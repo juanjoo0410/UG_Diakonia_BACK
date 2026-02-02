@@ -34,7 +34,7 @@ export class RBACService {
 
             for (const submenuData of menuData.submenus) {
                 const [submenu, createdSubmenu] = await Submenu.findOrCreate({
-                    where: { ruta: submenuData.ruta },
+                    where: { idSubmenu: submenuData.idSubmenu },
                     defaults: {
                         ...submenuData,
                         idMenu: menu.idMenu
