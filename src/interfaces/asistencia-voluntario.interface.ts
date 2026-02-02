@@ -8,8 +8,10 @@ export interface IAsistenciaVoluntario{
     idAsistenciaVoluntario?: number;
     semana: number;
     fecha: Date;
-    idInstitucion: number;
+    idInstitucion?: number;
     institucion?: IInstitucion;
+    familia: boolean;
+    voluntarioEducativo: boolean;
     idVoluntario: number;
     voluntario?: IVoluntario;
     idTipoJornada: number;

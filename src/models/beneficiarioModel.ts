@@ -5,6 +5,7 @@ import { IBeneficiario } from '../interfaces/IBeneficiario';
 export class Beneficiario extends Model<IBeneficiario> implements IBeneficiario {
     public idBeneficiario?: number;
     public codigo!: string;
+    public esExtranjero!: boolean;
     public identificacion!: string;
     public nombre!: string;
     public estadoCivil!: string;
@@ -20,7 +21,8 @@ Beneficiario.init(
     {
         idBeneficiario: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
         codigo: { type: DataTypes.STRING(7), allowNull: false },
-        identificacion: { type: DataTypes.STRING(13), allowNull: false },
+        esExtranjero: { type: DataTypes.BOOLEAN, allowNull: false },
+        identificacion: { type: DataTypes.STRING(15), allowNull: false },
         nombre: { type: DataTypes.STRING(150), allowNull: false },
         estadoCivil: { type: DataTypes.STRING(15), allowNull: false },
         sexo: { type: DataTypes.STRING(1), allowNull: false },

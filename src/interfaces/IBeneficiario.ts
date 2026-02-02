@@ -1,6 +1,7 @@
 export interface IBeneficiario{
     idBeneficiario?: number;
     codigo: string;
+    esExtranjero: boolean;
     identificacion: string;
     nombre: string;
     estadoCivil: string;

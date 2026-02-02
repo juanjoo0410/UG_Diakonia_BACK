@@ -66,6 +66,9 @@ const updateEmpresa = async (
             checkIs.representanteLegal = empresa.representanteLegal;
             checkIs.direccion = empresa.direccion;
             checkIs.telefono = empresa.telefono;
+            checkIs.direccionUrl = empresa.direccionUrl;
+            checkIs.latitud = empresa.latitud;
+            checkIs.longitud = empresa.longitud;            
             checkIs.rutaLogo = empresa.rutaLogo;
             checkIs.obligadoContabilidad = empresa.obligadoContabilidad;
             await checkIs.save();

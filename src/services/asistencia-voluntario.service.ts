@@ -46,6 +46,25 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
         }
     }
 
+    public async updateAsistenciaVoluntario(asistenciaVoluntarioData: IAsistenciaVoluntario): Promise<AsistenciaVoluntario> {
+        const asistenciaToUpdate = await this.ModelClass.findByPk(asistenciaVoluntarioData.idAsistenciaVoluntario);
+        if (!asistenciaToUpdate) throw new Error('ENTIDAD_NO_ENCONTRADA');
+
+        asistenciaToUpdate.idInstitucion = asistenciaVoluntarioData.idInstitucion;
+        asistenciaToUpdate.familia = asistenciaVoluntarioData.familia;
+        asistenciaToUpdate.voluntarioEducativo = asistenciaVoluntarioData.voluntarioEducativo;
+        asistenciaToUpdate.idTipoJornada = asistenciaVoluntarioData.idTipoJornada;
+        asistenciaToUpdate.recibeKit = asistenciaVoluntarioData.recibeKit;
+        asistenciaToUpdate.estatus = asistenciaVoluntarioData.estatus;
+        asistenciaToUpdate.idInstalacionExterna = asistenciaVoluntarioData.idInstalacionExterna;
+        asistenciaToUpdate.observacion1 = asistenciaVoluntarioData.observacion1;
+        asistenciaToUpdate.observacion2 = asistenciaVoluntarioData.observacion2;
+        asistenciaToUpdate.idArea = asistenciaVoluntarioData.idArea;
+        const updatedVoluntario = await asistenciaToUpdate.save();
+
+        return updatedVoluntario;
+    }
+
     public async getAllAsistenciasByDate(filters: FilterDto): Promise<AsistenciaVoluntario[]> {
         const { fechaInicio, fechaFin } = filters;
         try {
@@ -55,6 +74,7 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
                         [Op.between]: [fechaInicio, fechaFin],
                     },
                 },
+                order: [['fecha', 'DESC']],
                 include: [{
                     model: Institucion,
                     as: 'institucion',
