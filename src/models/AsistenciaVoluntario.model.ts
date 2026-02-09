@@ -20,6 +20,7 @@ export class AsistenciaVoluntario extends Model<IAsistenciaVoluntario> implement
     public institucion?: IInstitucion | undefined;
     public familia!: boolean;
     public voluntarioEducativo!: boolean;
+    public voluntarioCorporativo!: boolean;
     public idVoluntario!: number;
     public voluntario?: IVoluntario | undefined;
     public idTipoJornada!: number;
@@ -49,6 +50,7 @@ AsistenciaVoluntario.init(
         },
         familia: { type: DataTypes.BOOLEAN, allowNull: false },
         voluntarioEducativo: { type: DataTypes.BOOLEAN, allowNull: false },
+        voluntarioCorporativo: { type: DataTypes.BOOLEAN, allowNull: false },
         idVoluntario: {
             type: DataTypes.INTEGER,
             references: {

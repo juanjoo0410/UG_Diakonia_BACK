@@ -121,12 +121,24 @@ const update = async (req: Request & { user?: any }, res: Response) => {
             });
             return;
         }
+
+        if (institucion.identificacion.trim() !== checkIs.identificacion.trim()) {
+            const exist = await Institucion.findOne({ where: { identificacion: institucion.identificacion } });
+            if (exist) {
+                res.status(404).json({
+                    status: false,
+                    message: 'La Identificación/Ruc de la institución ya existe en la base datos.'
+                });
+                return;
+            }
+        }
+
         if (institucion.nombre != checkIs.nombre) {
             const nameExist = await Institucion.findOne({ where: { nombre: institucion.nombre } });
             if (nameExist) {
                 res.status(404).json({
                     status: false,
-                    message: 'El nomnre de la Institución ya existe'
+                    message: 'El nombre de la Institución ya existe.'
                 });
                 return;
             }
@@ -222,8 +234,18 @@ const importJson = async (
         const mapClasificacion = new Map(clasificaciones.map(c => [limpiarTildes(c.nombre), c.idClasificacion]));
         const mapSector = new Map(sectores.map(s => [limpiarTildes(s.nombre), s.idSector]));
 
+        const rucsExcel = institucionesExcel.map(row => row.ruc?.toString().trim()).filter(ruc => ruc);
+        const institucionesExistentes = await Institucion.findAll({
+            where: { identificacion: rucsExcel },
+            attributes: ['identificacion'],
+            transaction
+        });
+
+        const rucsExistentesSet = new Set(institucionesExistentes.map(i => i.identificacion));
+
         for (const row of institucionesExcel) {
-            const identificacion = row.ruc?.trim();
+            const identificacion = row.ruc?.toString().trim();
+            if (rucsExistentesSet.has(identificacion)) continue;
 
             const idTipoOrg = mapTipoOrg.get(limpiarTildes(row.tipoOrganizacion));
             const idTipoPoblacion = mapTipoPoblacion.get(limpiarTildes(row.tipoPoblacion));
