@@ -12,6 +12,7 @@ export interface IAsistenciaVoluntario{
     institucion?: IInstitucion;
     familia: boolean;
     voluntarioEducativo: boolean;
+    voluntarioCorporativo: boolean;
     idVoluntario: number;
     voluntario?: IVoluntario;
     idTipoJornada: number;
