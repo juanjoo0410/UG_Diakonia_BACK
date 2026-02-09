@@ -92,7 +92,19 @@ export class VoluntarioService extends BaseCRUDService<Voluntario> {
 
             const mapTipoJornada = new Map(tiposJornadas.map(t => [limpiarTildes(t.nombre), t.idTipoJornada]));
 
+            const idsExcel = lista.map(row => row.identificacion?.toString().trim()).filter(identificacion => identificacion);
+            const voluntariosExistentes = await Voluntario.findAll({
+                where: { identificacion: idsExcel },
+                attributes: ['identificacion'],
+                transaction
+            });
+
+            const idsExistentesSet = new Set(voluntariosExistentes.map(i => i.identificacion));
+
             for (const row of lista) {
+                let identificacion = String(row.identificacion || '').trim();
+                if (idsExistentesSet.has(identificacion)) continue;
+
                 const idTipoJornada = mapTipoJornada.get(limpiarTildes(row.tipoJornada));
 
                 // Validaciones de negocio
@@ -100,16 +112,11 @@ export class VoluntarioService extends BaseCRUDService<Voluntario> {
 
                 siguienteValor += 1;
                 const codigo = `${contadorLocal.prefijo}${siguienteValor.toString().padStart(contadorLocal.numFormato, '0')}`;
-                let identificacion = String(row.identificacion || '').trim();
-
-                if (identificacion.length === 9) {
-                    identificacion = '0' + identificacion;
-                }
 
                 await Voluntario.create({
                     codigo,
-                    esExtranjero : row.esExtranjero?.trim().toUpperCase() == 'SI' ? true : false,
-                    identificacion: identificacion,
+                    esExtranjero: row.esExtranjero?.trim().toUpperCase() == 'SI' ? true : false,
+                    identificacion,
                     nombre: row.nombre.toUpperCase().trim(),
                     sexo: row.sexo?.trim(),
                     idTipoJornada,

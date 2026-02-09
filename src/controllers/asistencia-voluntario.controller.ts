@@ -151,3 +151,47 @@ export const getById = async (req: Request, res: Response) => {
         handleHttp(res, `ERROR_GET_BY_ID_${entidad}`, error);
     }
 };
+
+export const getUltimaFecha = async (req: Request, res: Response) => {
+    try {
+        const fecha = await asistenciaVoluntarioService.getUltimaFechaAsistencia();
+        if (!fecha) {
+            res.status(404).json({
+                status: false,
+                message: 'No se encontraron registros de asistencias'
+            });
+            return;
+        }
+
+        res.status(200).json({
+            status: true,
+            value: fecha
+        });
+
+    } catch (error) {
+        handleHttp(res, `ERROR_GET_ULTIMA_FECHA_${entidad}`, error);
+    }
+};
+
+export const importJson = async (req: Request, res: Response) => {
+    try {
+        const voluntariosExcel = req.body;
+        const result = await asistenciaVoluntarioService.importAsistenciasJson(voluntariosExcel);
+
+        await registrarBitacora(req, 'CREACIÓN', 'Asistencias', `Importación desde Excel`);
+
+        res.status(201).json(result);
+    } catch (error: any) {
+        const msg = error.message;
+
+        if (msg.includes('INVALID') || msg.includes('NOT_FOUND')) {
+            res.status(400).json({
+                status: false,
+                message: msg.replace(/_/g, ' ')
+            });
+            return;
+        }
+
+        handleHttp(res, 'ERROR_POST_IMPORT', error);
+    }
+};
