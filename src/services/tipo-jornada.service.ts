@@ -1,8 +1,6 @@
 import { generarCodigo } from '../utils/contadorService';
 import sequelize from '../config/db';
 import { Transaction } from 'sequelize';
-import { IArea } from '../interfaces/area.interface';
-import { Area } from '../models/Area.model';
 import { BaseCRUDService } from './base-crud.service';
 import { ITipoJornada } from '../interfaces/tipo-jornada.interface';
 import { TipoJornada } from '../models/TipoJornada.model';
@@ -49,6 +47,7 @@ export class TipoJornadaService extends BaseCRUDService<TipoJornada> {
 
         tipoJornadaToUpdate.codigo = tipoJornadaData.codigo;
         tipoJornadaToUpdate.nombre = tipoJornadaData.nombre;
+        tipoJornadaToUpdate.horas = tipoJornadaData.horas;
         const updatedTipoJornada = await tipoJornadaToUpdate.save();
 
         return updatedTipoJornada;

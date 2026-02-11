@@ -41,6 +41,10 @@ export function excelDateToJSDate(serial: number): Date {
   export function getNumeroSemana(fecha: string): number {
     const date = new Date(fecha);
     const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    
+    // Esto desplaza el inicio de la semana al viernes.
+    d.setUTCDate(d.getUTCDate() + 3);
+
     d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
     const anioInicio = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
     const diferenciaMs = d.getTime() - anioInicio.getTime();

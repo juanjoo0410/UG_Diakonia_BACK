@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { create, getAllByDate, getAll, getById, update, deleteById, importJson, getUltimaFecha } from "../controllers/asistencia-voluntario.controller";
+import { create, getAllByDate, getAll, getById, update, deleteById, importJson, getUltimaFecha, getResumenHoras, getResumenVoluntarios } from "../controllers/asistencia-voluntario.controller";
 import { checkJwt } from "../middlewares/session";
 
 const router = Router();
@@ -9,6 +9,8 @@ router.post('/importJson', checkJwt, importJson);
 router.post('/getAllByDate', checkJwt, getAllByDate);
 router.put('/', checkJwt, update);
 router.get('/getLastDate', checkJwt, getUltimaFecha);
+router.get('/resumen-horas', checkJwt, getResumenHoras);
+router.get('/resumen-voluntarios', checkJwt, getResumenVoluntarios);
 router.get('/', checkJwt, getAll);
 router.get('/:id', checkJwt, getById);
 router.delete('/:id', checkJwt, deleteById);
