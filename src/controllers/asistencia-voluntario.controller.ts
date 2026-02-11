@@ -173,6 +173,54 @@ export const getUltimaFecha = async (req: Request, res: Response) => {
     }
 };
 
+export const getResumenHoras = async (req: Request, res: Response) => {
+    const { mes, anio } = req.query;
+    const mesNum = parseInt(mes as string);
+    const anioNum = parseInt(anio as string);
+    try {
+        if (isNaN(mesNum) || isNaN(anioNum)) {
+            res.status(400).json({
+                status: false,
+                message: "Mes y año inválidos."
+            });
+            return;
+        }
+
+        const data = await asistenciaVoluntarioService.getResumenHorasPorJornada(mesNum, anioNum);
+        res.status(200).json({
+            status: true,
+            value: data
+        });
+
+    } catch (error) {
+        handleHttp(res, `ERROR_GET_RESUMEN_HRS_${entidad}`, error);
+    }
+};
+
+export const getResumenVoluntarios = async (req: Request, res: Response) => {
+    const { mes, anio } = req.query;
+    const mesNum = parseInt(mes as string);
+    const anioNum = parseInt(anio as string);
+    try {
+        if (isNaN(mesNum) || isNaN(anioNum)) {
+            res.status(400).json({
+                status: false,
+                message: "Mes y año inválidos."
+            });
+            return;
+        }
+
+        const data = await asistenciaVoluntarioService.getResumenVoluntarios(mesNum, anioNum);
+        res.status(200).json({
+            status: true,
+            value: data
+        });
+
+    } catch (error) {
+        handleHttp(res, `ERROR_GET_RESUMEN_VOL_${entidad}`, error);
+    }
+};
+
 export const importJson = async (req: Request, res: Response) => {
     try {
         const voluntariosExcel = req.body;
