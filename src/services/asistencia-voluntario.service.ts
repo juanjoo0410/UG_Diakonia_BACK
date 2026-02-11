@@ -1,5 +1,5 @@
 import sequelize from '../config/db';
-import { col, fn, Transaction, where, Op } from 'sequelize';
+import { col, fn, Transaction, where, Op, literal } from 'sequelize';
 import { IAsistenciaVoluntario } from '../interfaces/asistencia-voluntario.interface';
 import { AsistenciaVoluntario } from '../models/AsistenciaVoluntario.model';
 import { BaseCRUDService } from './base-crud.service';
@@ -130,6 +130,91 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
             return `${day}/${month}/${year}`;
         } catch (error) {
             throw new Error(`Error al obtener la última fecha: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    public async getResumenHorasPorJornada(mes: number, anio: number): Promise<any[]> {
+        try {
+            let inicioMes: Date;
+            let finMes: Date;
+
+            if (mes === 0) {
+                inicioMes = new Date(anio, 0, 1, 0, 0, 0, 0);
+                finMes = new Date(anio, 11, 31, 23, 59, 59, 999);
+            } else {
+                inicioMes = new Date(anio, mes - 1, 1, 0, 0, 0, 0);
+                finMes = new Date(anio, mes, 0, 23, 59, 59, 999);
+            }
+
+            const resumen = await this.ModelClass.findAll({
+                attributes: [
+                    [col('tipoJornada.nombre'), 'jornada'],
+                    [fn('SUM', col('tipoJornada.horas')), 'totalHoras']
+                ],
+                where: {
+                    estatus: 'GENERADO',
+                    fecha: {
+                        [Op.between]: [inicioMes, finMes],
+                    },
+                },
+                include: [{
+                    model: TipoJornada,
+                    as: 'tipoJornada',
+                    attributes: []
+                }],
+                group: [col('tipoJornada.nombre')],
+                order: [[col('tipoJornada.nombre'), 'ASC']],
+                raw: true
+            });
+
+            return resumen;
+        } catch (error) {
+            throw new Error(`Error en resumen de horas: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    public async getResumenVoluntarios(mes: number, anio: number): Promise<any[]> {
+        try {
+            let inicioMes: Date;
+            let finMes: Date;
+
+            if (mes === 0) {
+                inicioMes = new Date(anio, 0, 1, 0, 0, 0, 0);
+                finMes = new Date(anio, 11, 31, 23, 59, 59, 999);
+            } else {
+                inicioMes = new Date(anio, mes - 1, 1, 0, 0, 0, 0);
+                finMes = new Date(anio, mes, 0, 23, 59, 59, 999);
+            }
+
+            const resumen = await this.ModelClass.findAll({
+                attributes: [
+                    [fn('COUNT', fn('DISTINCT', col('AsistenciaVoluntario.idVoluntario'))), 'totalGeneral'],
+                    [
+                        literal(`COUNT(DISTINCT CASE WHEN voluntario.sexo = 'M' THEN AsistenciaVoluntario.idVoluntario END)`),
+                        'totalHombres'
+                    ],
+                    [
+                        literal(`COUNT(DISTINCT CASE WHEN voluntario.sexo = 'F' THEN AsistenciaVoluntario.idVoluntario END)`),
+                        'totalMujeres'
+                    ]
+                ],
+                where: {
+                    estatus: 'GENERADO',
+                    fecha: {
+                        [Op.between]: [inicioMes, finMes],
+                    },
+                },
+                include: [{
+                    model: Voluntario,
+                    as: 'voluntario',
+                    attributes: []
+                }],
+                raw: true
+            });
+
+            return resumen;
+        } catch (error) {
+            throw new Error(`Error en resumen de horas: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 
