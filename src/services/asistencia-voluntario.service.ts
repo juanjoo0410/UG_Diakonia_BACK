@@ -57,6 +57,7 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
         asistenciaToUpdate.voluntarioCorporativo = asistenciaVoluntarioData.voluntarioCorporativo;
         asistenciaToUpdate.idTipoJornada = asistenciaVoluntarioData.idTipoJornada;
         asistenciaToUpdate.recibeKit = asistenciaVoluntarioData.recibeKit;
+        asistenciaToUpdate.recibeAlimentacion = asistenciaVoluntarioData.recibeAlimentacion;
         asistenciaToUpdate.estatus = asistenciaVoluntarioData.estatus;
         asistenciaToUpdate.idInstalacionExterna = asistenciaVoluntarioData.idInstalacionExterna;
         asistenciaToUpdate.observacion1 = asistenciaVoluntarioData.observacion1;
@@ -133,30 +134,22 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
         }
     }
 
-    public async getResumenHorasPorJornada(mes: number, anio: number): Promise<any[]> {
+    public async getResumenHorasPorJornada(semana: number, anio: number): Promise<any[]> {
         try {
-            let inicioMes: Date;
-            let finMes: Date;
-
-            if (mes === 0) {
-                inicioMes = new Date(anio, 0, 1, 0, 0, 0, 0);
-                finMes = new Date(anio, 11, 31, 23, 59, 59, 999);
-            } else {
-                inicioMes = new Date(anio, mes - 1, 1, 0, 0, 0, 0);
-                finMes = new Date(anio, mes, 0, 23, 59, 59, 999);
-            }
+            const whereConditions: any = {
+                estatus: 'GENERADO',
+                [Op.and]: [
+                    where(fn('YEAR', col('fecha')), anio)
+                ]
+            };
+            if (semana !== 0) { whereConditions.semana = semana; }
 
             const resumen = await this.ModelClass.findAll({
                 attributes: [
                     [col('tipoJornada.nombre'), 'jornada'],
                     [fn('SUM', col('tipoJornada.horas')), 'totalHoras']
                 ],
-                where: {
-                    estatus: 'GENERADO',
-                    fecha: {
-                        [Op.between]: [inicioMes, finMes],
-                    },
-                },
+                where: whereConditions,
                 include: [{
                     model: TipoJornada,
                     as: 'tipoJornada',
@@ -173,18 +166,15 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
         }
     }
 
-    public async getResumenVoluntarios(mes: number, anio: number): Promise<any[]> {
+    public async getResumenVoluntarios(semana: number, anio: number): Promise<any[]> {
         try {
-            let inicioMes: Date;
-            let finMes: Date;
-
-            if (mes === 0) {
-                inicioMes = new Date(anio, 0, 1, 0, 0, 0, 0);
-                finMes = new Date(anio, 11, 31, 23, 59, 59, 999);
-            } else {
-                inicioMes = new Date(anio, mes - 1, 1, 0, 0, 0, 0);
-                finMes = new Date(anio, mes, 0, 23, 59, 59, 999);
-            }
+            const whereConditions: any = {
+                estatus: 'GENERADO',
+                [Op.and]: [
+                    where(fn('YEAR', col('fecha')), anio)
+                ]
+            };
+            if (semana !== 0) { whereConditions.semana = semana; }
 
             const resumen = await this.ModelClass.findAll({
                 attributes: [
@@ -198,12 +188,7 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
                         'totalMujeres'
                     ]
                 ],
-                where: {
-                    estatus: 'GENERADO',
-                    fecha: {
-                        [Op.between]: [inicioMes, finMes],
-                    },
-                },
+                where: whereConditions,
                 include: [{
                     model: Voluntario,
                     as: 'voluntario',
@@ -214,7 +199,86 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
 
             return resumen;
         } catch (error) {
-            throw new Error(`Error en resumen de horas: ${error instanceof Error ? error.message : String(error)}`);
+            throw new Error(`Error en resumen de voluntarios: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    public async getResumenInstituciones(semana: number, anio: number): Promise<any[]> {
+        try {
+            const whereConditions: any = {
+                idInstitucion: { [Op.ne]: null },
+                estatus: 'GENERADO',
+                [Op.and]: [
+                    where(fn('YEAR', col('fecha')), anio)
+                ]
+            };
+            if (semana !== 0) { whereConditions.semana = semana; }
+
+            const resumen = await this.ModelClass.findAll({
+                attributes: [
+                    [fn('COUNT', fn('DISTINCT', col('AsistenciaVoluntario.idInstitucion'))), 'totalInstituciones']
+                ],
+                where: whereConditions,
+                raw: true
+            });
+
+            return resumen;
+        } catch (error) {
+            throw new Error(`Error en resumen de instituciones: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    public async getResumenLugares(mes: number, anio: number): Promise<any[]> {
+        try {
+
+            const whereConditions: any = {
+                estatus: 'GENERADO',
+                [Op.and]: [where(fn('YEAR', col('AsistenciaVoluntario.fecha')), anio)]
+            };
+
+            if (mes !== 0) {
+                whereConditions[Op.and].push(
+                    where(fn('MONTH', col('AsistenciaVoluntario.fecha')), mes)
+                );
+            }
+
+            const resumen = await this.ModelClass.findAll({
+                attributes: [
+                    [col('instalacionExterna.nombre'), 'lugar'],
+                    [
+                        literal(`COUNT(CASE WHEN voluntario.sexo = 'M' THEN AsistenciaVoluntario.idInstalacionExterna END)`),
+                        'totalHombres'
+                    ],
+                    [
+                        literal(`COUNT(CASE WHEN voluntario.sexo = 'F' THEN AsistenciaVoluntario.idInstalacionExterna END)`),
+                        'totalMujeres'
+                    ],
+                    [
+                        fn('COUNT', col('AsistenciaVoluntario.idInstalacionExterna')),
+                        'total'
+                    ]
+                ],
+                where: whereConditions,
+                include: [
+                    {
+                        model: Voluntario,
+                        as: 'voluntario',
+                        attributes: [] // Solo para el JOIN
+                    },
+                    {
+                        model: InstalacionExterna,
+                        as: 'instalacionExterna',
+                        attributes: [] // Solo para el JOIN
+                    }
+                ],
+                group: [col('instalacionExterna.nombre')],
+                order: [[col('instalacionExterna.nombre'), 'ASC']],
+                raw: true
+            });
+
+            return resumen;
+        } catch (error) {
+            throw new Error(`Error en resumen de lugares: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 
@@ -222,11 +286,13 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
         const transaction = await sequelize.transaction();
 
         try {
+            const [instituciones] = await Promise.all([Institucion.findAll({ where: { estado: true } })]);
             const [voluntarios] = await Promise.all([Voluntario.findAll({ where: { estado: true } })]);
             const [tiposJornadas] = await Promise.all([TipoJornada.findAll({ where: { estado: true } })]);
             const [instalaciones] = await Promise.all([InstalacionExterna.findAll({ where: { estado: true } })]);
             const [areas] = await Promise.all([Area.findAll({ where: { estado: true } })]);
 
+            const mapInstitucion = new Map(instituciones.map(t => [limpiarTildes(t.nombre), t.idInstitucion]));
             const mapVoluntario = new Map(voluntarios.map(t => [t.identificacion, t.idVoluntario]));
             const mapTipoJornada = new Map(tiposJornadas.map(t => [limpiarTildes(t.nombre), t.idTipoJornada]));
             const mapInstalacion = new Map(instalaciones.map(t => [limpiarTildes(t.nombre), t.idInstalacionExterna]));
@@ -240,14 +306,25 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
                 const semana = getNumeroSemana(fecha.toDateString());
                 const identificacion = String(row.identificacion || '').trim();
 
+                let institucion = row.solicitadoA?.toUpperCase().trim() ?? '';
+                let idInstitucion: number = 0;
+                let familia: boolean = institucion === 'FAMILIA' ? true : false;
+                let educativo: boolean = institucion === 'VOLUNTARIO EDUCATIVO' ? true : false;
+                let corporativo: boolean = institucion === 'VOLUNTARIO CORPORATIVO' ? true : false;
+                if (institucion !== 'FAMILIA' || institucion !== 'VOLUNTARIO EDUCATIVO' || institucion !== 'VOLUNTARIO CORPORATIVO') {
+                    const searchId = mapInstitucion.get(limpiarTildes(row.solicitadoA));
+                    if (!searchId) throw new Error(`TIPO_JORNADA_INVALID:${row.tipoJornada}`);
+                    idInstitucion = searchId;
+                }
+
                 const idVoluntario = mapVoluntario.get(identificacion);
                 if (!idVoluntario) throw new Error(`VOLUNTARIO_INVALID: ${identificacion} FILA:${count}`);
 
                 const idTipoJornada = mapTipoJornada.get(limpiarTildes(row.tipoJornada));
                 if (!idTipoJornada) throw new Error(`TIPO_JORNADA_INVALID: ${row.tipoJornada} FILA:${count}`);
 
-                const idInstalacionExterna = mapInstalacion.get(limpiarTildes(row.instalacion));
-                if (!idInstalacionExterna) throw new Error(`INSTALACION_INVALID: ${row.instalacion} FILA:${count}`);
+                const idInstalacionExterna = mapInstalacion.get(limpiarTildes(row.lugar));
+                if (!idInstalacionExterna) throw new Error(`INSTALACION_INVALID: ${row.lugar} FILA:${count}`);
 
                 const idArea = mapArea.get(limpiarTildes(row.area));
                 if (!idArea) throw new Error(`AREA_INVALID: ${row.area} FILA:${count}`);
@@ -255,13 +332,14 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
                 await AsistenciaVoluntario.create({
                     semana,
                     fecha,
-                    idInstitucion: row.institucion?.toString() ?? null,
-                    familia: row.familia?.trim().toUpperCase() == 'SI' ? true : false,
-                    voluntarioEducativo: row.educativo?.trim().toUpperCase() == 'SI' ? true : false,
-                    voluntarioCorporativo: row.corporativo?.trim().toUpperCase() == 'SI' ? true : false,
+                    idInstitucion: idInstitucion === 0 ? undefined : idInstitucion,
+                    familia,
+                    voluntarioEducativo: educativo,
+                    voluntarioCorporativo: corporativo,
                     idVoluntario,
                     idTipoJornada,
                     recibeKit: row.recibeKit?.trim().toUpperCase() == 'SI' ? true : false,
+                    recibeAlimentacion: row.recibeAlimentacion?.trim().toUpperCase() == 'SI' ? true : false,
                     estatus: row.estatus?.toUpperCase().trim() ?? 'NO GENERADO',
                     idInstalacionExterna,
                     observacion1: row.observacion1?.toUpperCase().trim() ?? '',

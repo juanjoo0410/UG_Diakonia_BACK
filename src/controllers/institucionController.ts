@@ -81,7 +81,7 @@ const getTotalBeneficiariosByInstituciones = async (req: Request, res: Response)
             where: { estado: true },
             attributes: [['nombre', 'name'], ['totalBeneficiarios', 'value']],
             order: [['totalBeneficiarios', 'DESC']],
-            limit: 5
+            limit: 10
         });
 
         res.status(200).json({

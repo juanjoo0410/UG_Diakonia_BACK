@@ -9,7 +9,7 @@ import { ComprobanteVentaDt } from '../models/comprobanteVentaDtModel';
 import { Beneficiario } from '../models/beneficiarioModel';
 import { actualizarStock } from '../utils/stockService';
 import { agregarKardex } from '../utils/kardexService';
-import { col, fn, Op } from 'sequelize';
+import { col, fn, literal, Op, where } from 'sequelize';
 import { Producto } from '../models/productoModel';
 
 const entidad = 'COMPROBANTE_TIENDITA';
@@ -216,6 +216,110 @@ const getTotalVentasMensual = async (req: Request, res: Response) => {
     }
 };
 
+const getProductosDemandantes = async (req: Request, res: Response) => {
+    const { mes, anio } = req.body;
+    const mesNum = parseInt(mes as string);
+    const anioNum = parseInt(anio as string);
+    try {
+        if (isNaN(mesNum) || isNaN(anioNum)) {
+            res.status(400).json({
+                status: false,
+                message: "Mes y año inválidos."
+            });
+            return;
+        }
+
+        const whereConditions: any = {
+            [Op.and]: [
+                where(fn('YEAR', col('comprobanteVenta.fecha')), anio),
+                { '$comprobanteVenta.estado$': 1 }
+            ]
+        };
+
+        if (mes !== 0) {
+            whereConditions[Op.and].push(
+                where(fn('MONTH', col('comprobanteVenta.fecha')), mes)
+            );
+        }
+
+        const resumen = await ComprobanteVentaDt.findAll({
+            attributes: [
+                [col('producto.descripcion'), 'name'],
+                [literal('CAST(SUM(cantidad) AS UNSIGNED)'), 'value']
+            ],
+            where: whereConditions,
+            include: [
+                {
+                    model: ComprobanteVenta,
+                    as: 'comprobanteVenta',
+                    attributes: []
+                },
+                {
+                    model: Producto,
+                    as: 'producto',
+                    attributes: []
+                }
+            ],
+            group: [col('producto.descripcion')],
+            order: [[fn('SUM', col('cantidad')), 'DESC']],
+            limit: 10,
+            raw: true
+        });
+
+        res.status(200).json({
+            status: true,
+            value: resumen
+        });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL_PRODUCTOS_DEMANDANTES', error);
+    }
+};
+
+const getTotalProductos = async (req: Request, res: Response) => {
+    const { fechaInicio, fechaFin } = req.body;
+    try {
+
+        const whereConditions: any = {
+            [Op.and]: [
+                { '$comprobanteVenta.fecha$': { [Op.between]: [fechaInicio, fechaFin] } },
+                { '$comprobanteVenta.estado$': 1 }
+            ]
+        };
+
+        const kardex = await ComprobanteVentaDt.findAll({
+            attributes: [
+                [col('producto.codigo'), 'codigo'],
+                [col('producto.descripcion'), 'descripcion'],
+                [col('producto.codigoBarras'), 'codigoBarras'],
+                [literal('CAST(SUM(cantidad) AS UNSIGNED)'), 'total']
+            ],
+            where: whereConditions,
+            include: [
+                {
+                    model: ComprobanteVenta,
+                    as: 'comprobanteVenta',
+                    attributes: []
+                },
+                {
+                    model: Producto,
+                    as: 'producto',
+                    attributes: []
+                }
+            ],
+            group: [
+                col('producto.codigo'),
+                col('producto.descripcion'),
+                col('producto.codigoBarras')
+            ],
+            order: [[fn('SUM', col('cantidad')), 'DESC']],
+            raw: true
+        });
+        res.status(200).json({ status: true, value: kardex });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL_TOTAL_PRODUCTOS', error);
+    }
+};
+
 const getComprobanteVentaById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
@@ -287,6 +391,8 @@ export {
     getComprobantesVenta,
     getTotalVentasMensual,
     getVentasByTipoPago,
+    getProductosDemandantes,
+    getTotalProductos,
     getComprobanteVentaById,
     deleteComprobanteVenta
 }

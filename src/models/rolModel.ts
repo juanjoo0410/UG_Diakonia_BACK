@@ -3,6 +3,7 @@ import sequelize from "../config/db";
 import { IRol } from '../interfaces/IRol';
 import { Usuario } from './usuarioModel';
 import { RolSubmenu } from './rolSubmenuModel';
+import { RolPermiso } from './RolPermiso.model';
 
 // Definimos el modelo sin usar decoradores
 export class Rol extends Model<IRol> implements IRol {
@@ -52,6 +53,16 @@ Rol.hasMany(RolSubmenu,{
 });
 
 RolSubmenu.belongsTo(Rol, {
+  foreignKey: 'idRol',
+  as: 'rol'
+});
+
+Rol.hasMany(RolPermiso,{
+  foreignKey: 'idRol',
+  as: 'roles_permisos'
+});
+
+RolPermiso.belongsTo(Rol, {
   foreignKey: 'idRol',
   as: 'rol'
 });
