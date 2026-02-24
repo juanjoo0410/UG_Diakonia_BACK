@@ -18,6 +18,7 @@ export interface IAsistenciaVoluntario{
     idTipoJornada: number;
     tipoJornada?: ITipoJornada;
     recibeKit: boolean;
+    recibeAlimentacion: boolean;
     estatus: string;
     idInstalacionExterna: number;
     instalacionExterna?: IInstalacionExterna;

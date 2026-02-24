@@ -174,19 +174,19 @@ export const getUltimaFecha = async (req: Request, res: Response) => {
 };
 
 export const getResumenHoras = async (req: Request, res: Response) => {
-    const { mes, anio } = req.query;
-    const mesNum = parseInt(mes as string);
+    const { semana, anio } = req.query;
+    const semanaNum = parseInt(semana as string);
     const anioNum = parseInt(anio as string);
     try {
-        if (isNaN(mesNum) || isNaN(anioNum)) {
+        if (isNaN(semanaNum) || isNaN(anioNum)) {
             res.status(400).json({
                 status: false,
-                message: "Mes y año inválidos."
+                message: "Semana y año inválidos."
             });
             return;
         }
 
-        const data = await asistenciaVoluntarioService.getResumenHorasPorJornada(mesNum, anioNum);
+        const data = await asistenciaVoluntarioService.getResumenHorasPorJornada(semanaNum, anioNum);
         res.status(200).json({
             status: true,
             value: data
@@ -198,19 +198,19 @@ export const getResumenHoras = async (req: Request, res: Response) => {
 };
 
 export const getResumenVoluntarios = async (req: Request, res: Response) => {
-    const { mes, anio } = req.query;
-    const mesNum = parseInt(mes as string);
+    const { semana, anio } = req.query;
+    const semanaNum = parseInt(semana as string);
     const anioNum = parseInt(anio as string);
     try {
-        if (isNaN(mesNum) || isNaN(anioNum)) {
+        if (isNaN(semanaNum) || isNaN(anioNum)) {
             res.status(400).json({
                 status: false,
-                message: "Mes y año inválidos."
+                message: "Semana y año inválidos."
             });
             return;
         }
 
-        const data = await asistenciaVoluntarioService.getResumenVoluntarios(mesNum, anioNum);
+        const data = await asistenciaVoluntarioService.getResumenVoluntarios(semanaNum, anioNum);
         res.status(200).json({
             status: true,
             value: data
@@ -218,6 +218,54 @@ export const getResumenVoluntarios = async (req: Request, res: Response) => {
 
     } catch (error) {
         handleHttp(res, `ERROR_GET_RESUMEN_VOL_${entidad}`, error);
+    }
+};
+
+export const getResumenInstituciones = async (req: Request, res: Response) => {
+    const { semana, anio } = req.query;
+    const semanaNum = parseInt(semana as string);
+    const anioNum = parseInt(anio as string);
+    try {
+        if (isNaN(semanaNum) || isNaN(anioNum)) {
+            res.status(400).json({
+                status: false,
+                message: "Semana y año inválidos."
+            });
+            return;
+        }
+
+        const data = await asistenciaVoluntarioService.getResumenInstituciones(semanaNum, anioNum);
+        res.status(200).json({
+            status: true,
+            value: data
+        });
+
+    } catch (error) {
+        handleHttp(res, `ERROR_GET_RESUMEN_INST_${entidad}`, error);
+    }
+};
+
+export const getResumenLugares = async (req: Request, res: Response) => {
+    const { mes, anio } = req.query;
+    const mesNum = parseInt(mes as string);
+    const anioNum = parseInt(anio as string);
+    try {
+        if (isNaN(mesNum) || isNaN(anioNum)) {
+            res.status(400).json({
+                status: false,
+                message: "mes y año inválidos."
+            });
+            return;
+        }
+
+        const data = await asistenciaVoluntarioService.getResumenLugares(mesNum, anioNum);
+        res.status(200).json({
+            status: true,
+            value: data
+        });
+
+    } catch (error) {
+        handleHttp(res, `ERROR_GET_RESUMEN_LUGARES_${entidad}`, error);
     }
 };
 

@@ -330,7 +330,7 @@ const getProductosTopVencidos = async (req: Request, res: Response) => {
                     }]
             },
             order: [['fechaCaducidad', 'ASC'], ['idProducto', 'ASC']],
-            limit: 5
+            limit: 10
         });
 
         res.status(200).json({ status: true, value: productos });

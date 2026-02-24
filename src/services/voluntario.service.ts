@@ -5,8 +5,8 @@ import { BaseCRUDService } from './base-crud.service';
 import { IVoluntario } from '../interfaces/voluntario.interface';
 import { Voluntario } from '../models/Voluntario.model';
 import { Contador } from '../models/contadorModel';
-import { TipoJornada } from '../models/TipoJornada.model';
 import { limpiarTildes } from '../utils/utilsService';
+import { Institucion } from '../models/institucionModel';
 
 type VoluntarioCreationData = Omit<IVoluntario, 'idVoluntario' | 'estado'>;
 
@@ -52,8 +52,12 @@ export class VoluntarioService extends BaseCRUDService<Voluntario> {
         voluntarioToUpdate.identificacion = voluntarioData.identificacion;
         voluntarioToUpdate.nombre = voluntarioData.nombre;
         voluntarioToUpdate.sexo = voluntarioData.sexo;
-        voluntarioToUpdate.idTipoJornada = voluntarioData.idTipoJornada;
+        voluntarioToUpdate.idInstitucion = voluntarioData.idInstitucion;
+        voluntarioToUpdate.familia = voluntarioData.familia;
+        voluntarioToUpdate.voluntarioEducativo = voluntarioData.voluntarioEducativo;
+        voluntarioToUpdate.voluntarioCorporativo = voluntarioData.voluntarioCorporativo;
         voluntarioToUpdate.recibeKit = voluntarioData.recibeKit;
+        voluntarioToUpdate.observaciones = voluntarioData.observaciones;
         const updatedVoluntario = await voluntarioToUpdate.save();
 
         return updatedVoluntario;
@@ -86,11 +90,8 @@ export class VoluntarioService extends BaseCRUDService<Voluntario> {
             let siguienteValor = contadorLocal.ultimoValor;
 
             // Carga de catálogos en paralelo para optimizar
-            const [tiposJornadas] = await Promise.all([
-                TipoJornada.findAll({ where: { estado: true } })
-            ]);
-
-            const mapTipoJornada = new Map(tiposJornadas.map(t => [limpiarTildes(t.nombre), t.idTipoJornada]));
+            const [instituciones] = await Promise.all([ Institucion.findAll({ where: { estado: true } }) ]);
+            const mapInstitucion = new Map(instituciones.map(t => [limpiarTildes(t.nombre), t.idInstitucion]));
 
             const idsExcel = lista.map(row => row.identificacion?.toString().trim()).filter(identificacion => identificacion);
             const voluntariosExistentes = await Voluntario.findAll({
@@ -105,22 +106,31 @@ export class VoluntarioService extends BaseCRUDService<Voluntario> {
                 let identificacion = String(row.identificacion || '').trim();
                 if (idsExistentesSet.has(identificacion)) continue;
 
-                const idTipoJornada = mapTipoJornada.get(limpiarTildes(row.tipoJornada));
-
-                // Validaciones de negocio
-                if (!idTipoJornada) throw new Error(`TIPO_JORNADA_INVALID:${row.tipoJornada}`);
+                let institucion = row.institucion?.toUpperCase().trim() ?? '';
+                let idInstitucion: number = 0;
+                let familia: boolean = institucion === 'FAMILIA' ? true : false;
+                let educativo: boolean = institucion === 'VOLUNTARIO EDUCATIVO' ? true : false;
+                let corporativo: boolean = institucion === 'VOLUNTARIO CORPORATIVO' ? true : false;
+                if (institucion !== 'FAMILIA' || institucion !== 'VOLUNTARIO EDUCATIVO' || institucion !== 'VOLUNTARIO CORPORATIVO') {
+                    const searchId = mapInstitucion.get(limpiarTildes(row.institucion));
+                    if (!searchId) throw new Error(`TIPO_JORNADA_INVALID:${row.tipoJornada}`);
+                    idInstitucion = searchId;
+                }
 
                 siguienteValor += 1;
                 const codigo = `${contadorLocal.prefijo}${siguienteValor.toString().padStart(contadorLocal.numFormato, '0')}`;
-
                 await Voluntario.create({
                     codigo,
                     esExtranjero: row.esExtranjero?.trim().toUpperCase() == 'SI' ? true : false,
                     identificacion,
                     nombre: row.nombre.toUpperCase().trim(),
                     sexo: row.sexo?.trim(),
-                    idTipoJornada,
+                    idInstitucion: idInstitucion === 0 ? undefined : idInstitucion,
+                    familia,
+                    voluntarioEducativo: educativo,
+                    voluntarioCorporativo: corporativo,
                     recibeKit: row.recibeKit?.trim().toUpperCase() == 'SI' ? true : false,
+                    observaciones: row.observaciones?.trim() ?? '',
                     estado: true
                 }, { transaction });
             }

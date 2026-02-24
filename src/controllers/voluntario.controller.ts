@@ -4,6 +4,7 @@ import { registrarBitacora } from '../utils/bitacoraService';
 import { VoluntarioService } from '../services/voluntario.service';
 import { IVoluntario } from '../interfaces/voluntario.interface';
 import { Voluntario } from '../models/Voluntario.model';
+import { Institucion } from '../models/institucionModel';
 
 const voluntarioService = new VoluntarioService();
 const entidad = 'VOLUNTARIO';
@@ -62,7 +63,7 @@ export const update = async (
             });
             return;
         }
-        
+
         if (errorMessage === 'COINCIDENCIA_ENTIDAD') {
             res.status(400).json({
                 status: false,
@@ -79,7 +80,7 @@ export const updateStatus = async (
     req: Request<{ id: string }> & { user?: any },
     res: Response
 ) => {
-    const id = req.params.id; 
+    const id = req.params.id;
     try {
         const updatedVoluntario = await voluntarioService.updateVoluntarioStatus(id);
         await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
@@ -103,7 +104,15 @@ export const updateStatus = async (
 
 export const getAll = async (req: Request, res: Response) => {
     try {
-        const voluntarios = await voluntarioService.getAll();
+        const voluntarios = await voluntarioService.getAll({
+            include: [
+                {
+                    model: Institucion,
+                    as: 'institucion',
+                    attributes: ['nombre']
+                }
+            ],
+        });
         res.status(200).json({ value: voluntarios });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL_VOLUNTARIOS', error);
@@ -149,7 +158,7 @@ export const importJson = async (req: Request, res: Response) => {
         res.status(201).json(result);
     } catch (error: any) {
         const msg = error.message;
-        
+
         if (msg.includes('INVALID') || msg.includes('NOT_FOUND')) {
             res.status(400).json({
                 status: false,

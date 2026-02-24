@@ -8,12 +8,14 @@ import { Menu } from '../models/menuModel';
 import { Submenu } from '../models/submenuModel';
 import { registrarBitacora } from '../utils/bitacoraService';
 import { Usuario } from '../models/usuarioModel';
+import { RolPermiso } from '../models/RolPermiso.model';
+import { Permiso } from '../models/Permiso.model';
 
 // Crear un nuevo rol
 const createRol = async (req: Request & { user?: any }, res: Response) => {
     const transaction = await sequelize.transaction();
     try {
-        const { nombre, permisos } = req.body;
+        const { nombre, submenus, permisos } = req.body;
         const checkIs = await Rol.findOne({ where: { nombre } });
         if (checkIs) {
             await transaction.rollback();
@@ -25,12 +27,20 @@ const createRol = async (req: Request & { user?: any }, res: Response) => {
         }
         const newRol = await Rol.create({ nombre }, { transaction });
 
+        if (submenus && submenus.length > 0) {
+            const submenusData = submenus.map((submenu: any) => ({
+                idRol: newRol.idRol,
+                idSubmenu: submenu.idSubmenu,
+            }));
+            await RolSubmenu.bulkCreate(submenusData, { transaction });
+        }
+
         if (permisos && permisos.length > 0) {
             const permisosData = permisos.map((permiso: any) => ({
                 idRol: newRol.idRol,
-                idSubmenu: permiso.idSubmenu,
+                idPermiso: permiso.idPermiso,
             }));
-            await RolSubmenu.bulkCreate(permisosData, { transaction });
+            await RolPermiso.bulkCreate(permisosData, { transaction });
         }
 
         await transaction.commit();
@@ -50,32 +60,47 @@ const createRol = async (req: Request & { user?: any }, res: Response) => {
 const getRoles = async (req: Request, res: Response) => {
     try {
         const roles = await Rol.findAll({
-            include: [{
-                model: RolSubmenu,
-                as: 'roles_submenus',
-                attributes: ['idSubmenu'],
-                include: [{
-                    model: Submenu,
-                    as: 'submenu',
-                    attributes: ['idSubmenu', 'nombre', 'idMenu'],
+            include: [
+                {
+                    model: RolSubmenu,
+                    as: 'roles_submenus',
+                    attributes: ['idSubmenu'],
                     include: [{
-                        model: Menu,
-                        as: 'menu',
-                        attributes: ['nombre']
+                        model: Submenu,
+                        as: 'submenu',
+                        attributes: ['idSubmenu', 'nombre', 'idMenu'],
+                        include: [{
+                            model: Menu,
+                            as: 'menu',
+                            attributes: ['nombre']
+                        }]
                     }]
-                }]
-            }],
+                },
+                {
+                    model: RolPermiso,
+                    as: 'roles_permisos',
+                    attributes: ['idPermiso'],
+                    include: [{
+                        model: Permiso,
+                        as: 'permiso',
+                        attributes: ['idPermiso', 'codigo'],
+                    }]
+                }],
         });
 
         const result = roles.map((rol: any) => ({
             idRol: rol.idRol,
             nombre: rol.nombre,
-            permisos: (rol.roles_submenus || []).map((permiso: any) => ({
-                idMenu: permiso.submenu?.idMenu,
-                nombreMenu: permiso.submenu?.menu?.nombre,
-                idSubmenu: permiso.submenu?.idSubmenu,
-                nombreSubmenu: permiso.submenu?.nombre,
+            submenus: (rol.roles_submenus || []).map((item: any) => ({
+                idMenu: item.submenu?.idMenu,
+                nombreMenu: item.submenu?.menu?.nombre,
+                idSubmenu: item.submenu?.idSubmenu,
+                nombreSubmenu: item.submenu?.nombre,
 
+            })),
+            permisos: (rol.roles_permisos || []).map((item: any) => ({
+                idPermiso: item.permiso?.idPermiso,
+                codigo: item.permiso?.codigo,
             })),
         }));
 
@@ -105,7 +130,7 @@ const updateRol = async (req: Request & { user?: any }, res: Response) => {
     const transaction = await sequelize.transaction();
 
     try {
-        const { idRol, nombre, permisos } = req.body;
+        const { idRol, nombre, submenus, permisos } = req.body;
         const existingRole = await Rol.findOne({
             where: { nombre, idRol: { [Op.ne]: idRol } },
         });
@@ -129,13 +154,23 @@ const updateRol = async (req: Request & { user?: any }, res: Response) => {
         }
         rol.nombre = nombre;
         await rol.save({ transaction });
+
         await RolSubmenu.destroy({ where: { idRol }, transaction });
+        if (submenus && submenus.length > 0) {
+            const submenusData = submenus.map((submenu: any) => ({
+                idRol,
+                idSubmenu: submenu.idSubmenu,
+            }));
+            await RolSubmenu.bulkCreate(submenusData, { transaction });
+        }
+
+        await RolPermiso.destroy({ where: { idRol }, transaction });
         if (permisos && permisos.length > 0) {
             const permisosData = permisos.map((permiso: any) => ({
                 idRol,
-                idSubmenu: permiso.idSubmenu,
+                idPermiso: permiso.idPermiso,
             }));
-            await RolSubmenu.bulkCreate(permisosData, { transaction });
+            await RolPermiso.bulkCreate(permisosData, { transaction });
         }
         await transaction.commit();
         await registrarBitacora(req, 'MODIFICACIÓN', 'ROL', `Se modificó la información del rol ${rol.nombre}.`)
@@ -175,6 +210,11 @@ const updateStatusRol = async (req: Request & { user?: any }, res: Response) => 
             await rol.save({ transaction });
 
             await RolSubmenu.destroy({
+                where: { idRol },
+                transaction,
+            });
+
+            await RolPermiso.destroy({
                 where: { idRol },
                 transaction,
             });
