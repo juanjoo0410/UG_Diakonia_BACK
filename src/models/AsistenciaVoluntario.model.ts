@@ -26,6 +26,7 @@ export class AsistenciaVoluntario extends Model<IAsistenciaVoluntario> implement
     public idTipoJornada!: number;
     public tipoJornada?: ITipoJornada | undefined;
     public recibeKit!: boolean;
+    public recibeAlimentacion!: boolean;
     public estatus!: string;
     public idInstalacionExterna!: number;
     public instalacionExterna?: IInstalacionExterna | undefined;
@@ -66,6 +67,7 @@ AsistenciaVoluntario.init(
             }
         },
         recibeKit: { type: DataTypes.BOOLEAN, allowNull: false },
+        recibeAlimentacion: { type: DataTypes.BOOLEAN, allowNull: false },
         estatus: { type: DataTypes.STRING(20), allowNull: false },
         idInstalacionExterna: {
             type: DataTypes.INTEGER,

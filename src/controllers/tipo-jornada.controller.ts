@@ -1,9 +1,6 @@
 import { Request, Response } from 'express';
 import { handleHttp } from '../utils/handleError';
 import { registrarBitacora } from '../utils/bitacoraService';
-import { AreaService } from '../services/area.service';
-import { Area } from '../models/Area.model';
-import { IArea } from '../interfaces/area.interface';
 import { TipoJornadaService } from '../services/tipo-jornada.service';
 import { ITipoJornada } from '../interfaces/tipo-jornada.interface';
 import { TipoJornada } from '../models/TipoJornada.model';

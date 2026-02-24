@@ -4,7 +4,6 @@ import { Transaction } from 'sequelize';
 import { BaseCRUDService } from './base-crud.service';
 import { ITipoJornada } from '../interfaces/tipo-jornada.interface';
 import { TipoJornada } from '../models/TipoJornada.model';
-import { Voluntario } from '../models/Voluntario.model';
 
 type TipoJornadaCreationData = Omit<ITipoJornada, 'idTipoJornada' | 'estado'>;
 
@@ -60,10 +59,6 @@ export class TipoJornadaService extends BaseCRUDService<TipoJornada> {
         let newStatus = true;
         if (tipoJornada.estado) {
             newStatus = false;
-            const voluntario = await Voluntario.findOne({ where: { estado: true, idTipoJornada: tipoJornada.idTipoJornada } });
-            if (voluntario) {
-                throw new Error('ASIGNADO_A_VOLUNTARIO');
-            }
         }
 
         tipoJornada.estado = newStatus;

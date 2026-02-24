@@ -26,7 +26,9 @@ async function startServer() {
 
         const adminRol = await rolService.ensureAdminRolExists();
         const allSubmenuIds = await rbacService.seedMenusAndSubmenus();
+        const allPermissionIds = await rbacService.seedPermissions();
         await rbacService.assignAllSubmenusToAdmin(adminRol, allSubmenuIds);
+        await rbacService.assignAllPermissionsToAdmin(adminRol, allPermissionIds);
         await usuarioService.ensureSuperAdminExists(adminRol);
 
         console.log('✨ Configuración inicial (RBAC, Admin) completada con éxito.');

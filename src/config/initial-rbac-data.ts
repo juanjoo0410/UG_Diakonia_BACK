@@ -205,7 +205,13 @@ export const initialMenuData = [
                 nombre: 'Impresión de Etiquetas',
                 ruta: '/main/pages/tiendita/etiquetas',
                 orden: 6
-            },            
+            },
+            {
+                idSubmenu: 39,
+                nombre: 'Distribución de Productos',
+                ruta: '/main/pages/tiendita/distribucion-productos',
+                orden: 6
+            },
         ]
     },
     {
@@ -271,7 +277,7 @@ export const initialMenuData = [
                 nombre: 'Proyectos',
                 ruta: '/main/pages/proyectos/proyectos',
                 orden: 1
-            },            
+            },
         ]
     },
     {
@@ -308,4 +314,27 @@ export const initialMenuData = [
             }
         ]
     }
+];
+
+export const initialSpecialPermissionsData = [
+    {
+        idPermiso: 1,
+        codigo: 'DSB-SHOW-TIENDITA',
+        anulado: false,
+    },
+    {
+        idPermiso: 2,
+        codigo: 'DSB-SHOW-VOLUNTARIADO',
+        anulado: false,
+    },
+    {
+        idPermiso: 3,
+        codigo: 'DSB-SHOW-INVENTARIO',
+        anulado: false,
+    },
+    {
+        idPermiso: 4,
+        codigo: 'DSB-SHOW-INSTITUCIONES',
+        anulado: false,
+    },
 ];
