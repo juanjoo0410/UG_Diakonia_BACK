@@ -164,6 +164,7 @@ export const importJson = async (req: Request, res: Response) => {
                 status: false,
                 message: msg.replace(/_/g, ' ')
             });
+            return;
         }
 
         handleHttp(res, 'ERROR_POST_IMPORT', error);
