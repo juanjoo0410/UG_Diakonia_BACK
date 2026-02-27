@@ -90,7 +90,7 @@ export class VoluntarioService extends BaseCRUDService<Voluntario> {
             let siguienteValor = contadorLocal.ultimoValor;
 
             // Carga de catálogos en paralelo para optimizar
-            const [instituciones] = await Promise.all([ Institucion.findAll({ where: { estado: true } }) ]);
+            const [instituciones] = await Promise.all([Institucion.findAll()]);
             const mapInstitucion = new Map(instituciones.map(t => [limpiarTildes(t.nombre), t.idInstitucion]));
 
             const idsExcel = lista.map(row => row.identificacion?.toString().trim()).filter(identificacion => identificacion);
@@ -102,18 +102,22 @@ export class VoluntarioService extends BaseCRUDService<Voluntario> {
 
             const idsExistentesSet = new Set(voluntariosExistentes.map(i => i.identificacion));
 
+            let count = 0;
             for (const row of lista) {
+                count += 1;
                 let identificacion = String(row.identificacion || '').trim();
                 if (idsExistentesSet.has(identificacion)) continue;
 
-                let institucion = row.institucion?.toUpperCase().trim() ?? '';
+                let institucion = row.solicitadoA?.toUpperCase().trim() ?? '';
                 let idInstitucion: number = 0;
-                let familia: boolean = institucion === 'FAMILIA' ? true : false;
-                let educativo: boolean = institucion === 'VOLUNTARIO EDUCATIVO' ? true : false;
-                let corporativo: boolean = institucion === 'VOLUNTARIO CORPORATIVO' ? true : false;
-                if (institucion !== 'FAMILIA' || institucion !== 'VOLUNTARIO EDUCATIVO' || institucion !== 'VOLUNTARIO CORPORATIVO') {
-                    const searchId = mapInstitucion.get(limpiarTildes(row.institucion));
-                    if (!searchId) throw new Error(`TIPO_JORNADA_INVALID:${row.tipoJornada}`);
+
+                let familia: boolean = institucion === 'FAMILIA';
+                let educativo: boolean = institucion === 'VOLUNTARIO EDUCATIVO';
+                let corporativo: boolean = institucion === 'VOLUNTARIO CORPORATIVO';
+
+                if (!familia && !educativo && !corporativo) {
+                    const searchId = mapInstitucion.get(limpiarTildes(institucion));
+                    if (!searchId) throw new Error(`INSTITUCION_INVALID: ${institucion} FILA:${count}`);
                     idInstitucion = searchId;
                 }
 

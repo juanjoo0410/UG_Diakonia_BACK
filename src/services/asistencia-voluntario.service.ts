@@ -286,7 +286,7 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
         const transaction = await sequelize.transaction();
 
         try {
-            const [instituciones] = await Promise.all([Institucion.findAll({ where: { estado: true } })]);
+            const [instituciones] = await Promise.all([Institucion.findAll()]);
             const [voluntarios] = await Promise.all([Voluntario.findAll({ where: { estado: true } })]);
             const [tiposJornadas] = await Promise.all([TipoJornada.findAll({ where: { estado: true } })]);
             const [instalaciones] = await Promise.all([InstalacionExterna.findAll({ where: { estado: true } })]);
@@ -308,12 +308,14 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
 
                 let institucion = row.solicitadoA?.toUpperCase().trim() ?? '';
                 let idInstitucion: number = 0;
-                let familia: boolean = institucion === 'FAMILIA' ? true : false;
-                let educativo: boolean = institucion === 'VOLUNTARIO EDUCATIVO' ? true : false;
-                let corporativo: boolean = institucion === 'VOLUNTARIO CORPORATIVO' ? true : false;
-                if (institucion !== 'FAMILIA' || institucion !== 'VOLUNTARIO EDUCATIVO' || institucion !== 'VOLUNTARIO CORPORATIVO') {
-                    const searchId = mapInstitucion.get(limpiarTildes(row.solicitadoA));
-                    if (!searchId) throw new Error(`TIPO_JORNADA_INVALID:${row.tipoJornada}`);
+
+                let familia: boolean = institucion === 'FAMILIA';
+                let educativo: boolean = institucion === 'VOLUNTARIO EDUCATIVO';
+                let corporativo: boolean = institucion === 'VOLUNTARIO CORPORATIVO';
+
+                if (!familia && !educativo && !corporativo) {
+                    const searchId = mapInstitucion.get(limpiarTildes(institucion));
+                    if (!searchId) throw new Error(`INSTITUCION_INVALID: ${institucion} FILA:${count}`);
                     idInstitucion = searchId;
                 }
 
