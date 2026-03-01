@@ -76,9 +76,17 @@ const getTotal = async (req: Request, res: Response) => {
 };
 
 const getTotalBeneficiariosByInstituciones = async (req: Request, res: Response) => {
+    const { idTipoOrg = 0 } = req.query;
+    const idTipoOrgNum = parseInt(idTipoOrg as string);
     try {
+        const whereConditions: any = {
+            estado: true,
+        };
+
+        if (idTipoOrgNum !== 0) { whereConditions.idTipoOrg = idTipoOrgNum; }
+
         const topInstituciones = await Institucion.findAll({
-            where: { estado: true },
+            where: whereConditions,
             attributes: [['nombre', 'name'], ['totalBeneficiarios', 'value']],
             order: [['totalBeneficiarios', 'DESC']],
             limit: 10

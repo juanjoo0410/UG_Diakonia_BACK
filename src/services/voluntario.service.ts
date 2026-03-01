@@ -137,6 +137,8 @@ export class VoluntarioService extends BaseCRUDService<Voluntario> {
                     observaciones: row.observaciones?.trim() ?? '',
                     estado: true
                 }, { transaction });
+
+                idsExistentesSet.add(identificacion);
             }
 
             contadorLocal.ultimoValor = siguienteValor;
