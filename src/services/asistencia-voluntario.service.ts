@@ -10,6 +10,8 @@ import { TipoJornada } from '../models/TipoJornada.model';
 import { InstalacionExterna } from '../models/InstalacionExterna.model';
 import { Area } from '../models/Area.model';
 import { getNumeroSemana, limpiarTildes, normalizarFecha } from '../utils/utilsService';
+import { Contador } from '../models/contadorModel';
+import { generarCodigo } from '../utils/contadorService';
 
 type AsistenciaVoluntarioData = Omit<IAsistenciaVoluntario, 'idAsistenciaVoluntario'>;
 
@@ -298,6 +300,10 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
             const mapInstalacion = new Map(instalaciones.map(t => [limpiarTildes(t.nombre), t.idInstalacionExterna]));
             const mapArea = new Map(areas.map(t => [limpiarTildes(t.nombre), t.idArea]));
 
+            const contadorLocal = await Contador.findOne({ where: { nombre: 'voluntarios' }, transaction });
+            if (!contadorLocal) throw new Error('CONTADOR_VOLUNTARIOS_NOT_FOUND');
+
+            let siguienteValor = contadorLocal.ultimoValor;
             let count = 0;
 
             for (const row of lista) {
@@ -305,6 +311,7 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
                 const fecha = normalizarFecha(row.fecha);
                 const semana = getNumeroSemana(fecha.toDateString());
                 const identificacion = String(row.identificacion || '').trim();
+                if (identificacion == '') throw new Error(`VOLUNTARIO_INVALID: VACÍO FILA:${count}`);
 
                 let institucion = row.solicitadoA?.toUpperCase().trim() ?? '';
                 let idInstitucion: number = 0;
@@ -319,8 +326,32 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
                     idInstitucion = searchId;
                 }
 
-                const idVoluntario = mapVoluntario.get(identificacion);
-                if (!idVoluntario) throw new Error(`VOLUNTARIO_INVALID: ${identificacion} FILA:${count}`);
+                let idVoluntario = mapVoluntario.get(identificacion);
+                if (!idVoluntario) {
+                    siguienteValor += 1;
+                    const codigo = await generarCodigo('voluntarios', transaction);
+                    const newVoluntario = await Voluntario.create({
+                        codigo,
+                        esExtranjero: row.esExtranjero?.trim().toUpperCase() == 'SI' ? true : false,
+                        identificacion,
+                        nombre: row.nombre.toUpperCase().trim(),
+                        sexo: row.sexo?.trim(),
+                        idInstitucion: idInstitucion === 0 ? undefined : idInstitucion,
+                        familia,
+                        voluntarioEducativo: educativo,
+                        voluntarioCorporativo: corporativo,
+                        recibeKit: row.recibeKit?.trim().toUpperCase() == 'SI' ? true : false,
+                        observaciones: row.observaciones?.trim() ?? '',
+                        estado: true
+                    }, { transaction });
+
+                    if (!newVoluntario) throw new Error(`VOLUNTARIO_NOT_FOUND: Verifique los datos del voluntario FILA:${count}`);
+
+                    contadorLocal.ultimoValor = siguienteValor;
+                    await contadorLocal.save({ transaction });
+                    idVoluntario = newVoluntario?.idVoluntario ?? 0;
+                    mapVoluntario.set(identificacion, idVoluntario);
+                }
 
                 const idTipoJornada = mapTipoJornada.get(limpiarTildes(row.tipoJornada));
                 if (!idTipoJornada) throw new Error(`TIPO_JORNADA_INVALID: ${row.tipoJornada} FILA:${count}`);
