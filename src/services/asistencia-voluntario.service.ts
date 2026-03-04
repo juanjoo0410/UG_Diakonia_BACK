@@ -136,7 +136,7 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
         }
     }
 
-    public async getResumenHorasPorJornada(semana: number, anio: number): Promise<any[]> {
+    public async getResumenHorasPorJornada(esMensual: boolean, valor: number, anio: number): Promise<any[]> {
         try {
             const whereConditions: any = {
                 estatus: 'GENERADO',
@@ -144,7 +144,11 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
                     where(fn('YEAR', col('fecha')), anio)
                 ]
             };
-            if (semana !== 0) { whereConditions.semana = semana; }
+
+            if (valor !== 0) {
+                if (esMensual) { whereConditions[Op.and].push(where(fn('MONTH', col('AsistenciaVoluntario.fecha')), valor)); }
+                else { whereConditions.semana = valor; }
+            }
 
             const resumen = await this.ModelClass.findAll({
                 attributes: [
@@ -168,7 +172,7 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
         }
     }
 
-    public async getResumenVoluntarios(semana: number, anio: number): Promise<any[]> {
+    public async getResumenVoluntarios(esMensual: boolean, valor: number, anio: number): Promise<any[]> {
         try {
             const whereConditions: any = {
                 estatus: 'GENERADO',
@@ -176,7 +180,11 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
                     where(fn('YEAR', col('fecha')), anio)
                 ]
             };
-            if (semana !== 0) { whereConditions.semana = semana; }
+
+            if (valor !== 0) {
+                if (esMensual) { whereConditions[Op.and].push(where(fn('MONTH', col('AsistenciaVoluntario.fecha')), valor)); }
+                else { whereConditions.semana = valor; }
+            }
 
             const resumen = await this.ModelClass.findAll({
                 attributes: [
@@ -205,7 +213,7 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
         }
     }
 
-    public async getResumenInstituciones(semana: number, anio: number): Promise<any[]> {
+    public async getResumenInstituciones(esMensual: boolean, valor: number, anio: number): Promise<any[]> {
         try {
             const whereConditions: any = {
                 idInstitucion: { [Op.ne]: null },
@@ -214,7 +222,11 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
                     where(fn('YEAR', col('fecha')), anio)
                 ]
             };
-            if (semana !== 0) { whereConditions.semana = semana; }
+
+            if (valor !== 0) {
+                if (esMensual) { whereConditions[Op.and].push(where(fn('MONTH', col('AsistenciaVoluntario.fecha')), valor)); }
+                else { whereConditions.semana = valor; }
+            }
 
             const resumen = await this.ModelClass.findAll({
                 attributes: [
@@ -230,7 +242,7 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
         }
     }
 
-    public async getResumenLugares(mes: number, anio: number): Promise<any[]> {
+    public async getResumenLugares(esMensual: boolean, valor: number, anio: number): Promise<any[]> {
         try {
 
             const whereConditions: any = {
@@ -238,10 +250,9 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
                 [Op.and]: [where(fn('YEAR', col('AsistenciaVoluntario.fecha')), anio)]
             };
 
-            if (mes !== 0) {
-                whereConditions[Op.and].push(
-                    where(fn('MONTH', col('AsistenciaVoluntario.fecha')), mes)
-                );
+            if (valor !== 0) {
+                if (esMensual) { whereConditions[Op.and].push(where(fn('MONTH', col('AsistenciaVoluntario.fecha')), valor)); }
+                else { whereConditions.semana = valor; }
             }
 
             const resumen = await this.ModelClass.findAll({
