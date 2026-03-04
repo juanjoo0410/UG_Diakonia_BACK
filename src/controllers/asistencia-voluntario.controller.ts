@@ -174,19 +174,20 @@ export const getUltimaFecha = async (req: Request, res: Response) => {
 };
 
 export const getResumenHoras = async (req: Request, res: Response) => {
-    const { semana, anio } = req.query;
-    const semanaNum = parseInt(semana as string);
+    const { esMensual, valor, anio } = req.query;
+    const esMensualBool = String(esMensual).toLowerCase() === 'true';
+    const valorNum = parseInt(valor as string);
     const anioNum = parseInt(anio as string);
     try {
-        if (isNaN(semanaNum) || isNaN(anioNum)) {
+        if (isNaN(valorNum) || isNaN(anioNum)) {
             res.status(400).json({
                 status: false,
-                message: "Semana y año inválidos."
+                message: "Filtros inválidos."
             });
             return;
         }
 
-        const data = await asistenciaVoluntarioService.getResumenHorasPorJornada(semanaNum, anioNum);
+        const data = await asistenciaVoluntarioService.getResumenHorasPorJornada(esMensualBool, valorNum, anioNum);
         res.status(200).json({
             status: true,
             value: data
@@ -198,19 +199,20 @@ export const getResumenHoras = async (req: Request, res: Response) => {
 };
 
 export const getResumenVoluntarios = async (req: Request, res: Response) => {
-    const { semana, anio } = req.query;
-    const semanaNum = parseInt(semana as string);
+    const { esMensual, valor, anio } = req.query;
+    const esMensualBool = String(esMensual).toLowerCase() === 'true';
+    const valorNum = parseInt(valor as string);
     const anioNum = parseInt(anio as string);
     try {
-        if (isNaN(semanaNum) || isNaN(anioNum)) {
+        if (isNaN(valorNum) || isNaN(anioNum)) {
             res.status(400).json({
                 status: false,
-                message: "Semana y año inválidos."
+                message: "Filtros inválidos."
             });
             return;
         }
 
-        const data = await asistenciaVoluntarioService.getResumenVoluntarios(semanaNum, anioNum);
+        const data = await asistenciaVoluntarioService.getResumenVoluntarios(esMensualBool, valorNum, anioNum);
         res.status(200).json({
             status: true,
             value: data
@@ -222,19 +224,20 @@ export const getResumenVoluntarios = async (req: Request, res: Response) => {
 };
 
 export const getResumenInstituciones = async (req: Request, res: Response) => {
-    const { semana, anio } = req.query;
-    const semanaNum = parseInt(semana as string);
+    const { esMensual, valor, anio } = req.query;
+    const esMensualBool = String(esMensual).toLowerCase() === 'true';
+    const valorNum = parseInt(valor as string);
     const anioNum = parseInt(anio as string);
     try {
-        if (isNaN(semanaNum) || isNaN(anioNum)) {
+        if (isNaN(valorNum) || isNaN(anioNum)) {
             res.status(400).json({
                 status: false,
-                message: "Semana y año inválidos."
+                message: "Filtros inválidos."
             });
             return;
         }
 
-        const data = await asistenciaVoluntarioService.getResumenInstituciones(semanaNum, anioNum);
+        const data = await asistenciaVoluntarioService.getResumenInstituciones(esMensualBool, valorNum, anioNum);
         res.status(200).json({
             status: true,
             value: data
@@ -246,19 +249,20 @@ export const getResumenInstituciones = async (req: Request, res: Response) => {
 };
 
 export const getResumenLugares = async (req: Request, res: Response) => {
-    const { mes, anio } = req.query;
-    const mesNum = parseInt(mes as string);
+    const { esMensual, valor, anio } = req.query;
+    const esMensualBool = String(esMensual).toLowerCase() === 'true';
+    const valorNum = parseInt(valor as string);
     const anioNum = parseInt(anio as string);
     try {
-        if (isNaN(mesNum) || isNaN(anioNum)) {
+        if (isNaN(valorNum) || isNaN(anioNum)) {
             res.status(400).json({
                 status: false,
-                message: "mes y año inválidos."
+                message: "Filtros inválidos."
             });
             return;
         }
 
-        const data = await asistenciaVoluntarioService.getResumenLugares(mesNum, anioNum);
+        const data = await asistenciaVoluntarioService.getResumenLugares(esMensualBool, valorNum, anioNum);
         res.status(200).json({
             status: true,
             value: data
