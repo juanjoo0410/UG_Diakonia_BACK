@@ -273,6 +273,31 @@ export const getResumenLugares = async (req: Request, res: Response) => {
     }
 };
 
+export const getPorcentajesSolicitadoA = async (req: Request, res: Response) => {
+    const { esMensual, valor, anio } = req.query;
+    const esMensualBool = String(esMensual).toLowerCase() === 'true';
+    const valorNum = parseInt(valor as string);
+    const anioNum = parseInt(anio as string);
+    try {
+        if (isNaN(valorNum) || isNaN(anioNum)) {
+            res.status(400).json({
+                status: false,
+                message: "Filtros inválidos."
+            });
+            return;
+        }
+
+        const data = await asistenciaVoluntarioService.getPorcentajesSolicitadoA(esMensualBool, valorNum, anioNum);
+        res.status(200).json({
+            status: true,
+            value: data
+        });
+
+    } catch (error) {
+        handleHttp(res, `ERROR_GET_PORC_SOLICITADOA_${entidad}`, error);
+    }
+};
+
 export const importJson = async (req: Request, res: Response) => {
     try {
         const voluntariosExcel = req.body;
