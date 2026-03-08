@@ -1,7 +1,8 @@
 import { Router } from "express";
 import {
     create, getAllByDate, getAll, getById, update, deleteById, importJson, getUltimaFecha, getResumenHoras,
-    getResumenVoluntarios, getResumenInstituciones, getResumenLugares
+    getResumenVoluntarios, getResumenInstituciones, getResumenLugares,
+    getPorcentajesSolicitadoA
 } from "../controllers/asistencia-voluntario.controller";
 import { checkJwt } from "../middlewares/session";
 
@@ -16,6 +17,7 @@ router.get('/resumen-horas', checkJwt, getResumenHoras);
 router.get('/resumen-voluntarios', checkJwt, getResumenVoluntarios);
 router.get('/resumen-instituciones', checkJwt, getResumenInstituciones);
 router.get('/resumen-lugares', checkJwt, getResumenLugares);
+router.get('/porcentajes-solicitado', checkJwt, getPorcentajesSolicitadoA);
 router.get('/', checkJwt, getAll);
 router.get('/:id', checkJwt, getById);
 router.delete('/:id', checkJwt, deleteById);
