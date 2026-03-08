@@ -216,7 +216,6 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
     public async getResumenInstituciones(esMensual: boolean, valor: number, anio: number): Promise<any[]> {
         try {
             const whereConditions: any = {
-                idInstitucion: { [Op.ne]: null },
                 estatus: 'GENERADO',
                 [Op.and]: [
                     where(fn('YEAR', col('fecha')), anio)
@@ -230,7 +229,10 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
 
             const resumen = await this.ModelClass.findAll({
                 attributes: [
-                    [fn('COUNT', fn('DISTINCT', col('AsistenciaVoluntario.idInstitucion'))), 'totalInstituciones']
+                    [fn('COUNT', fn('DISTINCT', col('AsistenciaVoluntario.idInstitucion'))), 'totalInstituciones'],
+                    [literal("IF(SUM(CASE WHEN familia = 1 THEN 1 ELSE 0 END) > 0, 1, 0)"), 'existFamilia'],
+                    [literal("IF(SUM(CASE WHEN voluntarioEducativo = 1 THEN 1 ELSE 0 END) > 0, 1, 0)"), 'existEstudiante'],
+                    [literal("IF(SUM(CASE WHEN voluntarioCorporativo = 1 THEN 1 ELSE 0 END) > 0, 1, 0)"), 'existCorporativo']
                 ],
                 where: whereConditions,
                 raw: true
@@ -292,6 +294,49 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
             return resumen;
         } catch (error) {
             throw new Error(`Error en resumen de lugares: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    public async getPorcentajesSolicitadoA(esMensual: boolean, valor: number, anio: number): Promise<any[]> {
+        try {
+            const whereConditions: any = {
+                estatus: 'GENERADO',
+                [Op.and]: [
+                    where(fn('YEAR', col('fecha')), anio)
+                ]
+            };
+
+            if (valor !== 0) {
+                if (esMensual) { whereConditions[Op.and].push(where(fn('MONTH', col('AsistenciaVoluntario.fecha')), valor)); }
+                else { whereConditions.semana = valor; }
+            }
+
+            const resumen = await this.ModelClass.findAll({
+                attributes: [
+                    [
+                        literal("ROUND(COALESCE((SUM(CASE WHEN idInstitucion IS NOT NULL THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)) * 100, 0), 2)"),
+                        'porcInstituciones'
+                    ],
+                    [
+                        literal("ROUND(COALESCE((SUM(CASE WHEN familia = 1 THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)) * 100, 0), 2)"),
+                        'porcFamilia'
+                    ],
+                    [
+                        literal("ROUND(COALESCE((SUM(CASE WHEN voluntarioEducativo = 1 THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)) * 100, 0), 2)"),
+                        'porcEstudiante'
+                    ],
+                    [
+                        literal("ROUND(COALESCE((SUM(CASE WHEN voluntarioCorporativo = 1 THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)) * 100, 0), 2)"),
+                        'porcCorporativo'
+                    ]
+                ],
+                where: whereConditions,
+                raw: true
+            });
+
+            return resumen;
+        } catch (error) {
+            throw new Error(`Error en porcentajes de solicitados a: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 
