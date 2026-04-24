@@ -7,7 +7,8 @@ import {
     getProductosDemandantes,
     getComprobanteVentaById,
     deleteComprobanteVenta,
-    getTotalProductos
+    getTotalProductos,
+    getTotalContribucionAnual
 } from "../controllers/comprobanteVentaController";
 import { checkJwt } from "../middlewares/session";
 
@@ -17,6 +18,7 @@ router.post('/', checkJwt, createComprobanteVenta);
 router.post('/fecha', checkJwt, getComprobantesVenta);
 router.post('/ventas', checkJwt, getVentasByTipoPago);
 router.post('/total', checkJwt, getTotalVentasMensual);
+router.post('/total-anual', checkJwt, getTotalContribucionAnual);
 router.post('/productos-demandantes', checkJwt, getProductosDemandantes);
 router.post('/total-productos', checkJwt, getTotalProductos);
 router.get('/:id', checkJwt, getComprobanteVentaById);
