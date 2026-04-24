@@ -216,6 +216,40 @@ const getTotalVentasMensual = async (req: Request, res: Response) => {
     }
 };
 
+const getTotalContribucionAnual = async (req: Request, res: Response) => {
+    const { anio } = req.body;
+    const anioNum = parseInt(anio as string);
+
+    try {
+        if (isNaN(anioNum)) {
+            res.status(400).json({
+                status: false,
+                message: "Año inválido."
+            });
+            return;
+        }
+
+        const whereConditions: any = {
+            estado: true,
+            [Op.and]: [where(fn('YEAR', col('fecha')), anio)]
+        };
+
+        const contribuciones = await ComprobanteVenta.findAll({
+            attributes: [
+                [fn('MONTH', col('fecha')), 'mes'],
+                [fn('SUM', col('total')), 'totalContribucion'],
+            ],
+            where: whereConditions,
+            group: [fn('MONTH', col('fecha'))],
+            raw: true,
+        });
+
+        res.status(200).json({ status: true, value: contribuciones });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_CONTRIBUCION_ANUAL', error);
+    }
+};
+
 const getProductosDemandantes = async (req: Request, res: Response) => {
     const { mes, anio } = req.body;
     const mesNum = parseInt(mes as string);
@@ -390,6 +424,7 @@ export {
     createComprobanteVenta,
     getComprobantesVenta,
     getTotalVentasMensual,
+    getTotalContribucionAnual,
     getVentasByTipoPago,
     getProductosDemandantes,
     getTotalProductos,
