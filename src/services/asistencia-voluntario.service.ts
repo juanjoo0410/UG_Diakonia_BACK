@@ -373,8 +373,8 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
                 let idInstitucion: number = 0;
 
                 let familia: boolean = institucion === 'FAMILIA';
-                let educativo: boolean = institucion === 'VOLUNTARIO EDUCATIVO';
-                let corporativo: boolean = institucion === 'VOLUNTARIO CORPORATIVO';
+                let educativo: boolean = institucion === 'VOLUNTARIO EDUCATIVO' || institucion === 'VOLUNTARIADO EDUCATIVO';
+                let corporativo: boolean = institucion === 'VOLUNTARIO CORPORATIVO' || institucion === 'VOLUNTARIADO CORPORATIVO';
 
                 if (!familia && !educativo && !corporativo) {
                     const searchId = mapInstitucion.get(limpiarTildes(institucion));

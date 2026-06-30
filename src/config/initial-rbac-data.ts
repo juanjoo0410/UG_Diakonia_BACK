@@ -218,7 +218,7 @@ export const initialMenuData = [
         idMenu: 7,
         nombre: 'Administración',
         icono: 'settings',
-        orden: 9,
+        orden: 10,
         submenus: [
             {
                 idSubmenu: 1,
@@ -256,7 +256,7 @@ export const initialMenuData = [
         idMenu: 8,
         nombre: 'Seguridad',
         icono: 'lock',
-        orden: 10,
+        orden: 11,
         submenus: [
             {
                 idSubmenu: 4,
@@ -310,6 +310,26 @@ export const initialMenuData = [
                 idSubmenu: 38,
                 nombre: 'Asistencia de Voluntarios',
                 ruta: '/main/pages/voluntariado/asistencias',
+                orden: 2
+            }
+        ]
+    },
+    {
+        idMenu: 12,
+        nombre: 'Dirección',
+        icono: 'insights',
+        orden: 9,
+        submenus: [
+            {
+                idSubmenu: 39,
+                nombre: 'Tableros BI',
+                ruta: '/main/pages/direccion/tableros',
+                orden: 1
+            },
+            {
+                idSubmenu: 40,
+                nombre: 'Visualización de Tableros BI',
+                ruta: '/main/pages/direccion/visualizacion-tableros',
                 orden: 2
             }
         ]

@@ -236,11 +236,12 @@ const getTotalContribucionAnual = async (req: Request, res: Response) => {
 
         const contribuciones = await ComprobanteVenta.findAll({
             attributes: [
+                [fn('YEAR', col('fecha')), 'año'],
                 [fn('MONTH', col('fecha')), 'mes'],
                 [fn('SUM', col('total')), 'totalContribucion'],
             ],
             where: whereConditions,
-            group: [fn('MONTH', col('fecha'))],
+            group: [fn('YEAR', col('fecha')), fn('MONTH', col('fecha'))],
             raw: true,
         });
 

@@ -2,6 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from "../config/db";
 import { IUsuario } from '../interfaces/IUsuario';
 import { Rol } from './rolModel';
+import { TableroUsuario } from './tablero-usuario.model';
 
 // Definimos el modelo sin usar decoradores
 export class Usuario extends Model<IUsuario> implements IUsuario {
@@ -63,3 +64,13 @@ Usuario.init(
     timestamps: true
   }
 );
+
+Usuario.hasMany(TableroUsuario, {
+    foreignKey: 'idUsuario',
+    as: 'tableros_usuarios'
+});
+
+TableroUsuario.belongsTo(Usuario, {
+    foreignKey: 'idUsuario',
+    as: 'usuarios'
+});
