@@ -321,13 +321,13 @@ export const initialMenuData = [
         orden: 9,
         submenus: [
             {
-                idSubmenu: 39,
+                idSubmenu: 40,
                 nombre: 'Tableros BI',
                 ruta: '/main/pages/direccion/tableros',
                 orden: 1
             },
             {
-                idSubmenu: 40,
+                idSubmenu: 41,
                 nombre: 'Visualización de Tableros BI',
                 ruta: '/main/pages/direccion/visualizacion-tableros',
                 orden: 2
