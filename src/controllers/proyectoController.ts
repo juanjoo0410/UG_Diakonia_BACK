@@ -138,7 +138,7 @@ const update = async (req: Request & { user?: any }, res: Response) => {
 
     if (proyectosInstituciones && proyectosInstituciones.length > 0) {
       const nuevasRelaciones = proyectosInstituciones.map((pi: any) => ({
-        idProyecto : idProyecto,
+        idProyecto: idProyecto,
         idInstitucion: pi.idInstitucion
       }));
       await ProyectoInstitucion.bulkCreate(nuevasRelaciones, { transaction });
