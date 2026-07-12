@@ -8,6 +8,7 @@
 
     /* Emit */
     "outDir": "./dist",                                   /* Specify an output folder for all emitted files. */
+    "rootDir": "./src",
 
     /* Interop Constraints */
     "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
@@ -18,5 +19,12 @@
 
     /* Completeness */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
-  }
+  },
+  "include": [
+    "src/**/*"                                           /* Le dice a TS que solo observe y compile lo que esté en src */
+  ],
+  "exclude": [
+    "node_modules",                                      /* Evita que intente compilar dependencias */
+    "dist"                                               /* Evita bucles infinitos ignorando la carpeta de salida */
+  ]
 }

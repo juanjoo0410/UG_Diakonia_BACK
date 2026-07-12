@@ -218,7 +218,7 @@ export const initialMenuData = [
         idMenu: 7,
         nombre: 'Administración',
         icono: 'settings',
-        orden: 10,
+        orden: 11,
         submenus: [
             {
                 idSubmenu: 1,
@@ -256,7 +256,7 @@ export const initialMenuData = [
         idMenu: 8,
         nombre: 'Seguridad',
         icono: 'lock',
-        orden: 11,
+        orden: 12,
         submenus: [
             {
                 idSubmenu: 4,
@@ -331,6 +331,50 @@ export const initialMenuData = [
                 nombre: 'Visualización de Tableros BI',
                 ruta: '/main/pages/direccion/visualizacion-tableros',
                 orden: 2
+            }
+        ]
+    },
+    {
+        idMenu: 13,
+        nombre: 'Tesoreria',
+        icono: 'point_of_sale',
+        orden: 10,
+        submenus: [
+            {
+                idSubmenu: 42,
+                nombre: 'Caja y Bancos',
+                ruta: '/main/pages/tesoreria/caja-bancos',
+                orden: 1
+            },
+            {
+                idSubmenu: 43,
+                nombre: 'Rubros',
+                ruta: '/main/pages/tesoreria/rubros',
+                orden: 2
+            },
+            {
+                idSubmenu: 44,
+                nombre: 'Vale de Caja',
+                ruta: '/main/pages/tesoreria/vale-caja',
+                orden: 3
+            },
+            {
+                idSubmenu: 45,
+                nombre: 'Apertura de Caja',
+                ruta: '/main/pages/tesoreria/apertura',
+                orden: 4
+            },
+            {
+                idSubmenu: 44,
+                nombre: 'Cierre de Caja',
+                ruta: '/main/pages/tesoreria/cierre',
+                orden: 5
+            },
+            {
+                idSubmenu: 45,
+                nombre: 'Estado de Cuenta',
+                ruta: '/main/pages/tesoreria/estado-cuenta',
+                orden: 6
             }
         ]
     }
