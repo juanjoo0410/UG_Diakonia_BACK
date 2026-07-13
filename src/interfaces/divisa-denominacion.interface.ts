@@ -4,4 +4,5 @@ export interface IDivisaDenominacion {
     tipo: String;
     descripcion: string;
     valor: number;
+    anulado?: boolean;
 }
