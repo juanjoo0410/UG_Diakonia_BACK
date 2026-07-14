@@ -1,7 +1,7 @@
 export interface ITransferenciaTesoreriaDt {
-    id: number;
+    id?: number;
     transferenciaTesoreriaId: number;
-    documentoId: string;
+    documentoId: number;
     tipo: string;
     divisaId: number;
     cambio: number;

@@ -1,5 +1,5 @@
 export interface IKardexTesoreria {
-    id: number;
+    id?: number;
     cajaBancoId: number;
     documentoId: number;
     numero: string;

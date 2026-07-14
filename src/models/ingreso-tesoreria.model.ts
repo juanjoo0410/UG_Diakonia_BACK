@@ -23,7 +23,7 @@ export class IngresoTesoreria extends Model<IIngresoTesoreria> implements IIngre
 IngresoTesoreria.init(
     {
         id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-        fecha: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, },
+        fecha: { type: DataTypes.DATEONLY, defaultValue: DataTypes.NOW, },
         tipo: { type: DataTypes.STRING(25), allowNull: false },
         descripcion: { type: DataTypes.STRING(200), allowNull: false },
         cajaBancoId: {
@@ -71,18 +71,15 @@ IngresoTesoreria.belongsTo(CajaBanco, {
     as: 'cajaBanco'
 });
 
-
 IngresoTesoreria.belongsTo(Divisa, {
     foreignKey: 'divisaId',
     as: 'divisa'
 });
 
-
 IngresoTesoreria.belongsTo(CajaBanco, {
     foreignKey: 'cajaCierreId',
     as: 'cajaCierre'
 });
-
 
 IngresoTesoreria.belongsTo(Usuario, {
     foreignKey: 'creadorId',
