@@ -1,5 +1,6 @@
 export interface IApertura {
     id?: number;
+    fecha: Date;
     cajaId: number;
     encargadoId: number;
     fondoFijo: number;
