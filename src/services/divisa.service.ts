@@ -43,16 +43,13 @@ export class DivisaService extends BaseCRUDService<Divisa> {
         }
     }
 
-public async updateDivisa(divisaData: IDivisa): Promise<Divisa> {
+    public async updateDivisa(divisaData: IDivisa): Promise<Divisa> {
         const transaction: Transaction = await sequelize.transaction();
-
         try {
-            // 1. Buscar la divisa a actualizar
-            const DivisaToUpdate = await this.ModelClass.findByPk(divisaData.id, { transaction });
-            if (!DivisaToUpdate) throw new Error('ENTIDAD_NO_ENCONTRADA');
+            const divisaToUpdate = await this.ModelClass.findByPk(divisaData.id, { transaction });
+            if (!divisaToUpdate) throw new Error('ENTIDAD_NO_ENCONTRADA');
 
-            // 2. Validación de nombre duplicado
-            if (divisaData.nombre.toLocaleUpperCase() !== DivisaToUpdate.nombre.toLocaleUpperCase()) {
+            if (divisaData.nombre.toLocaleUpperCase() !== divisaToUpdate.nombre.toLocaleUpperCase()) {
                 const nameExist = await this.ModelClass.findOne({
                     where: { nombre: divisaData.nombre },
                     transaction
@@ -60,66 +57,61 @@ public async updateDivisa(divisaData: IDivisa): Promise<Divisa> {
                 if (nameExist) throw new Error('NOMBRE_DE_ENTIDAD_EXISTE');
             }
 
-            // 3. Actualizar los campos de la cabecera
-            DivisaToUpdate.codigo = divisaData.codigo;
-            DivisaToUpdate.nombre = divisaData.nombre;
-            DivisaToUpdate.simbolo = divisaData.simbolo;
-            DivisaToUpdate.cambio = divisaData.cambio;
-            DivisaToUpdate.divisaBase = divisaData.divisaBase;
-            await DivisaToUpdate.save({ transaction });
+            divisaToUpdate.codigo = divisaData.codigo;
+            divisaToUpdate.nombre = divisaData.nombre;
+            divisaToUpdate.simbolo = divisaData.simbolo;
+            divisaToUpdate.cambio = divisaData.cambio;
+            divisaToUpdate.divisaBase = divisaData.divisaBase;
+            await divisaToUpdate.save({ transaction });
 
-            // 4. Sincronización del detalle (Denominaciones) sin destruir
             if (divisaData.divisaDenominaciones) {
-                
-                // Paso A: Anular lógicamente todas las denominaciones actuales de esta divisa
                 await DivisaDenominacion.update(
                     { anulado: true },
-                    { 
-                        where: { divisaId: DivisaToUpdate.id }, 
-                        transaction 
+                    {
+                        where: { divisaId: divisaToUpdate.id },
+                        transaction
                     }
                 );
 
                 const denominacionesParaCrear: any[] = [];
 
-                for (const denom of divisaData.divisaDenominaciones) {
-                    if (denom.id) {
-                        // Paso B: Si tiene un ID válido, actualizamos sus campos y lo des-anulamos (anulado: false)
-                        await DivisaDenominacion.update(
+                for (const denom of divisaData.divisaDenominaciones) {                    
+                    const denominacionExistente = await DivisaDenominacion.findOne({
+                        where: {
+                            divisaId: divisaToUpdate.id,
+                            tipo: denom.tipo,
+                            descripcion: denom.descripcion.trim()
+                        },
+                        transaction
+                    });
+
+                    if (denominacionExistente) {
+                        await denominacionExistente.update(
                             {
-                                tipo: denom.tipo,
-                                descripcion: denom.descripcion,
                                 valor: denom.valor,
-                                anulado: false // 👈 Vuelve a estar activo
+                                anulado: false
                             },
-                            { 
-                                where: { id: denom.id, divisaId: DivisaToUpdate.id }, 
-                                transaction 
-                            }
+                            { transaction }
                         );
                     } else {
-                        // Paso C: Si no tiene ID, lo preparamos para la inserción masiva
-                        // Omitimos el id para que la base de datos genere uno autoincremental limpio
                         const { id, ...restoDenominacion } = denom;
                         denominacionesParaCrear.push({
                             ...restoDenominacion,
-                            divisaId: DivisaToUpdate.id,
-                            anulado: false // Se crea activo por defecto
+                            descripcion: denom.descripcion.trim(),
+                            divisaId: divisaToUpdate.id,
+                            anulado: false
                         });
                     }
                 }
 
-                // Paso D: Insertar de golpe las denominaciones totalmente nuevas
                 if (denominacionesParaCrear.length > 0) {
                     await DivisaDenominacion.bulkCreate(denominacionesParaCrear, { transaction });
                 }
             }
 
             await transaction.commit();
-            
-            // Retornamos la divisa actualizada (puedes incluir el detalle si lo requieres con un findByPk)
-            return DivisaToUpdate;
 
+            return divisaToUpdate;
         } catch (error) {
             await transaction.rollback();
             throw error;
