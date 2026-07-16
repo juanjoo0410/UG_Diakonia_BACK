@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import { IDivisa } from "../interfaces/divisa.interface";
 import { Divisa } from "../models/divisa.model";
 import { BaseCRUDService } from "./base-crud.service";
@@ -22,6 +22,21 @@ export class DivisaService extends BaseCRUDService<Divisa> {
             if (checkIs) {
                 throw new Error('ENTIDAD_EXISTE');
             }
+
+            if (divisaData.divisaBase) {
+                const checkDivisaBase = await this.ModelClass.findOne({
+                    where: {
+                        divisaBase: true,
+                        anulado: false,
+                    },
+                    transaction: transaction,
+                });
+
+                if (checkDivisaBase) {
+                    throw new Error('EXISTE_DIVISA_BASE');
+                }
+            }
+
             const newDivisa = await this.ModelClass.create(divisaData, { transaction });
 
             if (divisaData.divisaDenominaciones && divisaData.divisaDenominaciones.length > 0) {
@@ -32,7 +47,7 @@ export class DivisaService extends BaseCRUDService<Divisa> {
                     valor: u.valor
                 }));
 
-                await Divisa.bulkCreate(denominaciones as any[], { transaction });
+                await DivisaDenominacion.bulkCreate(denominaciones as any[], { transaction });
             }
 
             await transaction.commit();
@@ -57,6 +72,23 @@ export class DivisaService extends BaseCRUDService<Divisa> {
                 if (nameExist) throw new Error('NOMBRE_DE_ENTIDAD_EXISTE');
             }
 
+            if (divisaData.divisaBase) {
+                const checkDivisaBase = await this.ModelClass.findOne({
+                    where: {
+                        divisaBase: true,
+                        anulado: false,
+                        id: {
+                            [Op.ne]: divisaData.id
+                        }
+                    },
+                    transaction: transaction,
+                });
+
+                if (checkDivisaBase) {
+                    throw new Error('EXISTE_DIVISA_BASE');
+                }
+            }
+
             divisaToUpdate.codigo = divisaData.codigo;
             divisaToUpdate.nombre = divisaData.nombre;
             divisaToUpdate.simbolo = divisaData.simbolo;
@@ -75,7 +107,7 @@ export class DivisaService extends BaseCRUDService<Divisa> {
 
                 const denominacionesParaCrear: any[] = [];
 
-                for (const denom of divisaData.divisaDenominaciones) {                    
+                for (const denom of divisaData.divisaDenominaciones) {
                     const denominacionExistente = await DivisaDenominacion.findOne({
                         where: {
                             divisaId: divisaToUpdate.id,

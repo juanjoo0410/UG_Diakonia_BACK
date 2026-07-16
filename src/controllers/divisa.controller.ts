@@ -4,6 +4,7 @@ import { IDivisa } from '../interfaces/divisa.interface';
 import { Divisa } from '../models/divisa.model';
 import { registrarBitacora } from '../utils/bitacoraService';
 import { handleHttp } from '../utils/handleError';
+import { DivisaDenominacion } from '../models/divisa-denominacion.model';
 
 const service = new DivisaService();
 const entidad = 'DIVISA';
@@ -30,6 +31,15 @@ export const create = async (
                 });
                 return;
             }
+
+            if (error.message === 'EXISTE_DIVISA_BASE') {
+                res.status(404).json({
+                    status: false,
+                    message: 'Ya existe una divisa base.'
+                });
+                return;
+            }
+
             return handleHttp(res, `ERROR_POST_${entidad}`, error);
         } else {
             return handleHttp(res, `ERROR_POST_${entidad}_UNKNOWN`, String(error));
@@ -62,11 +72,19 @@ export const update = async (
             });
             return;
         }
-        
+
         if (errorMessage === 'NOMBRE_DE_ENTIDAD_EXISTE') {
             res.status(400).json({
                 status: false,
                 message: 'El nombre de divisa ya existe.'
+            });
+            return;
+        }
+
+        if (errorMessage === 'EXISTE_DIVISA_BASE') {
+            res.status(404).json({
+                status: false,
+                message: 'Ya existe una divisa base.'
             });
             return;
         }
@@ -79,7 +97,7 @@ export const updateStatus = async (
     req: Request<{ id: string }> & { user?: any },
     res: Response
 ) => {
-    const id = req.params.id; 
+    const id = req.params.id;
     try {
         const updatedDivisa = await service.updateDivisaStatus(id);
         await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
@@ -103,7 +121,17 @@ export const updateStatus = async (
 
 export const getAll = async (req: Request, res: Response) => {
     try {
-        const divisas = await service.getAll();
+        const divisas = await service.getAll({
+            include: [
+                {
+                    model: DivisaDenominacion,
+                    as: 'divisaDenominaciones',
+                    attributes: ['id', 'tipo', 'descripcion', 'valor'],
+                    where: { anulado: false },
+                    required: false
+                }
+            ]
+        });
         res.status(200).json({ value: divisas });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL_DIVISAS', error);
