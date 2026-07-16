@@ -224,31 +224,37 @@ export const initialMenuData = [
                 idSubmenu: 1,
                 nombre: 'Roles',
                 ruta: '/main/pages/admin/roles',
-                orden: 2
+                orden: 3
             },
             {
                 idSubmenu: 2,
                 nombre: 'Usuarios',
                 ruta: '/main/pages/admin/usuarios',
-                orden: 3
+                orden: 4
             },
             {
                 idSubmenu: 3,
                 nombre: 'Empresa',
                 ruta: '/main/pages/admin/empresa',
-                orden: 4
+                orden: 5
             },
             {
                 idSubmenu: 30,
                 nombre: 'Configuración',
                 ruta: '/main/pages/admin/settings',
-                orden: 5
+                orden: 6
             },
             {
                 idSubmenu: 33,
                 nombre: 'Sectores',
                 ruta: '/main/pages/admin/sectores',
                 orden: 1
+            },
+            {
+                idSubmenu: 46,
+                nombre: 'Divisas',
+                ruta: '/main/pages/admin/divisas',
+                orden: 2
             },
         ]
     },
@@ -379,6 +385,8 @@ export const initialMenuData = [
         ]
     }
 ];
+
+//último submenuId: 46
 
 export const initialSpecialPermissionsData = [
     {

@@ -18,7 +18,9 @@
     "strict": true,                                      /* Enable all strict type-checking options. */
 
     /* Completeness */
-    "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
+    "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
+
+    "sourceMap": true,
   },
   "include": [
     "src/**/*"                                           /* Le dice a TS que solo observe y compile lo que esté en src */
