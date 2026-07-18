@@ -39,8 +39,8 @@ export class DivisaService extends BaseCRUDService<Divisa> {
 
             const newDivisa = await this.ModelClass.create(divisaData, { transaction });
 
-            if (divisaData.divisaDenominaciones && divisaData.divisaDenominaciones.length > 0) {
-                const denominaciones = divisaData.divisaDenominaciones.map(u => ({
+            if (divisaData.denominaciones && divisaData.denominaciones.length > 0) {
+                const denominaciones = divisaData.denominaciones.map(u => ({
                     divisaId: newDivisa.id,
                     tipo: u.tipo,
                     descripcion: u.descripcion,
@@ -96,7 +96,7 @@ export class DivisaService extends BaseCRUDService<Divisa> {
             divisaToUpdate.divisaBase = divisaData.divisaBase;
             await divisaToUpdate.save({ transaction });
 
-            if (divisaData.divisaDenominaciones) {
+            if (divisaData.denominaciones) {
                 await DivisaDenominacion.update(
                     { anulado: true },
                     {
@@ -107,7 +107,7 @@ export class DivisaService extends BaseCRUDService<Divisa> {
 
                 const denominacionesParaCrear: any[] = [];
 
-                for (const denom of divisaData.divisaDenominaciones) {
+                for (const denom of divisaData.denominaciones) {
                     const denominacionExistente = await DivisaDenominacion.findOne({
                         where: {
                             divisaId: divisaToUpdate.id,
