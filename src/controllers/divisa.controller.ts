@@ -125,7 +125,7 @@ export const getAll = async (req: Request, res: Response) => {
             include: [
                 {
                     model: DivisaDenominacion,
-                    as: 'divisaDenominaciones',
+                    as: 'denominaciones',
                     attributes: ['id', 'tipo', 'descripcion', 'valor'],
                     where: { anulado: false },
                     required: false
