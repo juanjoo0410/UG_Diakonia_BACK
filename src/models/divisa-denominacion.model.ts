@@ -31,7 +31,7 @@ DivisaDenominacion.init({
 
 Divisa.hasMany(DivisaDenominacion, {
     foreignKey: 'divisaId',
-    as: 'divisaDenominaciones'
+    as: 'denominaciones'
 })
 
 DivisaDenominacion.belongsTo(Divisa, {

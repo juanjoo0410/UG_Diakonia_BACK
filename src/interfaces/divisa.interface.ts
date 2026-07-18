@@ -5,5 +5,5 @@ export interface IDivisa extends IBaseMaster {
     simbolo: string;
     cambio: number;
     divisaBase: boolean;
-    divisaDenominaciones?: IDivisaDenominacion[];
+    denominaciones?: IDivisaDenominacion[];
 }
