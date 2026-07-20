@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { create, update, updateStatus, getAll, getById, getEfectivoDisponibleByCajaId } from "../controllers/caja-banco.controller";
+import { create, update, updateStatus, getAll, getById } from "../controllers/rubro-tesoreria.controller";
 import { checkJwt } from "../middlewares/session";
 
 const router = Router();
@@ -8,7 +8,6 @@ router.post('/', checkJwt, create);
 router.put('/', checkJwt, update);
 router.delete('/:id', checkJwt, updateStatus);
 router.get('/', checkJwt, getAll);
-router.get('/efectivo-disponible/:id', checkJwt, getEfectivoDisponibleByCajaId);
 router.get('/:id', checkJwt, getById);
 
 export default router;

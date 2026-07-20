@@ -8,5 +8,6 @@ export interface IKardexTesoreria {
     descripcion: string;
     tipoValor: string;    
     esDebito: boolean;
-    valor: number;        
+    valor: number;
+    creadorId: number;
 }

@@ -5,9 +5,10 @@ export interface IApertura {
     encargadoId: number;
     fondoFijo: number;
     cerrada: boolean;
-    cerradaPor?: number;
+    cerradaPorId?: number;
     cerradaFecha?: number;
     ingresoTesoreriaId?: number;
     faltante: number;
     sobrante: number;
+    creadorId: number;
 }

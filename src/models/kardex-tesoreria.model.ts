@@ -2,6 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/db";
 import { CajaBanco } from "./caja-banco.model";
 import { IKardexTesoreria } from "../interfaces/kardex-tesoreria.interface";
+import { Usuario } from "./usuarioModel";
 
 export class KardexTesoreria extends Model<IKardexTesoreria> implements IKardexTesoreria {
     public id?: number;
@@ -11,9 +12,10 @@ export class KardexTesoreria extends Model<IKardexTesoreria> implements IKardexT
     public fecha!: Date;
     public tipo!: string;
     public descripcion!: string;
-    public tipoValor!: string;    
+    public tipoValor!: string;
     public esDebito!: boolean;
-    public valor!: number; 
+    public valor!: number;
+    public creadorId!: number;
 }
 
 KardexTesoreria.init({
@@ -26,7 +28,14 @@ KardexTesoreria.init({
     descripcion: { type: DataTypes.STRING(200), allowNull: false },
     tipoValor: { type: DataTypes.STRING(25), allowNull: false },
     esDebito: { type: DataTypes.BOOLEAN, allowNull: false },
-    valor: { type: DataTypes.DECIMAL(18,2), allowNull: false },
+    valor: { type: DataTypes.DECIMAL(18, 2), allowNull: false },
+            creadorId: {
+            type: DataTypes.INTEGER,
+            references: {
+                model: 'usuarios',
+                key: 'idUsuario'
+            }
+        },
 }, {
     sequelize,
     tableName: 'kardex_tesoreria',
@@ -34,3 +43,7 @@ KardexTesoreria.init({
 });
 
 KardexTesoreria.belongsTo(CajaBanco, { foreignKey: 'cajaBancoId', as: 'caja' });
+KardexTesoreria.belongsTo(Usuario, {
+    foreignKey: 'creadorId',
+    as: 'creador'
+});
