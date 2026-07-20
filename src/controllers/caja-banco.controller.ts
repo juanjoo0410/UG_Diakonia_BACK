@@ -62,7 +62,7 @@ export const update = async (
             });
             return;
         }
-        
+
         if (errorMessage === 'NOMBRE_DE_ENTIDAD_EXISTE') {
             res.status(400).json({
                 status: false,
@@ -79,7 +79,7 @@ export const updateStatus = async (
     req: Request<{ id: string }> & { user?: any },
     res: Response
 ) => {
-    const id = req.params.id; 
+    const id = req.params.id;
     try {
         const updatedCajaBanco = await service.updateCajaBancoStatus(id);
         await registrarBitacora(req, 'CAMBIO ESTADO', entidad,
@@ -127,5 +127,33 @@ export const getById = async (req: Request, res: Response) => {
         });
     } catch (error) {
         handleHttp(res, `ERROR_GET_BY_ID_${entidad}`, error);
+    }
+};
+
+export const getEfectivoDisponibleByCajaId = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const idCajaNumerico = parseInt(id, 10);
+        if (isNaN(idCajaNumerico)) {
+            res.status(400).json({
+                status: false,
+                message: 'El identificador de la caja proporcionado no es válido.'
+            });
+            return;
+        }
+        const valorDisponible = await service.getEfectivoDisponibleByCajaId(idCajaNumerico);
+        if (valorDisponible == null) {
+            res.status(404).json({
+                status: false,
+                message: 'Valor disponible no calculado'
+            });
+            return;
+        }
+        res.status(200).json({
+            status: true,
+            value: valorDisponible
+        });
+    } catch (error) {
+        handleHttp(res, `ERROR_GET_DISPONIBLE_BY_ID_${entidad}`, error);
     }
 };

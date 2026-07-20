@@ -12,11 +12,12 @@ export class Apertura extends Model<IApertura> implements IApertura {
     public encargadoId!: number;
     public fondoFijo!: number;
     public cerrada!: boolean;
-    public cerradaPor?: number;
+    public cerradaPorId?: number;
     public cerradaFecha?: number;
     public ingresoTesoreriaId?: number;
     public faltante!: number;
     public sobrante!: number;
+    public creadorId!: number;
 }
 
 Apertura.init({
@@ -26,11 +27,12 @@ Apertura.init({
     encargadoId: { type: DataTypes.INTEGER, references: { model: 'usuarios', key: 'idUsuario' } },
     fondoFijo: { type: DataTypes.DECIMAL(18, 2), allowNull: false },
     cerrada: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-    cerradaPor: { type: DataTypes.INTEGER, allowNull: true, references: { model: 'usuarios', key: 'idUsuario' } },
+    cerradaPorId: { type: DataTypes.INTEGER, allowNull: true, references: { model: 'usuarios', key: 'idUsuario' } },
     cerradaFecha: { type: DataTypes.DATE, allowNull: true },
     ingresoTesoreriaId: { type: DataTypes.INTEGER, allowNull: true, references: { model: 'ingresos_tesoreria', key: 'id' } },
     faltante: { type: DataTypes.INTEGER, allowNull: false },
     sobrante: { type: DataTypes.INTEGER, allowNull: false },
+    creadorId: { type: DataTypes.INTEGER, references: { model: 'usuarios', key: 'idUsuario' } },
 }, {
     sequelize,
     tableName: 'aperturas',
@@ -39,5 +41,6 @@ Apertura.init({
 
 Apertura.belongsTo(CajaBanco, { foreignKey: 'cajaId', as: 'caja' });
 Apertura.belongsTo(Usuario, { foreignKey: 'encargadoId', as: 'encargado' });
-Apertura.belongsTo(Usuario, { foreignKey: 'cerradaPor', as: 'cerradaPor' });
+Apertura.belongsTo(Usuario, { foreignKey: 'cerradaPorId', as: 'cerradaPor' });
+Apertura.belongsTo(Usuario, { foreignKey: 'creadorId', as: 'creador' });
 Apertura.belongsTo(IngresoTesoreria, { foreignKey: 'ingresoTesoreriaId', as: 'ingreso' });
