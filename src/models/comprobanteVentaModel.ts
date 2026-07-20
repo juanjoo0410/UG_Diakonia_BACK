@@ -2,6 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from "../config/db";
 import { IComprobanteVenta } from '../interfaces/IComprobanteVenta';
 import { Beneficiario } from './beneficiarioModel';
+import { CajaBanco } from './caja-banco.model';
 
 export class ComprobanteVenta extends Model<IComprobanteVenta> implements IComprobanteVenta {
     public idComprobanteVenta?: number;
@@ -16,6 +17,7 @@ export class ComprobanteVenta extends Model<IComprobanteVenta> implements ICompr
     public usuario!: string;
     public estado?: boolean;
     public fecha?: Date;
+    public cajaId?: number | undefined;
     public beneficiario?: Beneficiario | undefined;
 }
 
@@ -39,6 +41,7 @@ ComprobanteVenta.init(
         usuario: { type: DataTypes.STRING(75), allowNull: false, },
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
         fecha: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, },
+        cajaId: { type: DataTypes.INTEGER, references: { model: 'cajas_bancos', key: 'id' } },
     },
     {
         sequelize,
@@ -51,3 +54,4 @@ ComprobanteVenta.belongsTo(Beneficiario, {
     foreignKey: 'idBeneficiario',
     as: 'beneficiario'
 });
+ComprobanteVenta.belongsTo(CajaBanco, { foreignKey: 'cajaId', as: 'caja' });

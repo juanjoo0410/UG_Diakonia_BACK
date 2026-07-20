@@ -16,4 +16,5 @@ export interface IComprobanteVenta{
     fecha?: Date;
     comprobanteVentaDt?: IComprobanteVentaDt[];
     beneficiario?: IBeneficiario;
+    cajaId?: number;
 }

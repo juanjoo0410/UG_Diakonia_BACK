@@ -9,5 +9,5 @@ export interface IEgresoTesoreria extends IBaseDocument {
     cambio: number;
     valor: number;
     cajaCierreId?: number;
-    egresoTesoreriaRubros?: IEgresoTesoreriaRubro[];
+    rubros?: IEgresoTesoreriaRubro[];
 }

@@ -168,7 +168,7 @@ export const initialMenuData = [
         idMenu: 6,
         nombre: 'Tiendita',
         icono: 'store',
-        orden: 8,
+        orden: 9,
         submenus: [
             {
                 idSubmenu: 26,
@@ -251,7 +251,7 @@ export const initialMenuData = [
                 orden: 1
             },
             {
-                idSubmenu: 46,
+                idSubmenu: 42,
                 nombre: 'Divisas',
                 ruta: '/main/pages/admin/divisas',
                 orden: 2
@@ -324,7 +324,7 @@ export const initialMenuData = [
         idMenu: 12,
         nombre: 'Dirección',
         icono: 'insights',
-        orden: 9,
+        orden: 10,
         submenus: [
             {
                 idSubmenu: 40,
@@ -344,40 +344,41 @@ export const initialMenuData = [
         idMenu: 13,
         nombre: 'Tesoreria',
         icono: 'point_of_sale',
-        orden: 10,
+        orden: 8,
         submenus: [
             {
-                idSubmenu: 42,
+                idSubmenu: 43,
                 nombre: 'Caja y Bancos',
-                ruta: '/main/pages/tesoreria/caja-bancos',
+                ruta: '/main/pages/tesoreria/cajas-bancos',
                 orden: 1
             },
             {
-                idSubmenu: 43,
+                idSubmenu: 44,
                 nombre: 'Rubros',
                 ruta: '/main/pages/tesoreria/rubros',
                 orden: 2
             },
-            {
-                idSubmenu: 44,
-                nombre: 'Vale de Caja',
-                ruta: '/main/pages/tesoreria/vale-caja',
-                orden: 3
-            },
+
             {
                 idSubmenu: 45,
                 nombre: 'Apertura de Caja',
                 ruta: '/main/pages/tesoreria/apertura',
+                orden: 3
+            },
+            {
+                idSubmenu: 46,
+                nombre: 'Vale de Caja',
+                ruta: '/main/pages/tesoreria/vale-caja',
                 orden: 4
             },
             {
-                idSubmenu: 44,
+                idSubmenu: 47,
                 nombre: 'Cierre de Caja',
                 ruta: '/main/pages/tesoreria/cierre',
                 orden: 5
             },
             {
-                idSubmenu: 45,
+                idSubmenu: 48,
                 nombre: 'Estado de Cuenta',
                 ruta: '/main/pages/tesoreria/estado-cuenta',
                 orden: 6
@@ -386,7 +387,7 @@ export const initialMenuData = [
     }
 ];
 
-//último submenuId: 46
+//último submenuId: 48
 
 export const initialSpecialPermissionsData = [
     {
