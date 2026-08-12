@@ -6,7 +6,7 @@ import { CajaBanco } from './caja-banco.model';
 
 export class ComprobanteVenta extends Model<IComprobanteVenta> implements IComprobanteVenta {
     public idComprobanteVenta?: number;
-    public idBeneficiario!: number;
+    public idBeneficiario?: number;
     public tipoPago!: string;
     public banco!: string;
     public subtotal!: number;
@@ -18,6 +18,7 @@ export class ComprobanteVenta extends Model<IComprobanteVenta> implements ICompr
     public estado?: boolean;
     public fecha?: Date;
     public cajaId?: number | undefined;
+    public bancoTransferenciaId?: number | undefined;
     public beneficiario?: Beneficiario | undefined;
 }
 
@@ -26,6 +27,7 @@ ComprobanteVenta.init(
         idComprobanteVenta: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
         idBeneficiario: {
             type: DataTypes.INTEGER,
+            allowNull: true,
             references: {
                 model: 'beneficiarios',
                 key: 'idBeneficiario'
@@ -40,13 +42,14 @@ ComprobanteVenta.init(
         totalPeso: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
         usuario: { type: DataTypes.STRING(75), allowNull: false, },
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
-        fecha: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, },
+        fecha: { type: DataTypes.DATEONLY, defaultValue: DataTypes.NOW, },
         cajaId: { type: DataTypes.INTEGER, references: { model: 'cajas_bancos', key: 'id' } },
+        bancoTransferenciaId: { type: DataTypes.INTEGER, allowNull: true, references: { model: 'cajas_bancos', key: 'id' } },
     },
     {
         sequelize,
         tableName: 'comprobantes_venta',
-        timestamps: false
+        timestamps: true
     }
 );
 
@@ -55,3 +58,5 @@ ComprobanteVenta.belongsTo(Beneficiario, {
     as: 'beneficiario'
 });
 ComprobanteVenta.belongsTo(CajaBanco, { foreignKey: 'cajaId', as: 'caja' });
+
+ComprobanteVenta.belongsTo(CajaBanco, { foreignKey: 'bancoTransferenciaId', as: 'bancoTransferencia' });

@@ -10,35 +10,15 @@ export class EgresoTesoreriaRubro extends Model<IEgresoTesoreriaRubro> implement
     public egresoTesoreriaId!: number;
     public rubroTesoreriaId!: number;
     public divisaId!: number;
-    public cambio!: number;
     public valor!: number;
 }
 
 EgresoTesoreriaRubro.init(
     {
         id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-        egresoTesoreriaId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: 'egresos_tesoreria',
-                key: 'id'
-            }
-        },
-        rubroTesoreriaId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: 'rubros_tesoreria',
-                key: 'id'
-            }
-        },
-        divisaId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: 'divisas',
-                key: 'id'
-            }
-        },
-        cambio: { type: DataTypes.DECIMAL(18,4), allowNull: false },
+        egresoTesoreriaId: { type: DataTypes.INTEGER, references: { model: 'egresos_tesoreria', key: 'id' } },
+        rubroTesoreriaId: { type: DataTypes.INTEGER, references: { model: 'rubros_tesoreria', key: 'id' } },
+        divisaId: { type: DataTypes.INTEGER, references: { model: 'divisas', key: 'id' } },
         valor: { type: DataTypes.DECIMAL(18, 2), allowNull: false },
     },
     {

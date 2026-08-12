@@ -15,20 +15,8 @@ export class IngresoTesoreriaDenominacion extends Model<IIngresoTesoreriaDenomin
 IngresoTesoreriaDenominacion.init(
     {
         id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-        ingresoTesoreriaId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: 'ingresos_tesoreria',
-                key: 'id'
-            }
-        },
-        denominacionId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: 'divisas_denominaciones',
-                key: 'id'
-            }
-        },
+        ingresoTesoreriaId: { type: DataTypes.INTEGER, references: { model: 'ingresos_tesoreria', key: 'id' }},
+        denominacionId: { type: DataTypes.INTEGER, references: { model: 'divisas_denominaciones', key: 'id' }},
         cantidad: { type: DataTypes.INTEGER, allowNull: false },
     },
     {

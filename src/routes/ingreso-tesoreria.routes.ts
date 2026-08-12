@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { getAll, getKardexCajaBancoByFecha } from "../controllers/kardex-tesoreria.controller";
+import { create, getAll, getById } from "../controllers/ingreso-tesoreria.controller";
 import { checkJwt } from "../middlewares/session";
 
 const router = Router();
 
-router.post('/kardex', checkJwt, getKardexCajaBancoByFecha);
+router.post('/', checkJwt, create);
 router.get('/', checkJwt, getAll);
+router.get('/:id', checkJwt, getById);
 
 export default router;

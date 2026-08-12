@@ -5,4 +5,5 @@ export interface ICajaBanco extends IBaseMaster {
     clase: string;
     institucionBancariaId?: number;   
     controlaApertura: boolean;
+    transferencia: boolean;
 }

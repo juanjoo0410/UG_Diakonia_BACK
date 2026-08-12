@@ -11,6 +11,7 @@ export class CajaBanco extends Model<ICajaBanco> implements ICajaBanco {
     public clase!: string;
     public institucionBancariaId?: number;
     public controlaApertura!: boolean;
+    public transferencia!: boolean;
     public anulado?: boolean;
 }
 
@@ -26,6 +27,7 @@ CajaBanco.init({
         references: { model: 'bancos', key: 'idBanco' }
     },
     controlaApertura: { type: DataTypes.BOOLEAN, allowNull: false },
+    transferencia: { type: DataTypes.BOOLEAN, allowNull: false },
     anulado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
 }, {
     sequelize,

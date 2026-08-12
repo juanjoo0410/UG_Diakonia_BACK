@@ -367,7 +367,7 @@ export const initialMenuData = [
             },
             {
                 idSubmenu: 46,
-                nombre: 'Vale de Caja',
+                nombre: 'Nuevo Vale de Caja',
                 ruta: '/main/pages/tesoreria/vale-caja',
                 orden: 4
             },
@@ -378,16 +378,40 @@ export const initialMenuData = [
                 orden: 5
             },
             {
+                idSubmenu: 51,
+                nombre: 'Depósito',
+                ruta: '/main/pages/tesoreria/deposito',
+                orden: 6
+            },            
+            {
                 idSubmenu: 48,
                 nombre: 'Estado de Cuenta',
                 ruta: '/main/pages/tesoreria/estado-cuenta',
-                orden: 6
-            }
+                orden: 7
+            },
+            {
+                idSubmenu: 49,
+                nombre: 'Informe de Aperturas/Cierres',
+                ruta: '/main/pages/tesoreria/aperturas-cierres',
+                orden: 8
+            },
+            {
+                idSubmenu: 50,
+                nombre: 'Informe de Vales de Caja',
+                ruta: '/main/pages/tesoreria/vales-caja',
+                orden: 9
+            },
+            {
+                idSubmenu: 52,
+                nombre: 'Informe de Depósitos',
+                ruta: '/main/pages/tesoreria/depositos',
+                orden: 10
+            }                      
         ]
     }
 ];
 
-//último submenuId: 48
+//último submenuId: 52
 
 export const initialSpecialPermissionsData = [
     {

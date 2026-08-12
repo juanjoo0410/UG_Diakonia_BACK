@@ -1,4 +1,4 @@
-import { col, fn, Transaction } from "sequelize";
+import { col, fn, QueryTypes, Transaction } from "sequelize";
 import { ICajaBanco } from "../interfaces/caja-banco.interface";
 import { CajaBanco } from "../models/caja-banco.model";
 import { BaseCRUDService } from "./base-crud.service";
@@ -49,6 +49,7 @@ export class CajaBancoService extends BaseCRUDService<CajaBanco> {
         cajaBancoToUpdate.numeroCuenta = cajaBancoData.numeroCuenta;
         cajaBancoToUpdate.clase = cajaBancoData.clase;
         cajaBancoToUpdate.controlaApertura = cajaBancoData.controlaApertura;
+        cajaBancoToUpdate.transferencia = cajaBancoData.transferencia;
         const updatedCajaBanco = await cajaBancoToUpdate.save();
 
         return updatedCajaBanco;
@@ -69,31 +70,52 @@ export class CajaBancoService extends BaseCRUDService<CajaBanco> {
 
     public async getEfectivoDisponibleByCajaId(cajaId: number): Promise<number> {
         try {
+            let efectivoDisponible: number = 0;
             const today = new Date();
+            today.setHours(0, 0, 0, 0);
             const fechaFormateada = today.toISOString().split('T')[0];
 
-            const sumComprobantesResult = await ComprobanteVenta.findOne({
-                attributes: [[fn('SUM', col('total')), 'totalIngresos']],
-                where: {
-                    cajaId: cajaId,
-                    tipoPago: 'Efectivo',
-                    fecha: fechaFormateada
-                },
-                raw: true
-            }) as any;
+            const caja = await this.ModelClass.findByPk(cajaId);
+            if (!caja) return efectivoDisponible;
 
-            const sumEgresosResult = await EgresoTesoreria.findOne({
-                attributes: [[fn('SUM', col('valor')), 'totalEgresos']], // 🍏 Ajusta 'monto' al nombre real de la columna
-                where: {
-                    cajaBancoId: cajaId,
-                    fecha: fechaFormateada
-                },
-                raw: true
-            }) as any;
-            
-            const totalIngresos = Number(sumComprobantesResult?.totalIngresos) || 0;
-            const totalEgresos = Number(sumEgresosResult?.totalEgresos) || 0;
-            const efectivoDisponible = totalIngresos - totalEgresos;
+            if (caja.controlaApertura) {
+                const sumComprobantesResult = await ComprobanteVenta.findOne({
+                    attributes: [[fn('SUM', col('total')), 'totalIngresos']],
+                    where: {
+                        cajaId: cajaId,
+                        tipoPago: 'Efectivo',
+                        fecha: fechaFormateada,
+                        estado: true
+                    },
+                    raw: true
+                }) as any;
+
+                const sumEgresosResult = await EgresoTesoreria.findOne({
+                    attributes: [[fn('SUM', col('valor')), 'totalEgresos']],
+                    where: {
+                        cajaBancoId: cajaId,
+                        fecha: fechaFormateada,
+                        anulado: false
+                    },
+                    raw: true
+                }) as any;
+
+                const totalIngresos = Number(sumComprobantesResult?.totalIngresos) || 0;
+                const totalEgresos = Number(sumEgresosResult?.totalEgresos) || 0;
+                efectivoDisponible = totalIngresos - totalEgresos;
+            }
+            else {
+                const resultado = await sequelize.query<{ saldo: number }>(
+                    `SELECT fn_ObtenerSaldoCajaBanco(:cajaId, :fecha) AS saldo`,
+                    {
+                        replacements: { cajaId, fecha: fechaFormateada },
+                        type: QueryTypes.SELECT,
+                        plain: true
+                    }
+                );
+  
+                efectivoDisponible = Number(resultado?.saldo ?? 0);;
+            }
 
             return Number(efectivoDisponible.toFixed(2));
         } catch (error) {
