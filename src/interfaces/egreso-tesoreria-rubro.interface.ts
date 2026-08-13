@@ -3,6 +3,5 @@ export interface IEgresoTesoreriaRubro {
     egresoTesoreriaId: number;
     rubroTesoreriaId: number;
     divisaId: number;
-    cambio: number;
     valor: number;
 }

@@ -5,11 +5,10 @@ import { IIngresoTesoreriaDt } from "./ingreso-tesoreria-dt.interface";
 
 export interface IIngresoTesoreria extends IBaseDocument {
     cajaBancoId: number;
+    cajaBancoCierreId?: number;
     divisaId: number;
-    cambio: number;
     valor: number;
-    cajaCierreId?: number;
-    ingresoTesoreriaDt?: IIngresoTesoreriaDt[];
-    ingresoTesoreriaDocumentos?: IIngresoTesoreriaDocumento[];
-    ingresoTesoreriaDenominaciones?: IIngresoTesoreriaDenominacion[];
+    detalles?: IIngresoTesoreriaDt[];
+    documentos?: IIngresoTesoreriaDocumento[];
+    denominaciones?: IIngresoTesoreriaDenominacion[];
 }

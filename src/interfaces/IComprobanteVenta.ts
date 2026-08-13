@@ -3,7 +3,7 @@ import { IComprobanteVentaDt } from "./IComprobanteVentaDt";
 
 export interface IComprobanteVenta{
     idComprobanteVenta?: number;
-    idBeneficiario: number;
+    idBeneficiario?: number;
     tipoPago: string;
     banco: string;
     subtotal: number;
@@ -17,4 +17,5 @@ export interface IComprobanteVenta{
     comprobanteVentaDt?: IComprobanteVentaDt[];
     beneficiario?: IBeneficiario;
     cajaId?: number;
+    bancoTransferenciaId?: number;
 }

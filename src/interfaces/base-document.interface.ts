@@ -5,5 +5,7 @@ export interface IBaseDocument {
     descripcion: string;
     nota: string;
     anulado?: boolean;
+    anuladoPorId?: number;
+    anuladoFecha?: Date;
     creadorId: number;
 }

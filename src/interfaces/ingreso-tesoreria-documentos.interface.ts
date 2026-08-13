@@ -7,7 +7,6 @@ export interface IIngresoTesoreriaDocumento {
     numero: string;
     descripcion: string;
     divisaId: number;
-    cambio: number;
     valor: number;
     cajeroId: number;
 }
