@@ -13,7 +13,7 @@ export class Apertura extends Model<IApertura> implements IApertura {
     public fondoFijo!: number;
     public cerrada!: boolean;
     public cerradaPorId?: number;
-    public cerradaFecha?: number;
+    public cerradaFecha?: Date;
     public ingresoTesoreriaId?: number;
     public faltante!: number;
     public sobrante!: number;
@@ -30,8 +30,8 @@ Apertura.init({
     cerradaPorId: { type: DataTypes.INTEGER, allowNull: true, references: { model: 'usuarios', key: 'idUsuario' } },
     cerradaFecha: { type: DataTypes.DATE, allowNull: true },
     ingresoTesoreriaId: { type: DataTypes.INTEGER, allowNull: true, references: { model: 'ingresos_tesoreria', key: 'id' } },
-    faltante: { type: DataTypes.INTEGER, allowNull: false },
-    sobrante: { type: DataTypes.INTEGER, allowNull: false },
+    faltante: { type: DataTypes.DECIMAL(18, 2), allowNull: false },
+    sobrante: { type: DataTypes.DECIMAL(18, 2), allowNull: false },
     creadorId: { type: DataTypes.INTEGER, references: { model: 'usuarios', key: 'idUsuario' } },
 }, {
     sequelize,

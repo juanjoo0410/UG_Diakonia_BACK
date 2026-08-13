@@ -2,7 +2,8 @@ export interface IIngresoTesoreriaDt {
     id?: number;
     ingresoTesoreriaId: number;
     tipoValor: string;
-    divisaId: number;
-    cambio: number;    
+    divisaId: number;   
     valor: number;
+    depositado: number;
+    bancoId?: number;
 }

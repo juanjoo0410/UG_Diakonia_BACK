@@ -4,6 +4,8 @@ import { IApertura } from '../interfaces/apertura.interface';
 import { Apertura } from '../models/apertura.model';
 import { registrarBitacora } from '../utils/bitacoraService';
 import { handleHttp } from '../utils/handleError';
+import { ICerrarCajaData } from '../interfaces/cerrar-caja-data.interface';
+import { FilterDto } from '../dtos/filter.dto';
 
 const service = new AperturaCierreService();
 const entidad = 'APERTURA';
@@ -27,6 +29,37 @@ export const aperturar = async (
             value: newAperturas
         });
         await registrarBitacora(req, 'CREACIÓN', entidad, `Se aperturaron las cajas.`);
+    } catch (error) {
+        if (error instanceof Error) {
+            if (error.message.includes('cajas')) {
+                res.status(400).json({
+                    status: false,
+                    message: error.message
+                });
+                return;
+            }
+
+            return handleHttp(res, `ERROR_POST_${entidad}`, error);
+        } else {
+            return handleHttp(res, `ERROR_POST_${entidad}_UNKNOWN`, String(error));
+        }
+    }
+};
+
+export const cerrar = async (
+    req: Request<{}, {}, ICerrarCajaData> & { user?: any },
+    res: Response
+) => {
+    const data: ICerrarCajaData = req.body;
+    try {
+        const usuarioId = req.user.idUsuario;
+        const updatedApertura: Apertura = await service.cerrarCajas(data, usuarioId);
+        res.status(201).json({
+            status: true,
+            message: 'Caja cerrada exitosamente.',
+            value: updatedApertura
+        });
+        await registrarBitacora(req, 'ACTUALIZACIÓN', entidad, `Se cerró la caja.`);
     } catch (error) {
         if (error instanceof Error) {
             if (error.message.includes('cajas')) {
@@ -159,5 +192,79 @@ export const getAll = async (req: Request, res: Response) => {
         res.status(200).json({ value: aperturas });
     } catch (error) {
         handleHttp(res, `ERROR_GET_ALL_${entidad}`, error);
+    }
+};
+
+export const getContribucionesCierreByDateAndCajaId = async (req: Request, res: Response) => {
+    const { fecha, cajaId } = req.query;
+    const fechaStr = fecha as string;
+    const cajaIdNum = parseInt(cajaId as string);
+    try {
+        if (isNaN(cajaIdNum)) {
+            res.status(400).json({
+                status: false,
+                message: "CajaID inválida."
+            });
+            return;
+        }
+
+        const data = await service.getContribucionesCierreByDateAndCajaIdAsync(fechaStr, cajaIdNum);
+        res.status(200).json({
+            status: true,
+            value: data
+        });
+
+    } catch (error) {
+        handleHttp(res, `ERROR_GET_RESUMEN_INST_${entidad}`, error);
+    }
+};
+
+export const getEgresosCierreByDateAndCajaId = async (req: Request, res: Response) => {
+    const { fecha, cajaId } = req.query;
+    const fechaStr = fecha as string;
+    const cajaIdNum = parseInt(cajaId as string);
+    try {
+        if (isNaN(cajaIdNum)) {
+            res.status(400).json({
+                status: false,
+                message: "CajaID inválida."
+            });
+            return;
+        }
+
+        const data = await service.getEgresosCierreByDateAndCajaIdAsync(fechaStr, cajaIdNum);
+        res.status(200).json({
+            status: true,
+            value: data
+        });
+
+    } catch (error) {
+        handleHttp(res, `ERROR_GET_RESUMEN_INST_${entidad}`, error);
+    }
+};
+
+export const getAperturaCierreByDateAndCajaId = async (
+    req: Request<{}, {}, FilterDto>,
+    res: Response
+) => {
+    const filters: FilterDto = req.body;
+
+    if (!filters.fechaInicio || !filters.fechaFin) {
+        res.status(400).json({
+            status: false,
+            message: 'Se requieren fechaInicio y fechaFin para la consulta.'
+        });
+        return;
+    }
+
+    try {
+        const kardex = await service.getAperturaCierreByDateAndCajaIdAsync(filters);
+
+        res.status(200).json({
+            status: true,
+            value: kardex
+        });
+    } catch (error) {
+        return handleHttp(res, `ERROR_GET_${entidad}`, error);
     }
 };

@@ -13,7 +13,6 @@ export class IngresoTesoreriaDocumento extends Model<IIngresoTesoreriaDocumento>
     public numero!: string;
     public descripcion!: string;
     public divisaId!: number;
-    public cambio!: number;
     public valor!: number;
     public cajeroId!: number;
 }
@@ -21,26 +20,13 @@ export class IngresoTesoreriaDocumento extends Model<IIngresoTesoreriaDocumento>
 IngresoTesoreriaDocumento.init(
     {
         id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-        ingresoTesoreriaId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: 'ingresos_tesoreria',
-                key: 'id'
-            }
-        },
+        ingresoTesoreriaId: { type: DataTypes.INTEGER, references: { model: 'ingresos_tesoreria', key: 'id' }},
         documentoId: { type: DataTypes.INTEGER, allowNull: false },
         fecha: { type: DataTypes.DATE, allowNull: false },
         tipo: { type: DataTypes.STRING(25), allowNull: false },
         numero: { type: DataTypes.STRING(10), allowNull: false },
         descripcion: { type: DataTypes.STRING(200), allowNull: false },
-        divisaId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: 'divisas',
-                key: 'id'
-            }
-        },
-        cambio: { type: DataTypes.DECIMAL(18, 4), allowNull: false },
+        divisaId: { type: DataTypes.INTEGER, references: { model: 'divisas', key: 'id' }},
         valor: { type: DataTypes.DECIMAL(18, 2), allowNull: false },
         cajeroId: { type: DataTypes.INTEGER, allowNull: false },
     },

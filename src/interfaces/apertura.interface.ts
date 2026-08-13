@@ -6,7 +6,7 @@ export interface IApertura {
     fondoFijo: number;
     cerrada: boolean;
     cerradaPorId?: number;
-    cerradaFecha?: number;
+    cerradaFecha?: Date;
     ingresoTesoreriaId?: number;
     faltante: number;
     sobrante: number;
