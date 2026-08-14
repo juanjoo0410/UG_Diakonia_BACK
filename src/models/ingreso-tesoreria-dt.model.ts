@@ -22,7 +22,7 @@ IngresoTesoreriaDt.init(
         tipoValor: { type: DataTypes.STRING(25), allowNull: false },
         divisaId: { type: DataTypes.INTEGER, references: { model: 'divisas', key: 'id' }},
         valor: { type: DataTypes.DECIMAL(18, 2), allowNull: false },
-        depositado: { type: DataTypes.DECIMAL(18, 2), allowNull: false },
+        depositado: { type: DataTypes.DECIMAL(18, 2), allowNull: false, defaultValue: 0 },
         bancoId: { type: DataTypes.INTEGER, allowNull: true, references: { model: 'cajas_bancos', key: 'id' } },
     },
     {
