@@ -25,6 +25,7 @@ export class Producto extends Model<IProducto> implements IProducto {
     public sku!: string;
     public codigoBarras?: string;
     public estado?: boolean;
+    public esCompuesto!: boolean;
     public grupoProducto?: GrupoProducto | undefined;
     public subgrupoProducto?: SubgrupoProducto | undefined;
     public categoria?: Categoria | undefined;
@@ -68,7 +69,8 @@ Producto.init(
         noAplicaDescuento: { type: DataTypes.BOOLEAN, allowNull: false },
         sku: { type: DataTypes.STRING(75), allowNull: false },
         codigoBarras: { type: DataTypes.STRING(13), allowNull: true },
-        estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
+        estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
+        esCompuesto: { type: DataTypes.BOOLEAN, allowNull: false },
     },
     {
         sequelize,

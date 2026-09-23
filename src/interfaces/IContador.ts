@@ -1,5 +1,5 @@
 export interface IContador{
-    idContador?: number;
+    idContador: number;
     nombre: string;
     prefijo: string;
     numFormato: number;

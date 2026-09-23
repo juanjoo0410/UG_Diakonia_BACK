@@ -49,6 +49,7 @@ export class DepositoService extends BaseCRUDService<Deposito> {
                 cajaId: data.cajaId,
                 divisaId: data.divisaId,
                 total: data.total,
+                fechaPapeleta: data.fechaPapeleta,
                 numeroPapeleta: data.numeroPapeleta,
                 rutaPapeleta: data.rutaPapeleta,
                 nota: data.nota,

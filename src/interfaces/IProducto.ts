@@ -26,4 +26,5 @@ export interface IProducto{
     subgrupoProducto?: ISubgrupoProducto;
     categoria?: ICategoria;
     donante?: IDonante;
+    esCompuesto: boolean;
 }

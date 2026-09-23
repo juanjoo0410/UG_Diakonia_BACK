@@ -1,4 +1,5 @@
-import { initialMenuData, initialSpecialPermissionsData } from "../config/initial-rbac-data";
+import { initialCountersData, initialMenuData, initialSpecialPermissionsData } from "../config/initial-rbac-data";
+import { Contador } from "../models/contadorModel";
 import { Menu } from "../models/menuModel";
 import { Permiso } from "../models/Permiso.model";
 import { Rol } from "../models/rolModel";
@@ -138,5 +139,42 @@ export class RBACService {
                 assignmentsCount++;
             }
         }));
+    }
+
+    public async seedCounters(): Promise<number[]> {
+        const allCountersIds: number[] = [];
+
+        for (const counterData of initialCountersData) {
+            const [counter, createdCounter] = await Contador.findOrCreate({
+                where: { idContador: counterData.idContador },
+                defaults: { ...counterData, ultimoValor: 0 }
+            });
+
+            if (!createdCounter) {
+                let updated = false;
+                if (counter.nombre !== counterData.nombre) {
+                    counter.nombre = counterData.nombre;
+                    updated = true;
+                }
+
+                if (counter.prefijo !== counterData.prefijo) {
+                    counter.prefijo = counterData.prefijo;
+                    updated = true;
+                }
+
+                if (counter.numFormato !== counterData.numFormato) {
+                    counter.numFormato = counterData.numFormato;
+                    updated = true;
+                }
+
+                if (updated) {
+                    await counter.save();
+                }
+            }
+
+            allCountersIds.push(counter.idContador);
+        }
+        console.log(`✨ Permisos iniciales asegurados/actualizados. Total: ${allCountersIds.length}`);
+        return allCountersIds;
     }
 }

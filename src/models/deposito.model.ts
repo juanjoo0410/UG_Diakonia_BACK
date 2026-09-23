@@ -14,6 +14,7 @@ export class Deposito extends Model<IDeposito> implements IDeposito {
     public cajaId!: number;
     public divisaId!: number;
     public total!: number;
+    public fechaPapeleta!: Date;
     public numeroPapeleta!: string;
     public rutaPapeleta!: string;
     public nota!: string;
@@ -34,6 +35,7 @@ Deposito.init(
         divisaId: { type: DataTypes.INTEGER, references: { model: 'divisas', key: 'id' } },
         total: { type: DataTypes.DECIMAL(18, 2), allowNull: false },
         nota: { type: DataTypes.STRING(200), allowNull: false, },
+        fechaPapeleta: { type: DataTypes.DATEONLY, defaultValue: DataTypes.NOW, },
         numeroPapeleta: { type: DataTypes.STRING(50), allowNull: false, },
         rutaPapeleta: { type: DataTypes.STRING(250), allowNull: false, },
         anulado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },

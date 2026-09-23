@@ -33,16 +33,19 @@ const createComprobanteVenta = async (
         const newComprobanteVenta = await ComprobanteVenta.create(
             {
                 idBeneficiario: comprobanteVenta.idBeneficiario,
+                empresaPatrocinadoraId: comprobanteVenta.empresaPatrocinadoraId,
                 tipoPago: comprobanteVenta.tipoPago,
                 banco: comprobanteVenta.banco,
                 subtotal: comprobanteVenta.subtotal,
                 descuento: comprobanteVenta.descuento,
                 valorCupon: comprobanteVenta.valorCupon,
+                diferenciaEfectivo: comprobanteVenta.diferenciaEfectivo,
                 total: comprobanteVenta.total,
                 totalPeso: comprobanteVenta.totalPeso,
                 usuario: comprobanteVenta.usuario,
                 cajaId: comprobanteVenta.cajaId,
-                bancoTransferenciaId: comprobanteVenta.bancoTransferenciaId
+                bancoTransferenciaId: comprobanteVenta.bancoTransferenciaId,
+                pedidoCorporativoId: comprobanteVenta.pedidoCorporativoId,                
             },
             { transaction }
         );
