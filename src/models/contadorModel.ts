@@ -3,7 +3,7 @@ import sequelize from "../config/db";
 import { IContador } from '../interfaces/IContador';
 
 export class Contador extends Model<IContador> implements IContador {
-    public idContador?: number;
+    public idContador!: number;
     public nombre!: string;
     public prefijo!: string;
     public numFormato!: number;
@@ -13,11 +13,11 @@ export class Contador extends Model<IContador> implements IContador {
 
 Contador.init(
     {
-        idContador: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+        idContador: { type: DataTypes.INTEGER, primaryKey: true, allowNull: false },
         nombre: { type: DataTypes.STRING(20), allowNull: false },
         prefijo: { type: DataTypes.STRING(6), allowNull: false },
         numFormato: { type: DataTypes.INTEGER, allowNull: false },
-        ultimoValor: { type: DataTypes.INTEGER, allowNull: false },
+        ultimoValor: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
     },
     {

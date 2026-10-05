@@ -6,6 +6,7 @@ export interface IDeposito extends IBaseDocument {
     cajaId: number;    
     divisaId: number;
     total: number;
+    fechaPapeleta: Date;
     numeroPapeleta: string;
     rutaPapeleta: string;
     detalles?: IDepositoDt[];

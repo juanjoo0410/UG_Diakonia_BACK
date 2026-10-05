@@ -15,7 +15,10 @@ import { Egreso } from '../models/egresoModel';
 import { ComprobanteVenta } from '../models/comprobanteVentaModel';
 import { Bodega } from '../models/bodegaModel';
 import { Ubicacion } from '../models/ubicacionModel';
+import { ProductoService } from '../services/producto.service';
+import { ProductoComposicion } from '../models/producto-composicion.model';
 
+const service = new ProductoService();
 const entidad = 'PRODUCTO';
 
 const createProducto = async (
@@ -75,6 +78,11 @@ const getProductos = async (req: Request, res: Response) => {
                     model: Categoria,
                     as: 'categoria',
                     attributes: ['nombre']
+                },
+                {
+                    model: ProductoComposicion,
+                    as: 'composiciones',
+                    required: false
                 }
             ]
         });
@@ -509,6 +517,114 @@ const generateBarcodeProducto = async (req: Request & { user?: any }, res: Respo
     }
 };
 
+const createProductoCompuesto = async (
+    req: Request<{}, {}, any> & { user?: any },
+    res: Response
+) => {
+    const data = req.body;
+    try {
+        const newProductoCompuesto: Producto = await service.createProductoCompuesto(data);
+        res.status(201).json({
+            status: true,
+            message: 'Producto compuesto creado exitosamente.',
+            value: newProductoCompuesto
+        });
+        await registrarBitacora(req, 'CREACIÓN', entidad, `Se creó el producto compuesto ${data.nombre}.`);
+    } catch (error) {
+        if (error instanceof Error) {
+            if (error.message === 'ENTIDAD_EXISTE') {
+                res.status(400).json({
+                    status: false,
+                    message: 'Producto compuesto ya existe.'
+                });
+                return;
+            }
+
+            if (error.message === 'ERROR_CREACION_PRODUCTO') {
+                res.status(404).json({
+                    status: false,
+                    message: 'No se pudo crear el producto compuesto.'
+                });
+                return;
+            }
+
+            if (error.message === 'ERROR_COMPOSICIONES') {
+                res.status(404).json({
+                    status: false,
+                    message: 'No se han especificado las composiciones.'
+                });
+                return;
+            }
+
+            if (error.message === 'ERROR_CREACION_INGRESO') {
+                res.status(404).json({
+                    status: false,
+                    message: 'No se pudo crear el ingreso del producto compuesto.'
+                });
+                return;
+            }
+
+            if (error.message === 'ERROR_CREACION_EGRESO') {
+                res.status(404).json({
+                    status: false,
+                    message: 'No se pudo crear el egreso de las composiciones.'
+                });
+                return;
+            }
+
+            return handleHttp(res, `ERROR_POST_${entidad}`, error);
+        } else {
+            return handleHttp(res, `ERROR_POST_${entidad}_UNKNOWN`, String(error));
+        }
+    }
+};
+
+const updateStockProductoCompuesto = async (
+    req: Request<{}, {}, any> & { user?: any },
+    res: Response
+) => {
+    const data = req.body;
+    try {
+        const response = await service.updateStockProductoCompuesto(data);
+        res.status(200).json({
+            status: true,
+            message: 'Stock de producto compuesto actualizado exitosamente',
+            value: response
+        });
+
+        await registrarBitacora(req, 'MODIFICACIÓN', 'STOCK', `Se actualizó stock del producto compuesto ${response.descripcion}.`);
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+
+        if (errorMessage === 'ENTIDAD_NO_ENCONTRADA') {
+            res.status(404).json({
+                status: false,
+                message: 'Divisa no encontrada.'
+            });
+            return;
+        }
+
+        if (errorMessage === 'ERROR_CREACION_INGRESO') {
+            res.status(404).json({
+                status: false,
+                message: 'No se pudo crear el ingreso del producto compuesto.'
+            });
+            return;
+        }
+
+        if (errorMessage === 'ERROR_CREACION_EGRESO') {
+            res.status(404).json({
+                status: false,
+                message: 'No se pudo crear el egreso de las composiciones.'
+            });
+            return;
+        }
+
+        return handleHttp(res, `ERROR_PUT_${entidad}`, error);
+    }
+};
+
 export {
     createProducto,
     getProductos,
@@ -523,5 +639,7 @@ export {
     updateProducto,
     updatePrecios,
     updateStatusProducto,
-    generateBarcodeProducto
+    generateBarcodeProducto,
+    createProductoCompuesto,
+    updateStockProductoCompuesto
 }
