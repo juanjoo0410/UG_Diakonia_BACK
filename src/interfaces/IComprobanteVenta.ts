@@ -1,14 +1,16 @@
 import { IBeneficiario } from "./IBeneficiario";
 import { IComprobanteVentaDt } from "./IComprobanteVentaDt";
 
-export interface IComprobanteVenta{
+export interface IComprobanteVenta {
     idComprobanteVenta?: number;
     idBeneficiario?: number;
+    empresaPatrocinadoraId?: number;
     tipoPago: string;
     banco: string;
     subtotal: number;
     descuento: number;
     valorCupon: number;
+    diferenciaEfectivo?: number;
     total: number;
     totalPeso: number;
     usuario: string;
@@ -18,4 +20,5 @@ export interface IComprobanteVenta{
     beneficiario?: IBeneficiario;
     cajaId?: number;
     bancoTransferenciaId?: number;
+    pedidoCorporativoId?: number;
 }
