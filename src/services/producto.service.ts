@@ -10,6 +10,8 @@ import { actualizarStock } from "../utils/stockService";
 import { agregarKardex } from "../utils/kardexService";
 import { Egreso } from "../models/egresoModel";
 import { EgresoDt } from "../models/egresoDtModel";
+import { Stock } from "../models/stockModel";
+import { FilterDto } from "../dtos/filter.dto";
 
 export class ProductoService extends BaseCRUDService<Producto> {
     constructor() {
@@ -26,6 +28,9 @@ export class ProductoService extends BaseCRUDService<Producto> {
             if (checkIs) { throw new Error('ENTIDAD_EXISTE') };
             data.codigo = await generarCodigo('productosCompuestos', transaction);
             data.codigoBarras = await generarBarcodeEAN13(transaction);
+
+            const cantidadSugerida = await this.calcularCantidadSugerida(data.composiciones);
+            if (data.cantidad > cantidadSugerida) { throw new Error('MOVIMIENTO_STOCK') };
 
             //Creación de producto compuesto (kit/combo)
             const newProductoCompuesto = await this.ModelClass.create({
@@ -61,11 +66,12 @@ export class ProductoService extends BaseCRUDService<Producto> {
 
             //Ingreso de encabezado
             const descripcionIngreso = `CREACIÓN DE PRODUCTO COMPUESTO ${newProductoCompuesto.descripcion}.`;
+            const totalPeso = data.pesoPorUnidad * data.cantidad;
             const newIngresoHD = await Ingreso.create({
                 idTipoTransaccion: data.tipoTransaccionId,
                 descripcion: descripcionIngreso,
                 idDonante: 0,
-                totalPeso: data.totalPeso,
+                totalPeso: totalPeso,
                 usuario: data.usuario
             },
                 { transaction }
@@ -78,7 +84,7 @@ export class ProductoService extends BaseCRUDService<Producto> {
                 idBodega: data.bodegaId,
                 idUbicacion: data.ubicacionId,
                 cantidad: data.cantidad,
-                peso: data.totalPeso
+                peso: totalPeso
             }];
 
             const dataKardexHD = {
@@ -98,7 +104,7 @@ export class ProductoService extends BaseCRUDService<Producto> {
                 idTipoTransaccion: data.tipoTransaccionId,
                 descripcion: descripcionEgreso,
                 idInstitucion: 0,
-                totalPeso: data.totalPeso,
+                totalPeso: totalPeso,
                 usuario: data.usuario
             },
                 { transaction }
@@ -109,9 +115,9 @@ export class ProductoService extends BaseCRUDService<Producto> {
                 idEgreso: newEgresoDT.idEgreso ?? 0,
                 idProducto: dt.composicionId,
                 idBodega: data.bodegaId,
-                idUbicacion: data.ubicacionId,
-                cantidad: dt.cantidad,
-                peso: dt.totalPeso
+                idUbicacion: dt.ubicacionId,
+                cantidad: (dt.cantidad * data.cantidad),
+                peso: ((dt.cantidad * data.cantidad) * dt.peso).toFixed(2)
             }));
 
             const dataKardexDT = {
@@ -138,13 +144,17 @@ export class ProductoService extends BaseCRUDService<Producto> {
             const productoCompuesto = await this.ModelClass.findByPk(data.idProducto, { transaction });
             if (!productoCompuesto) throw new Error('ENTIDAD_NO_ENCONTRADA');
 
+            const cantidadSugerida = await this.calcularCantidadSugerida(data.composiciones);
+            if (data.cantidad > cantidadSugerida) { throw new Error('MOVIMIENTO_STOCK') };
+
             //Ingreso de encabezado
             const descripcionIngreso = `INGRESO PRODUCTO COMPUESTO ${productoCompuesto.descripcion}.`;
+            const totalPeso = productoCompuesto.pesoPorUnidad * data.cantidad;
             const newIngresoHD = await Ingreso.create({
                 idTipoTransaccion: data.tipoTransaccionId,
                 descripcion: descripcionIngreso,
                 idDonante: 0,
-                totalPeso: data.totalPeso,
+                totalPeso: totalPeso,
                 usuario: data.usuario
             },
                 { transaction }
@@ -157,7 +167,7 @@ export class ProductoService extends BaseCRUDService<Producto> {
                 idBodega: data.bodegaId,
                 idUbicacion: data.ubicacionId,
                 cantidad: data.cantidad,
-                peso: data.totalPeso
+                peso: totalPeso
             }];
 
             const dataKardexHD = {
@@ -177,7 +187,7 @@ export class ProductoService extends BaseCRUDService<Producto> {
                 idTipoTransaccion: data.tipoTransaccionId,
                 descripcion: descripcionEgreso,
                 idInstitucion: 0,
-                totalPeso: data.totalPeso,
+                totalPeso: totalPeso,
                 usuario: data.usuario
             },
                 { transaction }
@@ -189,8 +199,8 @@ export class ProductoService extends BaseCRUDService<Producto> {
                 idProducto: dt.composicionId,
                 idBodega: data.bodegaId,
                 idUbicacion: data.ubicacionId,
-                cantidad: dt.cantidad,
-                peso: dt.totalPeso
+                cantidad: (dt.cantidad * data.cantidad),
+                peso: ((dt.cantidad * data.cantidad) * dt.peso).toFixed(2)
             }));
 
             const dataKardexDT = {
@@ -209,5 +219,46 @@ export class ProductoService extends BaseCRUDService<Producto> {
             await transaction.rollback();
             throw error;
         }
+    }
+
+    public async getComposicionesByBodegaIdAndProductoIdAsync(filters: FilterDto): Promise<any[]> {
+        const { bodegaId, productoId } = filters;
+
+        const resultados = await sequelize.query(
+            'CALL sp_ObtenerComposiciones(:bodegaId, :productoId)',
+            {
+                replacements: {
+                    bodegaId: bodegaId ? Number(bodegaId) : 0,
+                    productoId: productoId ? Number(productoId) : 0,
+                }
+            }
+        );
+
+        return resultados;
+    }
+
+    private async calcularCantidadSugerida(data: any[]): Promise<number> {
+        if (!data || data.length === 0) return 0;
+
+        const promesasCantidades = data.map(async (item: any) => {
+            const stockRecord = await Stock.findOne({
+                where: {
+                    idProducto: item.composicionId,
+                    idUbicacion: item.ubicacionId,
+                }
+            });
+
+            const stockActual = stockRecord ? Number((stockRecord as any).stock) || 0 : 0;
+            const cantidadRequerida = Number(item.cantidad) || 0;
+
+            if (cantidadRequerida <= 0) return Infinity;
+
+            return Math.floor(stockActual / cantidadRequerida);
+        });
+
+        const cantidadesPosibles = await Promise.all(promesasCantidades);
+        const maximoPosible = Math.min(...cantidadesPosibles);
+
+        return maximoPosible === Infinity ? 0 : maximoPosible;
     }
 }

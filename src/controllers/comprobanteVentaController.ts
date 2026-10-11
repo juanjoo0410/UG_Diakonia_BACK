@@ -45,7 +45,7 @@ const createComprobanteVenta = async (
                 usuario: comprobanteVenta.usuario,
                 cajaId: comprobanteVenta.cajaId,
                 bancoTransferenciaId: comprobanteVenta.bancoTransferenciaId,
-                pedidoCorporativoId: comprobanteVenta.pedidoCorporativoId,                
+                pedidoCorporativoId: comprobanteVenta.pedidoCorporativoId,               
             },
             { transaction }
         );

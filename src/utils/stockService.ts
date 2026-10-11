@@ -30,7 +30,7 @@ export const actualizarStock = async (
                 );
             }
             existingStock.stock = nuevoStock;
-            existingStock.pesoTotal = nuevoPeso;
+            existingStock.pesoTotal = nuevoPeso < 0 ? 0 : nuevoPeso;
             await existingStock.save({ transaction });
         } else if (esIngreso) {
             await Stock.create(

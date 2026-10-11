@@ -133,34 +133,40 @@ export const initialMenuData = [
                 orden: 9
             },
             {
+                idSubmenu: 54,
+                nombre: 'Gestión de Productos Compuestos',
+                ruta: '/main/pages/inventario/gestion-productos-compuestos',
+                orden: 10
+            },
+            {
                 idSubmenu: 21,
                 nombre: 'Informe de Ingresos',
                 ruta: '/main/pages/inventario/ingresos',
-                orden: 10
+                orden: 11
             },
             {
                 idSubmenu: 22,
                 nombre: 'Informe de Egresos',
                 ruta: '/main/pages/inventario/egresos',
-                orden: 11
+                orden: 12
             },
             {
                 idSubmenu: 23,
                 nombre: 'Informe de Transferencias',
                 ruta: '/main/pages/inventario/transferencias',
-                orden: 12
+                orden: 13
             },
             {
                 idSubmenu: 24,
                 nombre: 'Stock',
                 ruta: '/main/pages/inventario/stock',
-                orden: 13
+                orden: 14
             },
             {
                 idSubmenu: 25,
                 nombre: 'Kardex',
                 ruta: '/main/pages/inventario/kardex',
-                orden: 14
+                orden: 15
             },
         ]
     },
@@ -189,46 +195,40 @@ export const initialMenuData = [
                 orden: 3
             },
             {
-                idSubmenu: 54,
-                nombre: 'Creación de Producto Compuesto',
-                ruta: '/main/pages/tiendita/creacion-producto-compuesto',
-                orden: 4
-            },
-            {
                 idSubmenu: 28,
                 nombre: 'Nuevo Comprobante',
                 ruta: '/main/pages/tiendita/comprobante',
-                orden: 5
+                orden: 4
             },
             {
                 idSubmenu: 55,
                 nombre: 'Pedido Corporativo',
                 ruta: '/main/pages/tiendita/pedido-corporativo',
-                orden: 6
+                orden: 5
             },
             {
                 idSubmenu: 29,
                 nombre: 'Informe de Comprobantes',
                 ruta: '/main/pages/tiendita/comprobantes',
-                orden: 7
+                orden: 6
             },
             {
                 idSubmenu: 32,
                 nombre: 'Saldos',
                 ruta: '/main/pages/tiendita/saldos',
-                orden: 8
+                orden: 7
             },
             {
                 idSubmenu: 36,
                 nombre: 'Impresión de Etiquetas',
                 ruta: '/main/pages/tiendita/etiquetas',
-                orden: 9
+                orden: 8
             },
             {
                 idSubmenu: 39,
                 nombre: 'Distribución de Productos',
                 ruta: '/main/pages/tiendita/distribucion-productos',
-                orden: 10
+                orden: 9
             },
         ]
     },
@@ -454,4 +454,5 @@ export const initialCountersData = [
     { idContador: 14, nombre: 'voluntarios', prefijo: 'VOL', estado: true, numFormato: 4 },
     { idContador: 15, nombre: 'tableros', prefijo: 'TAB', estado: true, numFormato: 3 },
     { idContador: 16, nombre: 'productosCompuestos', prefijo: 'PC', estado: true, numFormato: 4 },
+    { idContador: 17, nombre: 'empresaPatrocinadora', prefijo: 'EMP', estado: true, numFormato: 3 },
 ];

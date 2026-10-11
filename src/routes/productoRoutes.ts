@@ -15,7 +15,8 @@ import {
     updateStatusProducto,
     generateBarcodeProducto,
     createProductoCompuesto,
-    updateStockProductoCompuesto
+    updateStockProductoCompuesto,
+    getComposicionesByBodegaIdAndProductoId
 } from "../controllers/productoController";
 import { checkJwt } from "../middlewares/session";
 
@@ -23,6 +24,7 @@ const router = Router();
 
 router.post('/', checkJwt, createProducto);
 router.post('/producto-compuesto', checkJwt, createProductoCompuesto);
+router.post('/composiciones', checkJwt, getComposicionesByBodegaIdAndProductoId);
 router.get('/', checkJwt, getProductos);
 router.get('/total', checkJwt, getTotalProductos);
 router.get('/conStock', checkJwt, getProductosConStock);

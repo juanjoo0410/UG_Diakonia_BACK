@@ -17,6 +17,7 @@ import { Bodega } from '../models/bodegaModel';
 import { Ubicacion } from '../models/ubicacionModel';
 import { ProductoService } from '../services/producto.service';
 import { ProductoComposicion } from '../models/producto-composicion.model';
+import { FilterDto } from '../dtos/filter.dto';
 
 const service = new ProductoService();
 const entidad = 'PRODUCTO';
@@ -540,6 +541,14 @@ const createProductoCompuesto = async (
                 return;
             }
 
+            if (error.message === 'MOVIMIENTO_STOCK') {
+                res.status(400).json({
+                    status: false,
+                    message: 'El stock de los productos ha cambiado.'
+                });
+                return;
+            }
+
             if (error.message === 'ERROR_CREACION_PRODUCTO') {
                 res.status(404).json({
                     status: false,
@@ -605,6 +614,14 @@ const updateStockProductoCompuesto = async (
             return;
         }
 
+        if (errorMessage === 'MOVIMIENTO_STOCK') {
+            res.status(404).json({
+                status: false,
+                message: 'El stock de los productos ha cambiado.'
+            });
+            return;
+        }
+
         if (errorMessage === 'ERROR_CREACION_INGRESO') {
             res.status(404).json({
                 status: false,
@@ -625,6 +642,23 @@ const updateStockProductoCompuesto = async (
     }
 };
 
+const getComposicionesByBodegaIdAndProductoId = async (
+    req: Request<{}, {}, FilterDto>,
+    res: Response
+) => {
+    const filters: FilterDto = req.body;
+    try {
+        const response = await service.getComposicionesByBodegaIdAndProductoIdAsync(filters);
+
+        res.status(200).json({
+            status: true,
+            value: response
+        });
+    } catch (error) {
+        return handleHttp(res, `ERROR_GET_${entidad}`, error);
+    }
+};
+
 export {
     createProducto,
     getProductos,
@@ -641,5 +675,6 @@ export {
     updateStatusProducto,
     generateBarcodeProducto,
     createProductoCompuesto,
-    updateStockProductoCompuesto
+    updateStockProductoCompuesto,
+    getComposicionesByBodegaIdAndProductoId
 }

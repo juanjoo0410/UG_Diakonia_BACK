@@ -5,6 +5,8 @@ import { IEmpresaPatrocinadora } from "../interfaces/empresa-patrocinadora.inter
 import { IEmpresaPatrocinadoraBeneficiario } from "../interfaces/empresa-patrocinadora-beneficiario.interface";
 import { EmpresaPatrocinadora } from "../models/empresa-patrocinadora.model";
 import { EmpresaPatrocinadoraBeneficiario } from "../models/empresa-patrocinadora-beneficiario.model";
+import { generarCodigo } from "../utils/contadorService";
+import { Beneficiario } from "../models/beneficiarioModel";
 
 type EmpresaPatrocinadoraCreationData = Omit<IEmpresaPatrocinadora, 'id' | 'anulado'>;
 
@@ -32,6 +34,30 @@ export class EmpresaPatrocinadoraService extends BaseCRUDService<EmpresaPatrocin
             });
             if (checkRuc) throw new Error('RUC_EXISTE');
 
+            if (empresaPatrocinadoraData.beneficiarios && empresaPatrocinadoraData.beneficiarios.length > 0) {
+                const idsBeneficiariosNuevos = empresaPatrocinadoraData.beneficiarios.map(u => u.beneficiarioId);
+                const beneficiarioExistente = await EmpresaPatrocinadoraBeneficiario.findOne({
+                    where: {
+                        beneficiarioId: { [Op.in]: idsBeneficiariosNuevos },
+                        [Op.or]: [{ anulado: false }]
+                    },
+                    include: [
+                        {
+                            model: Beneficiario,
+                            as: 'beneficiario',
+                            attributes: ['idBeneficiario', 'nombre']
+                        }
+                    ],
+                    transaction
+                });
+
+                if (beneficiarioExistente) {
+                    const nombreBeneficiario = (beneficiarioExistente as any).beneficiario?.nombre || beneficiarioExistente.beneficiarioId;
+                    throw new Error(`BENEFICIARIO_YA_ASIGNADO:${nombreBeneficiario}`);
+                }
+            }
+
+            empresaPatrocinadoraData.codigo = await generarCodigo('empresaPatrocinadora', transaction);
             const newEmpresaPatrocinadora = await this.ModelClass.create(empresaPatrocinadoraData, { transaction });
 
             if (empresaPatrocinadoraData.beneficiarios && empresaPatrocinadoraData.beneficiarios.length > 0) {
@@ -72,6 +98,30 @@ export class EmpresaPatrocinadoraService extends BaseCRUDService<EmpresaPatrocin
                     transaction
                 });
                 if (rucExist) throw new Error('RUC_EXISTE');
+            }
+
+            if (empresaPatrocinadoraData.beneficiarios && empresaPatrocinadoraData.beneficiarios.length > 0) {
+                const idsBeneficiariosNuevos = empresaPatrocinadoraData.beneficiarios.map(u => u.beneficiarioId);
+                const beneficiarioExistente = await EmpresaPatrocinadoraBeneficiario.findOne({
+                    where: {
+                        beneficiarioId: { [Op.in]: idsBeneficiariosNuevos },
+                        empresaPatrocinadoraId: { [Op.ne]: empresaPatrocinadoraData.id },
+                        [Op.or]: [{ anulado: false }]
+                    },
+                    include: [
+                        {
+                            model: Beneficiario,
+                            as: 'beneficiario',
+                            attributes: ['idBeneficiario', 'nombre']
+                        }
+                    ],
+                    transaction
+                });
+
+                if (beneficiarioExistente) {
+                    const nombreBeneficiario = (beneficiarioExistente as any).beneficiario?.nombre || beneficiarioExistente.beneficiarioId;
+                    throw new Error(`BENEFICIARIO_YA_ASIGNADO:${nombreBeneficiario}`);
+                }
             }
 
             empresaPatrocinadoraToUpdate.codigo = empresaPatrocinadoraData.codigo;

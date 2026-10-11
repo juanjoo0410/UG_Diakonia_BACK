@@ -35,7 +35,7 @@ export class Producto extends Model<IProducto> implements IProducto {
 Producto.init(
     {
         idProducto: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-        codigo: { type: DataTypes.STRING(5), allowNull: false },
+        codigo: { type: DataTypes.STRING(6), allowNull: false },
         descripcion: { type: DataTypes.STRING(100), allowNull: false },
         idGrupoProducto: {
             type: DataTypes.INTEGER,
