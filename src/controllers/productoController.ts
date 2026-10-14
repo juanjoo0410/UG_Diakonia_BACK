@@ -191,8 +191,13 @@ const getProductosUndSinPrecio = async (req: Request, res: Response) => {
                 {
                     model: Producto,
                     as: 'producto',
-                    attributes: ['descripcion', 'precioTiendita', 'prest', 'fechaCaducidad', 'sku'], //quitar sku y fecha
-                    where: [{ prest: 'UND' }],
+                    attributes: ['descripcion', 'precioTiendita', 'prest', 'fechaCaducidad', 'sku', 'esCompuesto'], //quitar sku y fecha
+                    where: {
+                        [Op.or]: [
+                            { prest: 'UND' },
+                            { esCompuesto: true }
+                        ]
+                    },
                     include: [
                         {
                             model: GrupoProducto,

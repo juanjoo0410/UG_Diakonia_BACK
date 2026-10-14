@@ -230,6 +230,12 @@ export const initialMenuData = [
                 ruta: '/main/pages/tiendita/distribucion-productos',
                 orden: 9
             },
+            {
+                idSubmenu: 56,
+                nombre: 'Informe de Pedidos Corporativos',
+                ruta: '/main/pages/tiendita/pedidos-corporativos',
+                orden: 10
+            },            
         ]
     },
     {
@@ -428,7 +434,7 @@ export const initialMenuData = [
         ]
     }
 ];
-//último submenuId: 55
+//último submenuId: 56
 
 export const initialSpecialPermissionsData = [
     { idPermiso: 1, codigo: 'DSB-SHOW-TIENDITA', anulado: false },

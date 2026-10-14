@@ -152,7 +152,7 @@ export const getAll = async (req: Request, res: Response) => {
                         {
                             model: Beneficiario,
                             as: 'beneficiario',
-                            attributes: ['nombre']
+                            attributes: ['identificacion', 'nombre']
                         }
                     ]
                 }

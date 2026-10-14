@@ -9,8 +9,12 @@ import { Producto } from "../models/productoModel";
 import { Bodega } from "../models/bodegaModel";
 import { Ubicacion } from "../models/ubicacionModel";
 import { Beneficiario } from "../models/beneficiarioModel";
+import { ReservaService } from "./reserva.service";
+import { FilterDto } from "../dtos/filter.dto";
 
 type ICreationData = Omit<IPedidoCorporativo, 'id' | 'anulado'>;
+
+const reservaService = new ReservaService();
 
 export class PedidoCorporativoService extends BaseCRUDService<PedidoCorporativo> {
     constructor() {
@@ -42,15 +46,12 @@ export class PedidoCorporativoService extends BaseCRUDService<PedidoCorporativo>
     }
 
     public async createPedidoCorporativo(data: ICreationData): Promise<PedidoCorporativo> {
-        const fechaFormateada = new Date(data.fecha).toISOString().split('T')[0];
-
         return await sequelize.transaction(async (t) => {
             const nuevoPedido = await this.ModelClass.create({
-                fecha: fechaFormateada,
                 tipo: data.tipo,
                 descripcion: data.descripcion,
                 empresaPatrocinadoraId: data.empresaPatrocinadoraId,
-                tipoPago: data.tipoPago,
+                tipoContribucion: data.tipoContribucion,
                 banco: data.banco,
                 subtotal: data.subtotal,
                 descuento: data.descuento,
@@ -60,6 +61,7 @@ export class PedidoCorporativoService extends BaseCRUDService<PedidoCorporativo>
                 totalPeso: data.totalPeso,
                 usuario: data.usuario,
                 nota: data.nota,
+                emitido: data.emitido,
                 creadorId: data.creadorId
             } as any, { transaction: t });
 
@@ -81,6 +83,9 @@ export class PedidoCorporativoService extends BaseCRUDService<PedidoCorporativo>
 
             await PedidoCorporativoDt.bulkCreate(detallesToCreate as any[], { transaction: t });
             await PedidoCorporativoBeneficiario.bulkCreate(beneficiariosToCreate as any[], { transaction: t });
+
+            //Actualizar reserva de productos
+            await reservaService.updateReserva(detallesToCreate as any[], true, t);
 
             return await this.getPedidoCorporativoById(nuevoPedido.id ?? 0, t);
         });
@@ -104,5 +109,28 @@ export class PedidoCorporativoService extends BaseCRUDService<PedidoCorporativo>
             await transaction.rollback();
             throw error;
         }
+    }
+
+    public async getPedidosByDateAndEmpresaIdAsync(filters: FilterDto): Promise<any[]> {
+        const { fechaInicio, fechaFin, empresaPatrocinadoraId } = filters;
+        const fechaIniFormateada = typeof fechaInicio === 'string'
+            ? fechaInicio.split('T')[0]
+            : fechaInicio.toISOString().split('T')[0];
+        const fechaFinFormateada = typeof fechaFin === 'string'
+            ? fechaFin.split('T')[0]
+            : fechaFin.toISOString().split('T')[0];
+
+        const result = await sequelize.query(
+            'CALL sp_ObtenerPedidosCorporativos(:fechaIniFormateada, :fechaFinFormateada, :empresaPatrocinadoraId)',
+            {
+                replacements: {
+                    fechaIniFormateada,
+                    fechaFinFormateada,                    
+                    empresaPatrocinadoraId: empresaPatrocinadoraId ? Number(empresaPatrocinadoraId) : 0
+                }
+            }
+        );
+
+        return result;
     }
 }

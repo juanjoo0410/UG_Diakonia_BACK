@@ -4,4 +4,5 @@ export interface FilterDto {
     cajaBancoId: number;
     bodegaId: number;
     productoId: number;
+    empresaPatrocinadoraId: number;    
 }

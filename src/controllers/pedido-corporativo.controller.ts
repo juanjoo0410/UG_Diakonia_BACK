@@ -4,6 +4,7 @@ import { handleHttp } from '../utils/handleError';
 import { PedidoCorporativoService } from '../services/pedido-corporativo.service';
 import { IPedidoCorporativo } from '../interfaces/pedido-corporativo.interface';
 import { PedidoCorporativo } from '../models/pedido-corporativo.model';
+import { FilterDto } from '../dtos/filter.dto';
 
 const service = new PedidoCorporativoService();
 const entidad = 'PEDIDO_CORPORATIVO';
@@ -123,5 +124,31 @@ export const annular = async (
         } else {
             return handleHttp(res, `ERROR_ANNULAR_${entidad}_UNKNOWN`, String(error));
         }
+    }
+};
+
+export const getPedidosByDateAndEmpresaId = async (
+    req: Request<{}, {}, FilterDto>,
+    res: Response
+) => {
+    const filters: FilterDto = req.body;
+
+    if (!filters.fechaInicio || !filters.fechaFin) {
+        res.status(400).json({
+            status: false,
+            message: 'Se requieren fechaInicio y fechaFin para la consulta.'
+        });
+        return;
+    }
+
+    try {
+        const response = await service.getPedidosByDateAndEmpresaIdAsync(filters);
+
+        res.status(200).json({
+            status: true,
+            value: response
+        });
+    } catch (error) {
+        return handleHttp(res, `ERROR_GET_${entidad}`, error);
     }
 };
