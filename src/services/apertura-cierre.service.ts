@@ -12,6 +12,7 @@ import { ICerrarCajaData } from "../interfaces/cerrar-caja-data.interface";
 import { KardexTesoreria } from "../models/kardex-tesoreria.model";
 import { Beneficiario } from "../models/beneficiarioModel";
 import { FilterDto } from "../dtos/filter.dto";
+import { EmpresaPatrocinadora } from "../models/empresa-patrocinadora.model";
 
 type AperturaCreationData = Omit<IApertura, 'id'>;
 
@@ -335,6 +336,10 @@ export class AperturaCierreService extends BaseCRUDService<Apertura> {
                 include: [{
                     model: Beneficiario,
                     as: 'beneficiario',
+                    attributes: ['nombre']
+                }, {
+                    model: EmpresaPatrocinadora,
+                    as: 'empresaPatrocinadora',
                     attributes: ['nombre']
                 }]
             });

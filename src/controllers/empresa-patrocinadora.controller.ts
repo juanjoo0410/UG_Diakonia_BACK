@@ -50,6 +50,14 @@ export const create = async (
                 return;
             }
 
+            if (error.message === 'ERROR_CREACION') {
+                res.status(404).json({
+                    status: false,
+                    message: 'Se presentó un error al obtener la empresa creada.'
+                });
+                return;
+            }
+
             return handleHttp(res, `ERROR_POST_${entidad}`, error);
         } else {
             return handleHttp(res, `ERROR_POST_${entidad}_UNKNOWN`, String(error));

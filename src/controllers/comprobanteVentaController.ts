@@ -11,7 +11,12 @@ import { actualizarStock } from '../utils/stockService';
 import { agregarKardex } from '../utils/kardexService';
 import { col, fn, literal, Op, where } from 'sequelize';
 import { Producto } from '../models/productoModel';
+import { ComprobanteContribucionService } from '../services/comprobante-contribucion.service';
+import { FilterDto } from '../dtos/filter.dto';
+import { Empresa } from '../models/empresaModel';
+import { EmpresaPatrocinadora } from '../models/empresa-patrocinadora.model';
 
+const service = new ComprobanteContribucionService();
 const entidad = 'COMPROBANTE_TIENDITA';
 
 const createComprobanteVenta = async (
@@ -45,7 +50,7 @@ const createComprobanteVenta = async (
                 usuario: comprobanteVenta.usuario,
                 cajaId: comprobanteVenta.cajaId,
                 bancoTransferenciaId: comprobanteVenta.bancoTransferenciaId,
-                pedidoCorporativoId: comprobanteVenta.pedidoCorporativoId,               
+                pedidoCorporativoId: comprobanteVenta.pedidoCorporativoId,
             },
             { transaction }
         );
@@ -65,7 +70,7 @@ const createComprobanteVenta = async (
             }));
         const documento = {
             idDocumento: newComprobanteVenta.idComprobanteVenta,
-            tipo: entidad,
+            tipo: 'CONTRIBUCION',
             detalle: `Comprobante: ${beneficiario?.nombre}.`,
             esIngreso: false
         }
@@ -367,8 +372,23 @@ const getComprobanteVentaById = async (req: Request, res: Response) => {
             where: { idComprobanteVenta: id },
             include: [
                 {
+                    model: Beneficiario,
+                    as: 'beneficiario',
+                    attributes: ['identificacion', 'nombre', 'esEmpleado']
+                },
+                {
+                    model: EmpresaPatrocinadora,
+                    as: 'empresaPatrocinadora',
+                    attributes: ['ruc', 'nombre']
+                },
+                {
                     model: ComprobanteVentaDt,
-                    as: "comvenDetalles",
+                    as: 'comvenDetalles',
+                    include: [{
+                        model: Producto,
+                        as: 'producto',
+                        attributes: ['descripcion']
+                    }]
                 }
             ],
         });
@@ -426,6 +446,32 @@ const deleteComprobanteVenta = async (req: Request & { user?: any }, res: Respon
     }
 };
 
+const getComprobantesContribucionByDate = async (
+    req: Request<{}, {}, FilterDto>,
+    res: Response
+) => {
+    const filters: FilterDto = req.body;
+
+    if (!filters.fechaInicio || !filters.fechaFin) {
+        res.status(400).json({
+            status: false,
+            message: 'Se requieren fechaInicio y fechaFin para la consulta.'
+        });
+        return;
+    }
+
+    try {
+        const response = await service.getComprobantesContribucionByDateAsync(filters);
+
+        res.status(200).json({
+            status: true,
+            value: response
+        });
+    } catch (error) {
+        return handleHttp(res, `ERROR_GET_${entidad}`, error);
+    }
+};
+
 export {
     createComprobanteVenta,
     getComprobantesVenta,
@@ -435,5 +481,6 @@ export {
     getProductosDemandantes,
     getTotalProductos,
     getComprobanteVentaById,
-    deleteComprobanteVenta
+    deleteComprobanteVenta,
+    getComprobantesContribucionByDate
 }

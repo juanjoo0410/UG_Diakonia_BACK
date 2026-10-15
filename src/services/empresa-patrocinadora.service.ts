@@ -69,8 +69,23 @@ export class EmpresaPatrocinadoraService extends BaseCRUDService<EmpresaPatrocin
                 await EmpresaPatrocinadoraBeneficiario.bulkCreate(beneficiarios as any[], { transaction });
             }
 
+            const empresaPatrocinadora = await EmpresaPatrocinadora.findOne({
+                where: { id: newEmpresaPatrocinadora.id },
+                include: [
+                    {
+                        model: EmpresaPatrocinadoraBeneficiario, as: 'beneficiarios',
+                        include: [
+                            { model: Beneficiario, as: 'beneficiario' }
+                        ]
+                    }
+                ],
+                transaction
+            });
+
+            if (!empresaPatrocinadora) throw new Error('ERROR_CREACION');
             await transaction.commit();
-            return newEmpresaPatrocinadora;
+
+            return empresaPatrocinadora;
         } catch (error) {
             await transaction.rollback();
             throw error;

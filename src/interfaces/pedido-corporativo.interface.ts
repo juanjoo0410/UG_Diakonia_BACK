@@ -9,7 +9,7 @@ export interface IPedidoCorporativo extends IBaseDocument {
     subtotal: number;
     descuento: number;
     valorCupon: number;
-    diferenciaEfectivo?: number;
+    diferenciaEfectivo: number;
     total: number;
     totalPeso: number;
     usuario: string;
