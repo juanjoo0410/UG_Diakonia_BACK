@@ -70,7 +70,7 @@ Producto.init(
         sku: { type: DataTypes.STRING(75), allowNull: false },
         codigoBarras: { type: DataTypes.STRING(13), allowNull: true },
         estado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
-        esCompuesto: { type: DataTypes.BOOLEAN, allowNull: false },
+        esCompuesto: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
     },
     {
         sequelize,
