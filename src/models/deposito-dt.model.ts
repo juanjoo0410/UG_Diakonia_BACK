@@ -37,7 +37,7 @@ Deposito.hasMany(DepositoDt, {
     as: 'detalles'
 })
 
-DepositoDt.hasMany(Deposito, {
+DepositoDt.belongsTo(Deposito, {
     foreignKey: 'depositoId',
     as: 'deposito'
 })
