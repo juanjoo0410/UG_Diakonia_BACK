@@ -26,7 +26,7 @@ export const create = async (
     } catch (error) {
         if (error instanceof Error) {
             if (error.message === 'ENTIDAD_EXISTE') {
-                res.status(400).json({
+                res.status(409).json({
                     status: false,
                     message: 'Empresa ya existe.'
                 });
@@ -34,9 +34,26 @@ export const create = async (
             }
 
             if (error.message === 'RUC_EXISTE') {
-                res.status(404).json({
+                res.status(400).json({
                     status: false,
                     message: 'Ya existe una empresa con el ruc especificado.'
+                });
+                return;
+            }
+
+            if (error.message.startsWith('BENEFICIARIO_YA_ASIGNADO:')) {
+                const nombreBeneficiario = error.message.split(':')[1] || 'seleccionado';
+                res.status(400).json({
+                    status: false,
+                    message: `El beneficiario "${nombreBeneficiario}" ya se encuentra asignado a otra empresa.`
+                });
+                return;
+            }
+
+            if (error.message === 'ERROR_CREACION') {
+                res.status(404).json({
+                    status: false,
+                    message: 'Se presentó un error al obtener la empresa creada.'
                 });
                 return;
             }
@@ -83,9 +100,18 @@ export const update = async (
         }
 
         if (errorMessage === 'RUC_EXISTE') {
-            res.status(404).json({
+            res.status(400).json({
                 status: false,
                 message: 'Ya existe una empresa con el ruc especificado.'
+            });
+            return;
+        }
+
+        if (errorMessage.startsWith('BENEFICIARIO_YA_ASIGNADO:')) {
+            const nombreBeneficiario = errorMessage.split(':')[1] || 'seleccionado';
+            res.status(400).json({
+                status: false,
+                message: `El beneficiario "${nombreBeneficiario}" ya se encuentra asignado a otra empresa.`
             });
             return;
         }
@@ -134,7 +160,7 @@ export const getAll = async (req: Request, res: Response) => {
                         {
                             model: Beneficiario,
                             as: 'beneficiario',
-                            attributes: ['nombre']
+                            attributes: ['identificacion', 'nombre']
                         }
                     ]
                 }

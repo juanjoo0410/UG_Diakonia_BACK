@@ -41,7 +41,8 @@ const getPermisosByIdRol = async (req: Request, res: Response) => {
             existingMenu.submenus.push({
                 idSubmenu: permiso.submenu.idSubmenu,
                 nombreSubmenu: permiso.submenu.nombre,
-                rutaSubmenu: permiso.submenu.ruta
+                rutaSubmenu: permiso.submenu.ruta,
+                orden: permiso.submenu.orden
             });
             return acc;
         }, []);

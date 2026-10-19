@@ -10,7 +10,7 @@ export const agregarKardex = async (
     transaction: Transaction
 ) => {
     for (const detalle of detalles) {
-        const producto = await Producto.findByPk(detalle.idProducto);
+        const producto = await Producto.findByPk(detalle.idProducto, { transaction });
         const stock = await Stock.findOne({
             where: {
                 idProducto: detalle.idProducto,
