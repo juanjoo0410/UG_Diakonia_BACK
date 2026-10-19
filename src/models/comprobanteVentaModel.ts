@@ -25,6 +25,7 @@ export class ComprobanteVenta extends Model<IComprobanteVenta> implements ICompr
     public bancoTransferenciaId?: number | undefined;
     public beneficiario?: Beneficiario | undefined;
     public pedidoCorporativoId?: number;
+    public semana?: number | undefined;
 }
 
 ComprobanteVenta.init(
@@ -46,6 +47,7 @@ ComprobanteVenta.init(
         cajaId: { type: DataTypes.INTEGER, references: { model: 'cajas_bancos', key: 'id' } },
         bancoTransferenciaId: { type: DataTypes.INTEGER, allowNull: true, references: { model: 'cajas_bancos', key: 'id' } },
         pedidoCorporativoId: { type: DataTypes.INTEGER, allowNull: true, references: { model: 'pedidos_corporativos', key: 'id' } },
+        semana: { type: DataTypes.INTEGER, allowNull: true },
     },
     {
         sequelize,

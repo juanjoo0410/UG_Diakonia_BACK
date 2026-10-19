@@ -17,6 +17,7 @@ import { IComprobanteVenta } from "../interfaces/IComprobanteVenta";
 import { actualizarStock } from "../utils/stockService";
 import { agregarKardex } from "../utils/kardexService";
 import { IDataResponse } from "../interfaces/data-response.interface";
+import { getNumeroSemana } from "../utils/utilsService";
 
 type ICreationData = Omit<IPedidoCorporativo, 'id' | 'anulado'>;
 
@@ -111,6 +112,7 @@ export class PedidoCorporativoService extends BaseCRUDService<PedidoCorporativo>
                     cajaId: data.cajaId,
                     bancoTransferenciaId: data.bancoTransferenciaId,
                     pedidoCorporativoId: newPedido.id,
+                    semana: getNumeroSemana(new Date().toDateString()),
                     comprobanteVentaDt: data.detalles?.map(dt => ({
                         idComprobanteVenta: 0,
                         idProducto: dt.productoId,
@@ -220,6 +222,7 @@ export class PedidoCorporativoService extends BaseCRUDService<PedidoCorporativo>
                     cajaId: data.cajaId,
                     bancoTransferenciaId: data.bancoTransferenciaId,
                     pedidoCorporativoId: data.id,
+                    semana: getNumeroSemana(new Date().toDateString()),
                     comprobanteVentaDt: data.detalles?.map(dt => ({
                         idComprobanteVenta: 0,
                         idProducto: dt.productoId,

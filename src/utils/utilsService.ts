@@ -38,17 +38,17 @@ export function excelDateToJSDate(serial: number): Date {
   return new Date(excelEpoch.getTime() + ms);
 }
 
-  export function getNumeroSemana(fecha: string): number {
-    const date = new Date(fecha);
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    
-    // Esto desplaza el inicio de la semana al viernes.
-    d.setUTCDate(d.getUTCDate() + 3);
+export function getNumeroSemana(fecha: string): number {
+  const date = new Date(fecha);
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
 
-    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-    const anioInicio = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    const diferenciaMs = d.getTime() - anioInicio.getTime();
-    const numeroSemana = Math.ceil(((diferenciaMs / 86400000) + 1) / 7);
+  // Esto desplaza el inicio de la semana al viernes.
+  d.setUTCDate(d.getUTCDate() + 3);
 
-    return numeroSemana;
-  }
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const anioInicio = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const diferenciaMs = d.getTime() - anioInicio.getTime();
+  const numeroSemana = Math.ceil(((diferenciaMs / 86400000) + 1) / 7);
+
+  return numeroSemana;
+}

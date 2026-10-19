@@ -15,6 +15,7 @@ import { ComprobanteContribucionService } from '../services/comprobante-contribu
 import { FilterDto } from '../dtos/filter.dto';
 import { Empresa } from '../models/empresaModel';
 import { EmpresaPatrocinadora } from '../models/empresa-patrocinadora.model';
+import { getNumeroSemana } from '../utils/utilsService';
 
 const service = new ComprobanteContribucionService();
 const entidad = 'COMPROBANTE_TIENDITA';
@@ -51,6 +52,7 @@ const createComprobanteVenta = async (
                 cajaId: comprobanteVenta.cajaId,
                 bancoTransferenciaId: comprobanteVenta.bancoTransferenciaId,
                 pedidoCorporativoId: comprobanteVenta.pedidoCorporativoId,
+                semana: getNumeroSemana(new Date().toDateString())
             },
             { transaction }
         );
