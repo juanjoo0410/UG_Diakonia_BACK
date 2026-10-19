@@ -4,10 +4,10 @@ import { IContador } from '../interfaces/IContador';
 import { Contador } from '../models/contadorModel';
 
 const createContador = async (
-    req: Request<{}, {}, Omit<IContador, 'idContador' | 'estado'>> & { user?: any },
+    req: Request<{}, {}, Omit<IContador, 'estado'>> & { user?: any },
     res: Response) => {
     try {
-        const contador: Omit<IContador, 'idContador' | 'estado'> = req.body;
+        const contador: Omit<IContador, 'estado'> = req.body;
         const checkIs = await Contador.findOne({ where: { nombre: contador.nombre } });
         if (checkIs) {
             res.status(400).json({

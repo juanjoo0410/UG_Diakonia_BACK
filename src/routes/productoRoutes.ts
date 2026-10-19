@@ -13,13 +13,18 @@ import {
     updateProducto,
     updatePrecios,
     updateStatusProducto,
-    generateBarcodeProducto
+    generateBarcodeProducto,
+    createProductoCompuesto,
+    updateStockProductoCompuesto,
+    getComposicionesByBodegaIdAndProductoId
 } from "../controllers/productoController";
 import { checkJwt } from "../middlewares/session";
 
 const router = Router();
 
 router.post('/', checkJwt, createProducto);
+router.post('/producto-compuesto', checkJwt, createProductoCompuesto);
+router.post('/composiciones', checkJwt, getComposicionesByBodegaIdAndProductoId);
 router.get('/', checkJwt, getProductos);
 router.get('/total', checkJwt, getTotalProductos);
 router.get('/conStock', checkJwt, getProductosConStock);
@@ -33,5 +38,6 @@ router.put('/', checkJwt, updateProducto);
 router.put('/precios', checkJwt, updatePrecios);
 router.delete('/:id', checkJwt, updateStatusProducto);
 router.put('/barcode', checkJwt, generateBarcodeProducto);
+router.put('/stock-producto-compuesto', checkJwt, updateStockProductoCompuesto);
 
 export default router;

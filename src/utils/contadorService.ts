@@ -11,12 +11,7 @@ export async function generarCodigo(
     });
 
     if (!contador) {
-        contador = await Contador.create({
-            nombre,
-            ultimoValor: 1,
-            prefijo: nombre.slice(0, 3).toUpperCase(),
-            numFormato: 4
-        }, { transaction });
+        throw new Error(`Contador ${nombre} no creado.`)
     } else {
         contador.ultimoValor += 1;
         console.log("CREANDO CODIGO: " + contador.nombre);
@@ -35,12 +30,7 @@ export async function generarBarcodeEAN13(transaction?: Transaction): Promise<st
     });
 
     if (!contador) {
-        contador = await Contador.create({
-            nombre,
-            ultimoValor: 1,
-            prefijo: '999',
-            numFormato: 9
-        }, { transaction });
+        throw new Error(`Contador ${nombre} no creado.`)
     } else {
         contador.ultimoValor += 1;
         await contador.save({ transaction });
