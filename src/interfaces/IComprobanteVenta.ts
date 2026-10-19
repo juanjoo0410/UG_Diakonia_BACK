@@ -21,4 +21,5 @@ export interface IComprobanteVenta {
     cajaId?: number;
     bancoTransferenciaId?: number;
     pedidoCorporativoId?: number;
+    semana?: number;
 }

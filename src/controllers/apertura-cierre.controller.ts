@@ -258,11 +258,11 @@ export const getAperturaCierreByDateAndCajaId = async (
     }
 
     try {
-        const kardex = await service.getAperturaCierreByDateAndCajaIdAsync(filters);
+        const response = await service.getAperturaCierreByDateAndCajaIdAsync(filters);
 
         res.status(200).json({
             status: true,
-            value: kardex
+            value: response
         });
     } catch (error) {
         return handleHttp(res, `ERROR_GET_${entidad}`, error);

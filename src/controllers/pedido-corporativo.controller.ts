@@ -3,7 +3,7 @@ import { registrarBitacora } from "../utils/bitacoraService";
 import { handleHttp } from '../utils/handleError';
 import { PedidoCorporativoService } from '../services/pedido-corporativo.service';
 import { IPedidoCorporativo } from '../interfaces/pedido-corporativo.interface';
-import { PedidoCorporativo } from '../models/pedido-corporativo.model';
+import { FilterDto } from '../dtos/filter.dto';
 
 const service = new PedidoCorporativoService();
 const entidad = 'PEDIDO_CORPORATIVO';
@@ -17,19 +17,81 @@ export const create = async (
         const usuarioId = req.user.idUsuario;
         data.creadorId = usuarioId;
 
-        const newPedido: PedidoCorporativo = await service.createPedidoCorporativo(data);
+        const response = await service.createPedidoCorporativo(data);
         res.status(201).json({
             status: true,
-            message: 'Pedido creado exitosamente.',
-            value: newPedido
+            message: response.message,
+            value: response.obj,
+            documentId: response.documentId
         });
-        await registrarBitacora(req, 'CREACIÓN', entidad, `Se creó el pedido No. ${data.id}.`);
+
+        await registrarBitacora(req, 'CREACIÓN', entidad, `Se creó el pedido No. ${response.obj.id}.`);
+
+        if (response.documentId != 0)
+            await registrarBitacora(req, 'CREACIÓN', entidad, `Se creó el comprobante de contribución No. ${response.documentId}.`);
     } catch (error) {
         if (error instanceof Error) {
+            if (error.message === 'COMPROBANTE_NO_EMITIDO') {
+                res.status(400).json({
+                    status: false,
+                    message: 'No se pudo emitir el comprobante.'
+                });
+                return;
+            }
+
             return handleHttp(res, `ERROR_POST_${entidad}`, error);
         } else {
             return handleHttp(res, `ERROR_POST_${entidad}_UNKNOWN`, String(error));
         }
+    }
+};
+
+export const update = async (
+    req: Request<{}, {}, IPedidoCorporativo> & { user?: any },
+    res: Response
+) => {
+    const data: IPedidoCorporativo = req.body;
+    try {
+        const response = await service.updatePedidoCorporativo(data);
+        res.status(200).json({
+            status: true,
+            message: response.message,
+            value: response.obj,
+            documentId: response.documentId
+        });
+
+        await registrarBitacora(req, 'MODIFICACIÓN', entidad, `Se actualizó información del pedido No. ${response.obj.id}.`);
+
+        if (response.documentId != 0)
+            await registrarBitacora(req, 'CREACIÓN', entidad, `Se creó el comprobante de contribución No. ${response.documentId}.`);
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+
+        if (errorMessage === 'DOCUMENTO_NO_ENCONTRADO') {
+            res.status(404).json({
+                status: false,
+                message: 'Pedido no encontrado.'
+            });
+            return;
+        }
+
+        if (errorMessage === 'DOCUMENTO_ANULADO') {
+            res.status(404).json({
+                status: false,
+                message: 'El pedido ya fue anulado.'
+            });
+            return;
+        }        
+
+        if (errorMessage === 'COMPROBANTE_NO_EMITIDO') {
+            res.status(400).json({
+                status: false,
+                message: 'No se pudo emitir el comprobante.'
+            });
+            return;
+        }
+
+        return handleHttp(res, `ERROR_PUT_${entidad}`, error);
     }
 };
 
@@ -123,5 +185,31 @@ export const annular = async (
         } else {
             return handleHttp(res, `ERROR_ANNULAR_${entidad}_UNKNOWN`, String(error));
         }
+    }
+};
+
+export const getPedidosByDateAndEmpresaId = async (
+    req: Request<{}, {}, FilterDto>,
+    res: Response
+) => {
+    const filters: FilterDto = req.body;
+
+    if (!filters.fechaInicio || !filters.fechaFin) {
+        res.status(400).json({
+            status: false,
+            message: 'Se requieren fechaInicio y fechaFin para la consulta.'
+        });
+        return;
+    }
+
+    try {
+        const response = await service.getPedidosByDateAndEmpresaIdAsync(filters);
+
+        res.status(200).json({
+            status: true,
+            value: response
+        });
+    } catch (error) {
+        return handleHttp(res, `ERROR_GET_${entidad}`, error);
     }
 };

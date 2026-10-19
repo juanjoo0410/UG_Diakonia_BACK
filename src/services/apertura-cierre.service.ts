@@ -4,19 +4,15 @@ import { BaseCRUDService } from "./base-crud.service";
 import sequelize from "../config/db";
 import { Op, Transaction } from "sequelize";
 import { CajaBanco } from "../models/caja-banco.model";
-import { IComprobanteVenta } from "../interfaces/IComprobanteVenta";
 import { ComprobanteVenta } from "../models/comprobanteVentaModel";
 import { EgresoTesoreria } from "../models/egreso-tesoreria.model";
-import { IngresoTesoreria } from "../models/ingreso-tesoreria.model";
 import { IngresoTesoreriaService } from "./ingreso-tesoreria.service";
-import { IIngresoTesoreria } from "../interfaces/ingreso-tesoreria.interface";
 import { TransferenciaBancariaService } from "./transferencia-bancaria.service";
-import { ITransferenciaBancaria } from "../interfaces/transferencia-bancaria.interface";
 import { ICerrarCajaData } from "../interfaces/cerrar-caja-data.interface";
-import { IKardexTesoreria } from "../interfaces/kardex-tesoreria.interface";
 import { KardexTesoreria } from "../models/kardex-tesoreria.model";
 import { Beneficiario } from "../models/beneficiarioModel";
 import { FilterDto } from "../dtos/filter.dto";
+import { EmpresaPatrocinadora } from "../models/empresa-patrocinadora.model";
 
 type AperturaCreationData = Omit<IApertura, 'id'>;
 
@@ -340,6 +336,10 @@ export class AperturaCierreService extends BaseCRUDService<Apertura> {
                 include: [{
                     model: Beneficiario,
                     as: 'beneficiario',
+                    attributes: ['nombre']
+                }, {
+                    model: EmpresaPatrocinadora,
+                    as: 'empresaPatrocinadora',
                     attributes: ['nombre']
                 }]
             });

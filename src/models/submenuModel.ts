@@ -17,36 +17,12 @@ export class Submenu extends Model<ISubmenu> implements ISubmenu {
 
 Submenu.init(
     {
-        idSubmenu: {
-            type: DataTypes.INTEGER,            
-            primaryKey: true,
-            allowNull: false
-        },
-        idMenu: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: 'menus',
-                key: 'idMenu'
-            }
-        },
-        nombre: {
-            type: DataTypes.STRING(45),
-            allowNull: false
-        },
-        ruta: {
-            type: DataTypes.STRING(45),
-            allowNull: false,
-            unique: true
-        },
-        orden: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        },
-        anulado: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
+        idSubmenu: { type: DataTypes.INTEGER, primaryKey: true, allowNull: false },
+        idMenu: { type: DataTypes.INTEGER, references: { model: 'menus', key: 'idMenu' } },
+        nombre: { type: DataTypes.STRING(75), allowNull: false },
+        ruta: { type: DataTypes.STRING(100), allowNull: false, unique: true },
+        orden: { type: DataTypes.INTEGER, allowNull: false },
+        anulado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     },
     {
         sequelize,
@@ -55,13 +31,5 @@ Submenu.init(
     }
 );
 
-Submenu.hasMany(RolSubmenu, {
-    foreignKey: 'idSubmenu',
-    as: 'roles_submenus'
-});
-
-RolSubmenu.belongsTo(Submenu, {
-    foreignKey: 'idSubmenu',
-    as: 'submenu'
-});
-
+Submenu.hasMany(RolSubmenu, { foreignKey: 'idSubmenu', as: 'roles_submenus' });
+RolSubmenu.belongsTo(Submenu, { foreignKey: 'idSubmenu', as: 'submenu' });
