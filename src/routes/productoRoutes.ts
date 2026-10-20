@@ -16,7 +16,8 @@ import {
     generateBarcodeProducto,
     createProductoCompuesto,
     updateStockProductoCompuesto,
-    getComposicionesByBodegaIdAndProductoId
+    getComposicionesByBodegaIdAndProductoId,
+    liberarComponentes
 } from "../controllers/productoController";
 import { checkJwt } from "../middlewares/session";
 
@@ -39,5 +40,6 @@ router.put('/precios', checkJwt, updatePrecios);
 router.delete('/:id', checkJwt, updateStatusProducto);
 router.put('/barcode', checkJwt, generateBarcodeProducto);
 router.put('/stock-producto-compuesto', checkJwt, updateStockProductoCompuesto);
+router.put('/liberar-componentes', checkJwt, liberarComponentes);
 
 export default router;
