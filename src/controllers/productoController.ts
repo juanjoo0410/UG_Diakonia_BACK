@@ -647,6 +647,68 @@ const updateStockProductoCompuesto = async (
     }
 };
 
+const liberarComponentes = async (
+    req: Request<{}, {}, any> & { user?: any },
+    res: Response
+) => {
+    const data = req.body;
+    try {
+        const response = await service.liberarComponentesAsync(data);
+        res.status(200).json({
+            status: true,
+            message: 'Liberación de componentes realizado exitosamente',
+            value: response
+        });
+
+        await registrarBitacora(req, 'MODIFICACIÓN', 'STOCK', `Se actualizó stock de los componentes del producto ${response.descripcion}.`);
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+
+        if (errorMessage === 'ENTIDAD_NO_ENCONTRADA') {
+            res.status(404).json({
+                status: false,
+                message: 'Divisa no encontrada.'
+            });
+            return;
+        }
+
+        if (errorMessage === 'SIN_STOCK_DISPONIBLE') {
+            res.status(404).json({
+                status: false,
+                message: 'El stock del producto compuesto ha cambiado.'
+            });
+            return;
+        }
+
+        if (errorMessage === 'COMPOSICIONES_EMPTY') {
+            res.status(404).json({
+                status: false,
+                message: 'El producto compuesto no dispone de composiciones.'
+            });
+            return;
+        }        
+
+        if (errorMessage === 'ERROR_CREACION_INGRESO') {
+            res.status(404).json({
+                status: false,
+                message: 'No se pudo crear el ingreso del producto compuesto.'
+            });
+            return;
+        }
+
+        if (errorMessage === 'ERROR_CREACION_EGRESO') {
+            res.status(404).json({
+                status: false,
+                message: 'No se pudo crear el egreso de las composiciones.'
+            });
+            return;
+        }
+
+        return handleHttp(res, `ERROR_PUT_${entidad}`, error);
+    }
+};
+
 const getComposicionesByBodegaIdAndProductoId = async (
     req: Request<{}, {}, FilterDto>,
     res: Response
@@ -681,5 +743,6 @@ export {
     generateBarcodeProducto,
     createProductoCompuesto,
     updateStockProductoCompuesto,
+    liberarComponentes,
     getComposicionesByBodegaIdAndProductoId
 }

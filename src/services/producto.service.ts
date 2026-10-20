@@ -12,6 +12,7 @@ import { Egreso } from "../models/egresoModel";
 import { EgresoDt } from "../models/egresoDtModel";
 import { Stock } from "../models/stockModel";
 import { FilterDto } from "../dtos/filter.dto";
+import { Reserva } from "../models/reserva.model";
 
 export class ProductoService extends BaseCRUDService<Producto> {
     constructor() {
@@ -212,6 +213,107 @@ export class ProductoService extends BaseCRUDService<Producto> {
             await EgresoDt.bulkCreate(detallesDT, { transaction });
             await actualizarStock(detallesDT, false, transaction);
             await agregarKardex(dataKardexDT, detallesDT, transaction);
+
+            await transaction.commit();
+            return productoCompuesto;
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
+    public async liberarComponentesAsync(data: any): Promise<Producto> {
+        const transaction: Transaction = await sequelize.transaction();
+        try {
+            const productoCompuesto = await this.ModelClass.findByPk(data.idProducto, { transaction });
+            if (!productoCompuesto) throw new Error('ENTIDAD_NO_ENCONTRADA');
+
+            const stock = await Stock.findOne({
+                where: {
+                    idProducto: data.idProducto,
+                    idBodega: data.bodegaId,
+                    idUbicacion: data.ubicacionId,
+                }
+            });
+
+            const reserva = await Reserva.findOne({
+                where: {
+                    productoId: data.idProducto,
+                    bodegaId: data.bodegaId,
+                    ubicacionId: data.ubicacionId,
+                }
+            });
+
+            const disponible = (stock?.stock ?? 0) - (reserva?.reserva ?? 0);
+            if (disponible <= 0) { throw new Error('SIN_STOCK_DISPONIBLE') };
+
+            //Ingreso de detalle
+            if (!data.composiciones || data.composiciones.length == 0) throw new Error('COMPOSICIONES_EMPTY');
+
+            const descripcionIngreso = `INGRESO POR LIBERACIÓN COMPONENTES DE PRODUCTO ${productoCompuesto.descripcion}.`;
+            const totalPeso = productoCompuesto.pesoPorUnidad * disponible;
+            const newIngresoDT = await Ingreso.create({
+                idTipoTransaccion: data.tipoTransaccionId,
+                descripcion: descripcionIngreso,
+                idDonante: 0,
+                totalPeso: totalPeso,
+                usuario: data.usuario
+            },
+                { transaction }
+            );
+            if (!newIngresoDT) { throw new Error('ERROR_CREACION_INGRESO') };
+
+            const detalleDT = data.composiciones.map((dt: any) => ({
+                idIngreso: newIngresoDT.idIngreso ?? 0,
+                idProducto: dt.composicionId,
+                idBodega: data.bodegaId,
+                idUbicacion: data.ubicacionId,
+                cantidad: (dt.cantidad * disponible),
+                peso: ((dt.cantidad * disponible) * dt.peso)
+            }));
+
+            const dataKardexDT = {
+                idDocumento: newIngresoDT.idIngreso,
+                tipo: 'INGRESO',
+                detalle: descripcionIngreso,
+                esIngreso: true
+            }
+
+            await IngresoDt.bulkCreate(detalleDT, { transaction });
+            await actualizarStock(detalleDT, true, transaction);
+            await agregarKardex(dataKardexDT, detalleDT, transaction);
+
+            //Egreso de detalle
+            const descripcionEgreso = `EGRESO POR LIBERACIÓN COMPONENTES DE PRODUCTO ${productoCompuesto.descripcion}.`;
+            const newEgresoHD = await Egreso.create({
+                idTipoTransaccion: data.tipoTransaccionId,
+                descripcion: descripcionEgreso,
+                idInstitucion: 0,
+                totalPeso: totalPeso,
+                usuario: data.usuario
+            },
+                { transaction }
+            );
+            if (!newEgresoHD) { throw new Error('ERROR_CREACION_EGRESO') };
+
+            const detallesHD = [{
+                idEgreso: newEgresoHD.idEgreso ?? 0,
+                idProducto: productoCompuesto.idProducto ?? 0,
+                idBodega: data.bodegaId,
+                idUbicacion: data.ubicacionId,
+                cantidad: disponible,
+                peso: totalPeso
+            }];
+
+            const dataKardexHD = {
+                idDocumento: newEgresoHD.idEgreso,
+                tipo: 'EGRESO',
+                detalle: descripcionEgreso,
+                esIngreso: false
+            }
+            await EgresoDt.bulkCreate(detallesHD, { transaction });
+            await actualizarStock(detallesHD, false, transaction);
+            await agregarKardex(dataKardexHD, detallesHD, transaction);
 
             await transaction.commit();
             return productoCompuesto;
