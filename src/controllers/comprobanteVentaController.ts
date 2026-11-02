@@ -124,6 +124,59 @@ const getComprobantesVenta = async (req: Request, res: Response) => {
     }
 };
 
+const getVentasByTipoPagoSemanal = async (req: Request, res: Response) => {
+    const { semana, anio } = req.body;
+    const semanaNum = parseInt(semana as string);
+    const anioNum = parseInt(anio as string);
+
+    try {
+        if (isNaN(semanaNum) || isNaN(anioNum)) {
+            res.status(400).json({
+                status: false,
+                message: "Semana y año inválidos."
+            });
+            return;
+        }
+
+        const whereConditions: any = {
+            estado: true,
+            [Op.and]: [where(fn('YEAR', col('ComprobanteVenta.fecha')), anioNum)]
+        };
+
+        if (semanaNum !== 0) { whereConditions.semana = semanaNum; }
+
+        const ventas = await ComprobanteVenta.findAll({
+            attributes: [["tipoPago", "name"], [fn("SUM", col("total")), "value"]],
+            where: whereConditions,
+            group: ["tipoPago"]
+        });
+
+        // Convertimos el resultado a un diccionario
+        const tiposDePago = ['Efectivo', 'Transferencia', 'Crédito'];
+        const ventasDict: { [key: string]: number } = {};
+
+        for (const venta of ventas) {
+            const name = venta.get('name') as string;
+            const value = parseFloat(venta.get('value') as string);
+            ventasDict[name] = value;
+        }
+
+        // Generamos la respuesta asegurando los 3 tipos
+        const resultado = tiposDePago.map(tipo => ({
+            name: tipo,
+            value: ventasDict[tipo] || 0
+        }));
+
+        res.status(200).json({
+            status: true,
+            value: resultado
+        });
+
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
 const getVentasByTipoPago = async (req: Request, res: Response) => {
     const { mes, anio } = req.body;
     const mesNum = parseInt(mes as string);
@@ -179,6 +232,41 @@ const getVentasByTipoPago = async (req: Request, res: Response) => {
             value: resultado
         });
 
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL', error);
+    }
+};
+
+const getTotalVentasSemanal = async (req: Request, res: Response) => {
+    const { semana, anio } = req.body;
+    const semanaNum = parseInt(semana as string);
+    const anioNum = parseInt(anio as string);
+    try {
+        if (isNaN(semanaNum) || isNaN(anioNum)) {
+            res.status(400).json({
+                status: false,
+                message: "Semana y año inválidos."
+            });
+            return;
+        }
+
+        const whereConditions: any = {
+            estado: true,
+            [Op.and]: [where(fn('YEAR', col('ComprobanteVenta.fecha')), anioNum)]
+        };
+
+        if (semanaNum !== 0) { whereConditions.semana = semanaNum; }
+
+        const totalVentas = await ComprobanteVenta.findOne({
+            attributes: [[fn('SUM', col('total')), 'totalVentas']],
+            where: whereConditions,
+            raw: true,
+        });
+
+        res.status(200).json({
+            status: true,
+            value: totalVentas
+        });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_ALL', error);
     }
@@ -260,6 +348,65 @@ const getTotalContribucionAnual = async (req: Request, res: Response) => {
         res.status(200).json({ status: true, value: contribuciones });
     } catch (error) {
         handleHttp(res, 'ERROR_GET_CONTRIBUCION_ANUAL', error);
+    }
+};
+
+const getProductosDemandantesSemanal = async (req: Request, res: Response) => {
+    const { semana, anio } = req.body;
+    const semanaNum = parseInt(semana as string);
+    const anioNum = parseInt(anio as string);
+    try {
+        if (isNaN(semanaNum) || isNaN(anioNum)) {
+            res.status(400).json({
+                status: false,
+                message: "Semana y año inválidos."
+            });
+            return;
+        }
+
+        const whereConditions: any = {
+            [Op.and]: [
+                where(fn('YEAR', col('comprobanteVenta.fecha')), anio),
+                { '$comprobanteVenta.estado$': 1 }
+            ]
+        };
+
+        if (semana !== 0) {
+            whereConditions[Op.and].push(
+                { '$comprobanteVenta.semana$': semana }
+            );
+        }
+
+        const resumen = await ComprobanteVentaDt.findAll({
+            attributes: [
+                [col('producto.descripcion'), 'name'],
+                [literal('CAST(SUM(cantidad) AS UNSIGNED)'), 'value']
+            ],
+            where: whereConditions,
+            include: [
+                {
+                    model: ComprobanteVenta,
+                    as: 'comprobanteVenta',
+                    attributes: []
+                },
+                {
+                    model: Producto,
+                    as: 'producto',
+                    attributes: []
+                }
+            ],
+            group: [col('producto.descripcion')],
+            order: [[fn('SUM', col('cantidad')), 'DESC']],
+            limit: 10,
+            raw: true
+        });
+
+        res.status(200).json({
+            status: true,
+            value: resumen
+        });
+    } catch (error) {
+        handleHttp(res, 'ERROR_GET_ALL_PRODUCTOS_DEMANDANTES_SEMANAL', error);
     }
 };
 
@@ -477,9 +624,12 @@ const getComprobantesContribucionByDate = async (
 export {
     createComprobanteVenta,
     getComprobantesVenta,
+    getTotalVentasSemanal,
     getTotalVentasMensual,
     getTotalContribucionAnual,
+    getVentasByTipoPagoSemanal,
     getVentasByTipoPago,
+    getProductosDemandantesSemanal,
     getProductosDemandantes,
     getTotalProductos,
     getComprobanteVentaById,
