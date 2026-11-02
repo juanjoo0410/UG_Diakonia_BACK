@@ -313,17 +313,40 @@ export class AsistenciaVoluntarioService extends BaseCRUDService<AsistenciaVolun
 
             const resumen = await this.ModelClass.findAll({
                 attributes: [
+                    // --- Instituciones ---
+                    [
+                        literal("SUM(CASE WHEN idInstitucion IS NOT NULL THEN 1 ELSE 0 END)"),
+                        'cantInstituciones'
+                    ],
                     [
                         literal("ROUND(COALESCE((SUM(CASE WHEN idInstitucion IS NOT NULL THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)) * 100, 0), 2)"),
                         'porcInstituciones'
+                    ],
+
+                    // --- Familia ---
+                    [
+                        literal("SUM(CASE WHEN familia = 1 THEN 1 ELSE 0 END)"),
+                        'cantFamilia'
                     ],
                     [
                         literal("ROUND(COALESCE((SUM(CASE WHEN familia = 1 THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)) * 100, 0), 2)"),
                         'porcFamilia'
                     ],
+
+                    // --- Estudiante ---
+                    [
+                        literal("SUM(CASE WHEN voluntarioEducativo = 1 THEN 1 ELSE 0 END)"),
+                        'cantEstudiante'
+                    ],
                     [
                         literal("ROUND(COALESCE((SUM(CASE WHEN voluntarioEducativo = 1 THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)) * 100, 0), 2)"),
                         'porcEstudiante'
+                    ],
+
+                    // --- Corporativo ---
+                    [
+                        literal("SUM(CASE WHEN voluntarioCorporativo = 1 THEN 1 ELSE 0 END)"),
+                        'cantCorporativo'
                     ],
                     [
                         literal("ROUND(COALESCE((SUM(CASE WHEN voluntarioCorporativo = 1 THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)) * 100, 0), 2)"),

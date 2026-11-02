@@ -47,12 +47,21 @@ export const getAll = async (req: Request, res: Response) => {
 
 export const getById = async (req: Request, res: Response) => {
     const { id } = req.params;
+    const idNum = parseInt(id as string);
     try {
-        const ingreso = await service.getById(id);
+        if (isNaN(idNum)) {
+            res.status(400).json({
+                status: false,
+                message: "IngresoId inválido."
+            });
+            return;
+        }
+
+        const ingreso = await service.getIngresoById(idNum);
         if (!ingreso) {
             res.status(404).json({
                 status: false,
-                message: 'Ingreso no encontrada/o'
+                message: 'Ingreso no encontrado'
             });
             return;
         }

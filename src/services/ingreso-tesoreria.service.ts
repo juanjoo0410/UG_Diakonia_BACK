@@ -6,6 +6,7 @@ import { IngresoTesoreriaDt } from "../models/ingreso-tesoreria-dt.model";
 import { IngresoTesoreriaDocumento } from "../models/ingreso-tesoreria-documento.model";
 import { IngresoTesoreriaDenominacion } from "../models/ingreso-tesoreria-denominacion.model";
 import { Transaction } from "sequelize";
+import { DivisaDenominacion } from "../models/divisa-denominacion.model";
 
 type ICreationData = Omit<IIngresoTesoreria, 'id' | 'anulado'>;
 
@@ -24,7 +25,8 @@ export class IngresoTesoreriaService extends BaseCRUDService<IngresoTesoreria> {
                 as: 'documentos'
             }, {
                 model: IngresoTesoreriaDenominacion,
-                as: 'denominaciones'
+                as: 'denominaciones',
+                include: [{ model: DivisaDenominacion, as: 'denominacion' }]
             }],
             transaction
         });
