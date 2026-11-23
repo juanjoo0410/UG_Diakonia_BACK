@@ -1,5 +1,7 @@
-import { initialCountersData, initialMenuData, initialSpecialPermissionsData } from "../config/initial-rbac-data";
+import { initialAutoidentificacionEtnicaData, initialCountersData, initialEstadoCivilData, initialMenuData, initialSpecialPermissionsData } from "../config/initial-rbac-data";
+import { AutoidentificacionEtnica } from "../models/autoidentificacion-etnica.model";
 import { Contador } from "../models/contadorModel";
+import { EstadoCivil } from "../models/estado-civil.model";
 import { Menu } from "../models/menuModel";
 import { Permiso } from "../models/Permiso.model";
 import { Rol } from "../models/rolModel";
@@ -176,5 +178,57 @@ export class RBACService {
         }
         console.log(`✨ Permisos iniciales asegurados/actualizados. Total: ${allCountersIds.length}`);
         return allCountersIds;
+    }
+
+    public async seedEstadoCivil(): Promise<number[]> {
+        const allIds: number[] = [];
+
+        for (const data of initialEstadoCivilData) {
+            const [record, created] = await EstadoCivil.findOrCreate({
+                where: { id: data.id },
+                defaults: { ...data }
+            });
+
+            let updated = false;
+            if (record.codigo !== data.codigo || record.nombre !== data.nombre) {
+                record.codigo = data.codigo;
+                record.nombre = data.nombre;
+                updated = true;
+            }
+
+            if (updated) {
+                await record.save();
+            }
+
+            allIds.push(record.id!);
+        }
+        console.log(`✨ Estados civiles iniciales asegurados/actualizados. Total: ${allIds.length}`);
+        return allIds;
+    }
+
+    public async seedAutoidentificacionEtnica(): Promise<number[]> {
+        const allIds: number[] = [];
+
+        for (const data of initialAutoidentificacionEtnicaData) {
+            const [record, created] = await AutoidentificacionEtnica.findOrCreate({
+                where: { id: data.id },
+                defaults: { ...data }
+            });
+
+            let updated = false;
+            if (record.codigo !== data.codigo || record.nombre !== data.nombre) {
+                record.codigo = data.codigo;
+                record.nombre = data.nombre;
+                updated = true;
+            }
+
+            if (updated) {
+                await record.save();
+            }
+
+            allIds.push(record.id!);
+        }
+        console.log(`✨ Autoidentificaciones étnicas iniciales aseguradas/actualizadas. Total: ${allIds.length}`);
+        return allIds;
     }
 }

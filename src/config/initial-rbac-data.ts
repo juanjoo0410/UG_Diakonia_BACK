@@ -235,7 +235,7 @@ export const initialMenuData = [
                 nombre: 'Informe de Pedidos Corporativos',
                 ruta: '/main/pages/tiendita/pedidos-corporativos',
                 orden: 10
-            },            
+            },
         ]
     },
     {
@@ -308,6 +308,12 @@ export const initialMenuData = [
                 ruta: '/main/pages/proyectos/proyectos',
                 orden: 1
             },
+            {
+                idSubmenu: 57,
+                nombre: 'Beneficiarios de proyectos',
+                ruta: '/main/pages/proyectos/beneficiarios-proyectos',
+                orden: 2
+            },            
         ]
     },
     {
@@ -434,7 +440,7 @@ export const initialMenuData = [
         ]
     }
 ];
-//último submenuId: 56
+//último submenuId: 57
 
 export const initialSpecialPermissionsData = [
     { idPermiso: 1, codigo: 'DSB-SHOW-TIENDITA', anulado: false },
@@ -461,4 +467,22 @@ export const initialCountersData = [
     { idContador: 15, nombre: 'tableros', prefijo: 'TAB', estado: true, numFormato: 3 },
     { idContador: 16, nombre: 'productosCompuestos', prefijo: 'PC', estado: true, numFormato: 4 },
     { idContador: 17, nombre: 'empresaPatrocinadora', prefijo: 'EMP', estado: true, numFormato: 3 },
+    { idContador: 18, nombre: 'beneficiariosProyecto', prefijo: 'BP', estado: true, numFormato: 4 },
+];
+
+export const initialEstadoCivilData = [
+    { id: 1, codigo: 'SOLTERO', nombre: 'Soltero/a', anulado: false },
+    { id: 2, codigo: 'CASADO', nombre: 'Casado/a', anulado: false },
+    { id: 3, codigo: 'DIVORCIADO', nombre: 'Divorciado/a', anulado: false },
+    { id: 4, codigo: 'VIUDO', nombre: 'Viudo/a', anulado: false },
+    { id: 5, codigo: 'UNION_LIBRE', nombre: 'Unión libre', anulado: false },
+];
+
+export const initialAutoidentificacionEtnicaData = [
+    { id: 1, codigo: 'MESTIZO', nombre: 'Mestizo/a', anulado: false },
+    { id: 2, codigo: 'INDIGENA', nombre: 'Indígena', anulado: false },
+    { id: 3, codigo: 'AFROECUATORIANO', nombre: 'Afroecuatoriano/a', anulado: false },
+    { id: 4, codigo: 'MONTUBIO', nombre: 'Montubio/a', anulado: false },
+    { id: 5, codigo: 'BLANCO', nombre: 'Blanco/a', anulado: false },
+    { id: 6, codigo: 'OTRO', nombre: 'Otro/a', anulado: false }
 ];

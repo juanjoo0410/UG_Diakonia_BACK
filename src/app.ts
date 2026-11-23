@@ -28,6 +28,9 @@ async function startServer() {
         const allSubmenuIds = await rbacService.seedMenusAndSubmenus();
         const allPermissionIds = await rbacService.seedPermissions();
         const allCountersIds = await rbacService.seedCounters();
+        const allEstadosCivilIds = await rbacService.seedEstadoCivil();
+        const allAutoidentificacionEtnicaIds = await rbacService.seedAutoidentificacionEtnica();
+        
         await rbacService.assignAllSubmenusToAdmin(adminRol, allSubmenuIds);
         await rbacService.assignAllPermissionsToAdmin(adminRol, allPermissionIds);
         await usuarioService.ensureSuperAdminExists(adminRol);

@@ -14,7 +14,7 @@ export class Contador extends Model<IContador> implements IContador {
 Contador.init(
     {
         idContador: { type: DataTypes.INTEGER, primaryKey: true, allowNull: false },
-        nombre: { type: DataTypes.STRING(20), allowNull: false },
+        nombre: { type: DataTypes.STRING(25), allowNull: false },
         prefijo: { type: DataTypes.STRING(6), allowNull: false },
         numFormato: { type: DataTypes.INTEGER, allowNull: false },
         ultimoValor: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
